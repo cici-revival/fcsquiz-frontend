@@ -1,0 +1,164 @@
+:global(body) {
+  margin: 0;
+  padding: 0;
+}
+:global(body) {
+  margin: 0;
+  padding: 0;
+  /* Убираем ограничения с body */
+}
+
+.container {
+  display: flex;
+  position: fixed; /* Фиксируем контейнер */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+}
+
+.main {
+  flex: 1;
+	inset: 0;
+	max-height: 100%;
+	max-width: 100%;
+  overflow-y: auto;
+  padding: 20px;
+	scrollbar-width: thin;
+  /* box-sizing: border-box; */
+}
+
+.sidebar {
+  width: 300px;
+	gap: 20px;
+  min-width: 300px;
+  padding: 20px;
+  border-right: 1px solid #E6E6E6;
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  overflow-y: auto;
+  box-sizing: border-box;
+  height: 100%;
+}
+.navContainer {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.navButton {
+  display: flex;
+  width: 100%;
+  justify-content: flex-start;
+  gap: 20px;
+  border-radius: 4px !important;
+}
+
+.navLink {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  text-decoration: none;
+}
+
+.subNav {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 4px 0 4px 28px;
+  padding-left: 8px;
+  border-left: 1px solid #E6E6E6;
+}
+
+.subNavButton {
+  display: flex;
+  width: 100%;
+  justify-content: flex-start;
+  border-radius: 4px !important;
+  font-size: 13px;
+  font-weight: 400;
+  height: auto;
+  padding: 6px 10px;
+  text-align: left;
+  white-space: normal;
+}
+
+.statsSection {
+  gap: 8px;
+}
+
+.statusConnecting,
+.statusDisconnected,
+.statusError {
+  display: flex;
+  align-items: center;
+	flex-direction: column;
+	align-items: flex-start;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.statusConnecting {
+  background: rgba(100, 116, 139, 0.1);
+  color: #64748b;
+}
+.statusConnectingContainer {
+	display: flex;
+	align-items: center;
+	gap: 20px;
+}
+
+.statusDisconnected {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.statusError {
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+}
+
+.statusTitle {
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+.errorText {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-top: 2px;
+}
+
+.spinIcon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.reconnectBtn {
+  margin-top: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+	justify-content: left;
+	gap: 20px;
+	width: 100% !important;
+}

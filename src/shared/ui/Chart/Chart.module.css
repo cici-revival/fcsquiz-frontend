@@ -1,0 +1,82 @@
+.chart {
+  width: 100%;
+  min-width: 0;
+  min-height: 200px;
+  font-size: var(--text-xs, 0.75rem);
+}
+
+.chart > div {
+  min-width: 0;
+}
+
+.chart {
+  --chart-1: hsl(222.2 47.4% 11.2%);
+  --chart-2: hsl(217 91% 60%);
+  --chart-3: hsl(160 84% 39%);
+  --chart-4: hsl(38 92% 50%);
+  --chart-5: hsl(280 65% 60%);
+}
+
+.chart :global(.recharts-cartesian-grid line) {
+  stroke: hsl(var(--border));
+}
+
+.chart :global(.recharts-cartesian-axis-tick-value) {
+  fill: hsl(var(--muted-foreground));
+}
+
+.chart :global(.recharts-text) {
+  fill: hsl(var(--muted-foreground));
+}
+
+.chart :global(.recharts-surface:focus),
+.chart :global(.recharts-wrapper:focus-visible) {
+  outline: none;
+}
+
+.tooltip {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 8rem;
+  padding: 8px 10px;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-md, 0.375rem);
+  background-color: hsl(var(--popover, var(--background)));
+  color: hsl(var(--foreground));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  font-size: 0.8125rem;
+}
+
+.tooltipLabel {
+  font-weight: 600;
+}
+
+.tooltipItems {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tooltipItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tooltipMarker {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.tooltipName {
+  color: hsl(var(--muted-foreground));
+}
+
+.tooltipValue {
+  margin-left: auto;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}

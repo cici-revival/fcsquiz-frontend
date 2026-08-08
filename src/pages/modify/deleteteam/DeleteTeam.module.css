@@ -1,0 +1,151 @@
+.numberInput {
+  max-width: 200px;
+}
+.gameInfo {
+  display: flex;
+	justify-content: flex-start;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  gap: 16px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.description {
+  margin-top: 8px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.gameInfo {
+  display: flex;
+  gap: 16px;
+}
+
+.inputGroup {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.numberInput {
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.numberInput:focus {
+  outline: none;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mainFormInput {
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.mainFormInput:focus {
+  outline: none;
+}
+
+.inputError {
+  border-color: #ef4444;
+}
+
+.validationAlert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  color: #ef4444;
+  font-size: 14px;
+  font-weight: 500;
+}
+.chevronIcon {
+	color: grey;
+	height: 60%;
+}
+.alertIcon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
+.submitButton {
+  align-self: flex-end;
+}
+
+
+/* Combobox Styles */
+.comboboxTrigger {
+  width: 100%;
+  justify-content: space-between;
+  text-align: left;
+  font-weight: 400;
+}
+
+.comboboxContent {
+  width: var(--radix-popover-trigger-width);
+  padding: 0;
+}
+
+.commandInput {
+  height: 36px;
+}
+
+.commandItem {
+  cursor: pointer;
+}
+
+.checkIcon {
+  margin-inline-start: auto;
+}
+
+.checkIcon {
+  width: 16px;
+  height: 16px;
+}

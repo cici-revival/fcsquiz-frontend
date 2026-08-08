@@ -1,0 +1,202 @@
+ .page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  height: 100%;
+	padding: 30px;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 600;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.5fr);
+  gap: 32px;
+  align-items: flex-start;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.playersColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.playerCard {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  border-radius: 15px;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  border: 1px solid #e5e7eb;
+}
+
+.playerMain {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.playerName {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  white-space: nowrap;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  padding: 5px;
+  transition: 0.3s;
+  border-radius: 15px;
+}
+.playerName:hover {
+	text-decoration: underline;
+	/* transform: scale(1.02); */
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-size: 13px;
+  white-space: nowrap;
+  cursor: default;
+  border: 1px solid rgb(206, 206, 206);
+  background-color: white;
+}
+
+.pillClickable {
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.pillClickable:hover {
+  background-color: #111827;
+  color: #f9fafb;
+}
+
+.selectWrapper {
+  /* width: 220px; */
+	display: flex;
+	flex-direction: row;
+	gap: 10px;
+}
+
+.teamsColumn {
+  border-left: 1px solid #e5e7eb;
+  padding-left: 24px;
+}
+
+.teamsHeaderRow {
+  display: grid;
+  grid-template-columns: 1.6fr 0.6fr 1fr;
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 8px;
+  padding-inline: 4px;
+}
+
+.teamsList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.teamRow {
+  display: grid;
+  grid-template-columns: 1.6fr 0.6fr 1fr;
+  align-items: center;
+  font-size: 14px;
+  padding: 8px 10px;
+  border-radius: 15px;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+}
+
+.teamRowFilled {
+  opacity: 0.55;
+}
+
+.teamName {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.seats {
+  text-align: center;
+}
+
+.submitRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 32px;
+}
+
+.statusText {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.emptyText {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+.teamsEmpty {
+  font-size: 14px;
+  color: #9ca3af;
+  margin-top: 4px;
+}
+
+.divider {
+  width: 1px;
+  background-color: #e5e7eb;
+  align-self: stretch;
+}
+
+.teamsDivider {
+  height: 1px;
+  background-color: #e5e7eb;
+  margin: 8px 0;
+}
+
+.loading {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.error {
+  font-size: 14px;
+  color: #b91c1c;
+}
+
+@media (max-width: 960px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .teamsColumn {
+    border-left: none;
+    padding-left: 0;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 16px;
+  }
+}

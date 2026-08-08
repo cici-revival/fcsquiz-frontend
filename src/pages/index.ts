@@ -1,0 +1,7 @@
+export { Landing } from './landing'
+export { Home } from './home'
+export { UploadPage } from './upload'
+export { ModifyPage } from './modify'
+export { DistributePage } from './distribute'
+export { SignsPage } from './signs'
+export { LoginPage } from './login'
