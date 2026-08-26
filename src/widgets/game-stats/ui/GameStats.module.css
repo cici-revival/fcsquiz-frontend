@@ -1,0 +1,175 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.toolbar {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.gameSelect {
+  display: flex;
+  gap: 12px;
+}
+
+.selectGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.selectLabel {
+  font-size: 0.8125rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.selectTrigger {
+  min-width: 90px;
+}
+
+.placeholder {
+  color: hsl(var(--muted-foreground));
+  font-size: 0.95rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  align-items: stretch;
+}
+
+.tableCard {
+  grid-column: 1 / -1;
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.placeholderBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.tableContent {
+  overflow: hidden;
+}
+
+.tableScroll {
+  max-height: 360px;
+  overflow: auto;
+	scrollbar-width: thin;
+}
+
+.teamName {
+  font-weight: 600;
+}
+
+.muted {
+  color: hsl(var(--muted-foreground));
+}
+
+.emptyRow {
+  text-align: center;
+  color: hsl(var(--muted-foreground));
+  padding-block: 24px;
+}
+
+.passesTrigger {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: hsl(var(--primary));
+  cursor: pointer;
+  text-decoration: underline dotted;
+}
+
+.passesTooltip[data-slot="tooltip-content"] {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.passesList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.8125rem;
+}
+
+.chartCard {
+  min-width: 0;
+}
+
+.chartBox {
+  height: 260px;
+	padding: 0 5px;
+}
+
+.chartHint {
+  margin-top: 12px;
+  font-size: 0.85rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.chartError {
+  margin-top: 12px;
+  font-size: 0.85rem;
+  color: hsl(var(--destructive));
+}
+
+.skTitle {
+  height: 18px;
+  width: 160px;
+}
+
+.skSubtitle {
+  height: 12px;
+  width: 220px;
+  margin-top: 6px;
+}
+
+.skRows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 0;
+}
+
+.skRow {
+  height: 28px;
+  width: 100%;
+}
+
+.skChart {
+  height: 260px;
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+.statsHeader {
+	display: flex !important;
+	gap: 20px !important;
+	justify-content: space-between;
+	padding: 10px;
+}
+
+.statsHeaderWrapper {
+	display: grid;
+	gap: 8px;
+}

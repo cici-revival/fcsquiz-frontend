@@ -1,0 +1,21 @@
+.page {
+  height: 100%;
+  padding: 2rem;
+  z-index: 1;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  color: #1f2937;
+}
+
+.alert {
+  z-index: 100;
+}

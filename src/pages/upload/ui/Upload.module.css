@@ -1,0 +1,253 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 32px;
+  min-height: 100vh;
+  padding: 30px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  gap: 24px;
+}
+
+.dropzone {
+  position: relative;
+  border-radius: 10px;
+  flex: 1;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-panel, #fff);
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.dropzone.collapsed {
+  flex: 0 0 auto;
+  min-height: 120px;
+  padding: 16px 20px;
+  align-items: center;
+}
+
+.dropzone::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid transparent;
+  background-image:
+    linear-gradient(to right, #343434 1px, transparent 1px),
+    linear-gradient(to right, #343434 1px, transparent 1px),
+    linear-gradient(to bottom, #343434 1px, transparent 1px),
+    linear-gradient(to bottom, #343434 1px, transparent 1px);
+  background-size: 5px 1px, 5px 1px, 1px 5px, 1px 5px;
+  background-position: 0 0, 0 100%, 0 0, 100% 0;
+  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+  pointer-events: none;
+}
+
+.uploadInput {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.dropzoneContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  z-index: 1;
+}
+
+.dropzone.collapsed .dropzoneContent {
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  gap: 16px;
+}
+
+.fileInfo {
+  display: flex;
+  align-items: center;
+	justify-content: center;
+  gap: 20px;
+}
+.fileInfo div {
+	text-align: left;
+}
+
+.fileName {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  word-break: break-all;
+}
+
+.fileSize {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+.dropHint {
+	color: rgb(194, 194, 194);
+	font-size: 14px;
+}
+.removeButton {
+  white-space: nowrap;
+  margin-left: auto;
+	gap: 10px;
+	color: red;
+}
+.removeButton:hover {
+	color: red !important;
+}
+
+.actions {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border, #e5e7eb);
+}
+
+/* Добавьте эти стили */
+.loaderIcon {
+  animation: spin 1s linear infinite;
+}
+
+.buttonLoader {
+  animation: spin 1s linear infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.error {
+  background: #fee;
+  border: 1px solid #fcc;
+  color: #c00;
+  padding: 12px;
+  border-radius: 6px;
+  margin: 16px 0;
+  max-height: 12rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  word-break: break-word;
+}
+
+.parseInfo {
+  font-size: 14px;
+  color: #666;
+  margin-top: 4px;
+}
+
+.preview {
+  margin-top: 32px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}
+
+.preview h3 {
+  margin: 0 0 16px 0;
+  color: #333;
+}
+
+.previewTable {
+  overflow-x: auto;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background: white;
+}
+
+.previewTable table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.previewTable th {
+  background: #f1f3f5;
+  padding: 12px;
+  text-align: left;
+  border-bottom: 2px solid #dee2e6;
+  font-weight: 600;
+  color: #495057;
+}
+
+.previewTable td {
+  padding: 12px;
+  border-bottom: 1px solid #e9ecef;
+  vertical-align: top;
+}
+
+.previewTable tr:last-child td {
+  border-bottom: none;
+}
+
+.fieldName {
+  font-weight: 500;
+  color: #495057;
+  white-space: nowrap;
+  min-width: 200px;
+}
+
+.fieldValue {
+  color: #212529;
+  word-break: break-word;
+}
+
+.empty {
+  color: #6c757d;
+  font-style: italic;
+}
+
+.previewNote {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #6c757d;
+  text-align: center;
+}
+
+.gameInfo {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-foreground, #111827);
+}
+
+.numberInput {
+  max-width: 200px;
+}

@@ -1,0 +1,455 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.wrapperCard {
+	border: 1px solid rgb(222, 222, 222);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.meta input, .meta button {
+	border: 1px solid rgb(197, 197, 197);
+}
+.meta button {
+	min-width: 200px;
+	border-radius: 8px;
+}
+
+.form label {
+	font-weight: 600;
+}
+.replaceSecondInput {
+	margin-top: 20px;
+}
+.pass {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 15px;
+	border: 1px solid rgb(223, 223, 223);
+	border-radius: 8px;
+	padding: 7px;
+}
+.cntHeader {
+	font-weight: 600;
+}
+
+.inputWrapper {
+	display: flex;
+
+	gap: 50px;
+}
+.inputWrapper div {
+	min-width: 250px;
+	display: flex;
+	gap: 20px;
+	align-items: center;
+	justify-content: center;
+	border: 1px solid rgb(223, 223, 223);
+	border-radius: 8px;
+	padding: 6px;
+}
+
+
+.changeBlocks {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.input {
+	min-width: 400px;
+	border: 1px solid rgb(232, 232, 232);
+}
+.input::placeholder {
+  color: #cacaca;
+}
+
+.changeBlock {
+  border: 1px solid #dadada;
+  border-radius: 0.5rem;
+	flex: 0;
+  padding: 1rem;
+  /* background-color: #f9fafb; */
+	gap: 20px;
+	display: flex;
+	flex-direction: column;
+
+
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+}
+
+
+.blockHeader {
+  margin-bottom: 1rem;
+	min-width: max-content;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.radioGroup {
+  display: flex;
+	flex-direction: column;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.radioOption {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.actionFields {
+  display: grid;
+	grid-template-columns: 50% 10% 25%;
+	align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.note {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+.warning {
+  background: #fee;
+  border: 1px solid #fcc;
+  color: red !important;
+  padding: 12px;
+  border-radius: 6px;
+  margin: 16px 0;
+	min-width: 250px;
+}
+.warningWrapper {
+	min-width: 400px;
+}
+.warningField {
+	display: flex;
+	flex-direction: row;
+	gap: 40px;
+}
+.submit {
+  align-self: flex-end;
+}
+.numberInput {
+  max-width: 200px;
+}
+.gameInfo {
+  display: flex;
+	justify-content: flex-start;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.successBlock {
+  border: 2px solid #10b981;
+  border-radius: 8px;
+}
+
+.errorBlock {
+  border: 2px solid #ef4444;
+  border-radius: 8px;
+}
+
+.pendingBlock {
+  /* border: 2px solid #d1d5db; */
+  border-radius: 8px;
+}
+
+.blockTitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+	gap: 10px;
+}
+
+.removeButton {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s;
+}
+
+.removeButton:hover {
+  background-color: #fee2e2;
+}
+
+.statusIndicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fromStoreBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  background-color: #ecfeff;
+  color: #0369a1;
+}
+
+.successIcon {
+  color: #10b981;
+}
+
+.errorIcon {
+  color: #ef4444;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #d1d5db;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.errorMessage {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: #fee2e2;
+  color: #dc2626;
+  border-radius: 4px;
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+.singleSubmit {
+  margin-top: 12px;
+  display: flex;
+}
+
+.controls {
+  display: flex;
+	align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.resetButton {
+  border: 1px solid #d1d5db;
+}
+
+.numberInputContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.numberBtn {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 6px;
+  font-size: 20px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  padding: 0;
+  color: #374151;
+  user-select: none;
+}
+
+.numberBtn:hover:not(:disabled) {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.numberBtn:active:not(:disabled) {
+  background: #e5e7eb;
+  transform: translateY(1px);
+}
+
+.numberBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: #f9fafb;
+}
+
+.numberBtn:first-child {
+  order: 1;
+}
+
+.numberInputField {
+  order: 2;
+  width: 80px;
+  text-align: center;
+  padding: 0 12px;
+}
+
+.numberBtn:last-child {
+  order: 3;
+}
+
+.loadingCombobox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background-color: #f9fafb;
+  color: #6b7280;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #e5e7eb;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* Combobox Styles */
+.comboboxTrigger {
+  width: 100%;
+  justify-content: space-between;
+  text-align: left;
+  font-weight: 400;
+}
+
+.comboboxContent {
+  width: var(--radix-popover-trigger-width);
+  padding: 0;
+}
+
+.commandInput {
+  height: 36px;
+}
+
+.commandItem {
+  cursor: pointer;
+}
+
+.checkIcon {
+  margin-inline-start: auto;
+}
+
+.checkIcon {
+  width: 16px;
+  height: 16px;
+  color: #3b82f6;
+}
+
+.playerComboboxWrapper {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+}
+.chevronIcon {
+	color: grey;
+	height: 60%;
+}
+
+.playerDropdown {
+  width: 100%;
+  max-width: 400px;
+	border: none !important;
+}
+
+.playerDropdown :global(.rw-widget) {
+  width: 100%;
+	border: none !important;
+}
+
+.playerDropdown :global(.rw-widget-input) {
+  /* border-radius: 6px; */
+  border: none !important;
+  padding: 6px 10px;
+  font-size: 14px;
+}
+
+.playerDropdown :global(.rw-widget-picker) {
+  border-radius: 6px;
+  border-color: #e5e7eb;
+}
+
+.playerDropdown :global(.rw-widget-input:focus-within) {
+  outline: 2px solid #3b82f6;
+  outline-offset: 1px;
+  border-color: transparent;
+}
+
+.playerSuggestions {
+  position: absolute;
+  z-index: 20;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  max-height: 220px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+}
+
+.playerSuggestionItem {
+  width: 100%;
+  padding: 6px 10px;
+  text-align: left;
+  font-size: 14px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.playerSuggestionItem:hover {
+  background: #f3f4f6;
+}
+
+
+.checkIcon {
+  width: 16px;
+  height: 16px;
+  color: #3b82f6;
+}

@@ -1,0 +1,18 @@
+.gameInfo {
+  display: flex;
+	justify-content: flex-start;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.numberInput {
+  max-width: 200px;
+	border: 1px solid rgb(197, 197, 197);
+}

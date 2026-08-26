@@ -1,0 +1,227 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.description {
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin-top: 0.25rem;
+}
+
+.gameInfo {
+  display: flex;
+	justify-content: flex-start;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+.numberInput {
+  max-width: 200px;
+	border: 1px solid rgb(228, 228, 228);
+}
+
+.mainFormInput {
+	border: 1px solid rgb(228, 228, 228);
+}
+.mainFormInput::placeholder {
+  color: #cacaca;
+}
+
+/* Pass Blocks */
+.passBlocks {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.passBlock {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  position: relative;
+}
+
+.blockHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.blockNumber {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.95rem;
+}
+
+.removeButton {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s;
+}
+
+.removeButton:hover {
+  background-color: #fee2e2;
+}
+
+.blockFields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+/* Combobox Styles */
+.comboboxTrigger {
+  width: 100%;
+  justify-content: space-between;
+  text-align: left;
+  font-weight: 400;
+}
+
+.comboboxContent {
+  width: var(--radix-popover-trigger-width);
+  padding: 0;
+}
+
+.commandInput {
+  height: 36px;
+}
+
+.commandItem {
+  cursor: pointer;
+}
+
+.checkIcon {
+  margin-inline-start: auto;
+}
+
+.submitButton {
+  align-self: flex-end;
+  width: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+.chevronIcon {
+	color: grey;
+	height: 60%;
+}
+.modeButtons {
+	display: flex;
+	flex-direction: column;
+	max-width: 100px;
+	gap: 10px;
+}
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 150px;
+  gap: 1rem;
+  color: #6b7280;
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+
+
+.blockHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.blockHeaderLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fromStoreBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  background-color: #ecfeff;
+  color: #0369a1;
+}
+
+.blockError {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #ef4444;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.blockError svg {
+  flex-shrink: 0;
+}
+
+.validationAlert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background-color: #fef2f2;
+  border-radius: 6px;
+  border: 1px solid #ef4444;
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.validationAlert svg {
+  flex-shrink: 0;
+}
+
+.passBlock {
+  position: relative;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  background-color: white;
+  transition: border-color 0.2s ease;
+}
+
+.passBlock:hover {
+  border-color: #d1d5db;
+}
