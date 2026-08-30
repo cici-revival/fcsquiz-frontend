@@ -1,0 +1,69 @@
+name: Publish image
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  publish-image:
+    name: Publish frontend release channels
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    env:
+      IMAGE: cr.yandex/crp31i5qre24385kgor3/csquiz/frontend
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm test
+
+      - name: Log in to Yandex Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: cr.yandex
+          username: json_key
+          password: ${{ secrets.YCR_AUTHORIZED_KEY_JSON }}
+
+      - uses: docker/setup-buildx-action@v3
+
+      - id: publish
+        name: Build and publish frontend
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:sha-${{ github.sha }}
+            ${{ env.IMAGE }}:staging
+            ${{ env.IMAGE }}:production
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
+
+      - name: Record published digest
+        env:
+          DIGEST: ${{ steps.publish.outputs.digest }}
+        run: |
+          {
+            echo '### Frontend release channels published'
+            echo
+            echo "- Immutable tag: \`$IMAGE:sha-$GITHUB_SHA\`"
+            echo "- Staging channel: \`$IMAGE:staging\`"
+            echo "- Production channel: \`$IMAGE:production\`"
+            echo "- Digest: \`$DIGEST\`"
+            echo '- Dokploy deployment: not triggered'
+          } >> "$GITHUB_STEP_SUMMARY"
