@@ -15,7 +15,6 @@ import { parseExcelFile } from "./parseExcelFile";
 import { uploadGameStateTable } from "@/pages/upload/api/loader";
 import { useTeamStore } from "@/entities/team/model/team.store";
 import { useUploadResultStore } from "../model/uploadResult.store";
-import RegistrationAccordion from "./RegistrationAccordion";
 
 const VALID_EXTENSIONS = [".xlsx", ".xls"];
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -165,10 +164,17 @@ export default function UploadPage() {
       </header>
 
       {uploadResult && (
-        <RegistrationAccordion
-          newRecords={uploadResult.new_registration_records}
-          oldRecords={uploadResult.old_registration_records}
-        />
+        <section className={styles.result} aria-label="Результат импорта">
+          <h2>Импорт завершён</h2>
+          <dl className={styles.resultGrid}>
+            <div><dt>Всего регистраций</dt><dd>{uploadResult.total_registration_records}</dd></div>
+            <div><dt>Новых регистраций</dt><dd>{uploadResult.new_registration_records_count}</dd></div>
+            <div><dt>Новых команд</dt><dd>{uploadResult.unique_new_teams_count}</dd></div>
+            <div><dt>Новых изменений</dt><dd>{uploadResult.new_changes_count}</dd></div>
+            <div><dt>Старых изменений</dt><dd>{uploadResult.old_changes_count}</dd></div>
+            <div><dt>Игроков без команды</dt><dd>{uploadResult.new_lost_players_count}</dd></div>
+          </dl>
+        </section>
       )}
 
       <form className={styles.form} onSubmit={handleSubmit}>

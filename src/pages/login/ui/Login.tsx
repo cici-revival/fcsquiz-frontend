@@ -13,15 +13,15 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
+  const magicLinkToken = searchParams.get("token");
 
   useEffect(() => {
-    const token = searchParams.get("token");
-    if (!token) return;
+    if (!magicLinkToken) return;
 
     const confirm = async () => {
       try {
         setIsConfirming(true);
-        const data = await adminkaApi.confirmMagicLink({ token });
+        const data = await adminkaApi.confirmMagicLink({ token: magicLinkToken });
         login({
           access_token: data.access_token,
         });
@@ -36,13 +36,13 @@ export default function Login() {
     };
 
     confirm();
-  }, [login, navigate, searchParams]);
+  }, [login, magicLinkToken, navigate]);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !magicLinkToken) {
       navigate("/admin/home", { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, magicLinkToken, navigate]);
 
   const handleRequestMagicLink = async () => {
     if (!email) {

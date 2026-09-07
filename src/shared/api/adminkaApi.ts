@@ -12,7 +12,8 @@ import type {
   LostPlayersInfoResponse,
   LostMarkFoundRequest,
   LostMarkFoundResponse,
-  GameStateUploadResponse,
+  FileUploadURL,
+  RegistrationImportStatus,
   SignsRequest,
   SignsResponse,
   GameID,
@@ -57,36 +58,48 @@ export const adminkaApi = {
     return adminkaApiClient.request<GameID>("/v1/games/current");
   },
 
-  getRegisteredTeams(payload: { season: number; game_number: number }) {
+  async getRegisteredTeams(payload: { season: number; game_number: number }) {
     const params = new URLSearchParams({
       season: String(payload.season),
       game_number: String(payload.game_number),
     });
 
-    return adminkaApiClient.request<RegisteredTeamsResponse>(
+    const response = await adminkaApiClient.request<RegisteredTeamsResponse>(
       `/v1/game/registered_teams?${params.toString()}`,
+    );
+
+    return response.teams;
+  },
+
+  createFileUploadURL(payload: { filename: string; size: number }) {
+    return adminkaApiClient.request<FileUploadURL>("/files/upload-url", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  submitFile(fileID: string) {
+    return adminkaApiClient.request<void>(`/files/${fileID}/submit`, {
+      method: "POST",
+    });
+  },
+
+  startRegistrationImport(payload: {
+    file_id: string;
+    game_id: GameID;
+  }) {
+    return adminkaApiClient.request<RegistrationImportStatus>(
+      "/registration-imports",
+      {
+        method: "POST",
+        body: JSON.stringify(payload),
+      },
     );
   },
 
-  postGameState(payload: {
-    season: number;
-    game_number: number;
-    file: File;
-  }) {
-    const params = new URLSearchParams({
-      season: String(payload.season),
-      game_number: String(payload.game_number),
-    });
-
-    const body = new FormData();
-    body.append("file", payload.file);
-
-    return adminkaApiClient.request<GameStateUploadResponse>(
-      `/v2/game/state?${params.toString()}`,
-      {
-        method: "POST",
-        body,
-      },
+  getRegistrationImport(fileID: string) {
+    return adminkaApiClient.request<RegistrationImportStatus>(
+      `/registration-imports/${fileID}`,
     );
   },
 
