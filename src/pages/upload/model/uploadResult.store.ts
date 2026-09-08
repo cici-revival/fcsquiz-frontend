@@ -1,9 +1,9 @@
 import { create } from "zustand";
-import type { GameStateUploadResponse } from "@/types/api";
+import type { RegistrationImportResult } from "@/types/api";
 
 type UploadResultState = {
-  result: GameStateUploadResponse | null;
-  setResult: (result: GameStateUploadResponse | null) => void;
+  result: RegistrationImportResult | null;
+  setResult: (result: RegistrationImportResult | null) => void;
   clear: () => void;
 };
 

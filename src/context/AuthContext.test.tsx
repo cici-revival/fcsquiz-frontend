@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { useContext } from "react";
 import { render, waitFor, act } from "@testing-library/react";
-import { AuthProvider, AuthContext } from "./AuthContext";
+import { AuthProvider } from "./AuthContext";
+import { AuthContext } from "./context";
 import { adminkaApiClient } from "@shared/api/client";
 import { authEvents } from "@shared/events/authEvents";
 
@@ -19,8 +20,9 @@ vi.mock("jwt-decode", () => ({
     }
     if (token === "valid-access") {
       return {
-        user_id: 7,
+        id: "user-id",
         email: "a@b.c",
+        role: "admin",
         exp: Math.floor(Date.now() / 1000) + 3600,
       };
     }
@@ -34,6 +36,7 @@ function Probe() {
   return (
     <div>
       <span data-testid="user">{ctx.user ? ctx.user.id : "none"}</span>
+      <span data-testid="role">{ctx.user?.role ?? "none"}</span>
       <span data-testid="authenticated">
         {ctx.isAuthenticated ? "yes" : "no"}
       </span>
@@ -77,7 +80,8 @@ describe("AuthContext — in-memory token storage", () => {
 
     expect(localStorage.getItem("access_token")).toBeNull();
     expect(localStorage.getItem("refresh_token")).toBeNull();
-    expect(getByTestId("user").textContent).toBe("7");
+    expect(getByTestId("user").textContent).toBe("user-id");
+    expect(getByTestId("role").textContent).toBe("admin");
     expect(getByTestId("authenticated").textContent).toBe("yes");
   });
 
@@ -108,7 +112,7 @@ describe("AuthContext — in-memory token storage", () => {
     );
 
     await waitFor(() => expect(adminkaApiClient.tryRestoreSession).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(getByTestId("user").textContent).toBe("7"));
+    await waitFor(() => expect(getByTestId("user").textContent).toBe("user-id"));
     expect(getByTestId("authenticated").textContent).toBe("yes");
   });
 
@@ -135,7 +139,7 @@ describe("AuthContext — in-memory token storage", () => {
       </AuthProvider>,
     );
 
-    await waitFor(() => expect(getByTestId("user").textContent).toBe("7"));
+    await waitFor(() => expect(getByTestId("user").textContent).toBe("user-id"));
 
     await act(async () => {
       getByTestId("logout").click();
@@ -155,7 +159,7 @@ describe("AuthContext — in-memory token storage", () => {
       </AuthProvider>,
     );
 
-    await waitFor(() => expect(getByTestId("user").textContent).toBe("7"));
+    await waitFor(() => expect(getByTestId("user").textContent).toBe("user-id"));
 
     act(() => {
       authEvents.dispatchEvent(new Event("logout"));

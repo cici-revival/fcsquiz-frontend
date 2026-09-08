@@ -69,6 +69,25 @@ describe("ApiClient — secure cookie storage contract", () => {
     expect(localStorage.getItem("refresh_token")).toBeNull();
   });
 
+  it("revokes the refresh cookie and clears the in-memory access token on logout", async () => {
+    const { calls } = mockFetchSequence([
+      { status: 200, body: { access_token: "access-token" } },
+      { status: 200 },
+      { status: 200, body: { ok: true } },
+    ]);
+    const client = new ApiClient("http://api");
+
+    await client.tryRestoreSession();
+    await client.logoutRequest();
+    await client.get("/v1/games/current");
+
+    expect(calls[1].url).toBe("http://api/v1/adminka/logout");
+    expect(calls[1].init.method).toBe("POST");
+    expect(calls[1].init.credentials).toBe("include");
+    expect(new Headers(calls[1].init.headers).get("X-Requested-By")).toBe("csquiz-admin");
+    expect(new Headers(calls[2].init.headers).get("Authorization")).toBeNull();
+  });
+
   it("intercept 401 → call /refresh (cookie-based) → retry original request with new access", async () => {
     const { calls } = mockFetchSequence([
       { status: 401, body: { details: "expired" } },

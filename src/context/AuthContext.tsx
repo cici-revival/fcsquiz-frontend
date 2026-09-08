@@ -1,5 +1,4 @@
 import {
-  createContext,
   useState,
   useEffect,
   type ReactNode,
@@ -8,30 +7,13 @@ import {
 import { jwtDecode } from "jwt-decode";
 import { authEvents } from "../shared/events/authEvents";
 import { adminkaApiClient } from "@shared/api/client";
+import { AuthContext, type Tokens, type User } from "./context";
 
-export interface User {
-  id: number;
+interface AccessTokenClaims {
+  id: string;
   email?: string | null;
-  phone?: string | null;
-  first_name?: string | null;
-  last_name?: string | null;
+  role: string;
 }
-
-export interface Tokens {
-  access_token: string;
-}
-
-export interface AuthContextType {
-  user: User | null;
-  isLoading: boolean;
-  login: (tokens: Tokens) => void;
-  logout: () => void;
-  isAuthenticated: boolean;
-}
-
-export const AuthContext = createContext<AuthContextType | undefined>(
-  undefined,
-);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -60,13 +42,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const setUserFromToken = useCallback((token: string) => {
     try {
-      const decoded: any = jwtDecode(token);
+      const decoded = jwtDecode<AccessTokenClaims>(token);
       setUser({
-        id: decoded.user_id || decoded.id,
+        id: decoded.id,
         email: decoded.email,
-        phone: decoded.phone,
-        first_name: decoded.first_name,
-        last_name: decoded.last_name,
+        role: decoded.role,
       });
     } catch (error) {
       console.error("Invalid token:", error);
@@ -105,6 +85,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         login,
         logout,
         isAuthenticated: !!user,
+        hasAdminAccess: user?.role === "admin",
       }}
     >
       {children}

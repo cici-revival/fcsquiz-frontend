@@ -44,16 +44,19 @@ export class ApiClient {
     };
   }
 
-  // ПОКА НЕ ИСПОЛЬЗУЕТСЯ
   async logoutRequest(): Promise<void> {
     try {
-      await fetch(`${this.baseUrl}/api/auth/logout`, {
+      const response = await fetch(`${this.baseUrl}/v1/adminka/logout`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json", [csrfHeader]: csrfHeaderValue },
       });
-    } catch (e) {
-      console.error("Logout request failed", e);
+
+      if (!response.ok) {
+        await this.handleError(response);
+      }
+    } finally {
+      this.accessToken = null;
     }
   }
 
@@ -167,7 +170,7 @@ export class ApiClient {
     const url = `${this.baseUrl}${path}`;
     const maxRetries = 1;
 
-    let response = await fetch(url, {
+    const response = await fetch(url, {
       ...options,
       headers: this.buildHeaders(
         options.headers,

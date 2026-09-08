@@ -48,7 +48,7 @@ export type GameID = {
   game_number: number;
 };
 
-export type RegisteredTeamsResponse = Team[];
+export type RegisteredTeamsResponse = { teams: Team[] };
 
 // ---------- ПРОПУСКИ ----------
 // Контракты для passes-ручек /v1/changes/passes/* по gateway openapi.yaml:
@@ -112,34 +112,25 @@ export type StructureChangeDetails =
 export type MagicLinkConfirmResponse = { access_token: string };
 export type RefreshTokenResponse = { access_token: string };
 
-export type GameStateUploadRegistrationRecord = {
-  id: string;
-  row_index: number;
-  author: string;
-  group: string;
-  type: number;
-  tg: string;
-  team_name: string;
-  canonized_team_name?: string;
-  team_id?: string;
-  players_count: number;
-  passes: string[];
-  is_ready_to_accept_players: boolean;
-  changes: string;
-  ip_address: string;
-  timestamp: string;
-  errors?: string[];
+export type FileUploadURL = {
+  file_id: string;
+  upload_url: string;
+  required_headers: Record<string, string>;
 };
 
-export type GameStateUploadResponse = {
-  old_registration_records: GameStateUploadRegistrationRecord[];
-  new_registration_records: GameStateUploadRegistrationRecord[];
+export type RegistrationImportResult = {
   total_registration_records: number;
   new_registration_records_count: number;
   unique_new_teams_count: number;
   old_changes_count: number;
   new_changes_count: number;
   new_lost_players_count: number;
+};
+
+export type RegistrationImportStatus = {
+  status: "queued" | "processing" | "succeeded" | "failed";
+  result?: RegistrationImportResult;
+  errors?: string[];
 };
 
 // ---------- ТАБЛИЧКИ (SIGNS) ----------

@@ -7,6 +7,34 @@
   padding: 30px;
 }
 
+.result {
+  padding: 1rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+}
+
+.resultGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 1rem;
+  margin: 1rem 0 0;
+}
+
+.resultGrid div {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.resultGrid dt {
+  color: hsl(var(--muted-foreground));
+}
+
+.resultGrid dd {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
 .form {
   display: flex;
   flex-direction: column;
