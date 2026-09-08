@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import { AuthContext, type AuthContextType } from "@/context/context";
@@ -45,7 +45,7 @@ describe("ProtectedRoute", () => {
         user: { ...adminUser, role: "user" },
         hasAdminAccess: false,
       },
-      expected: "У вас нет прав для доступа к админке.",
+      expected: "Нет доступа к админке",
     },
     {
       name: "монтирует админку для пользователя с ролью admin",
@@ -60,5 +60,18 @@ describe("ProtectedRoute", () => {
     if (!context.hasAdminAccess && context.hasAdminAccess !== undefined) {
       expect(screen.queryByText("Админка")).not.toBeInTheDocument();
     }
+  });
+
+  it("завершает сессию с экрана отсутствия доступа", () => {
+    const logout = vi.fn();
+    renderRoute({
+      user: { ...adminUser, role: "user" },
+      hasAdminAccess: false,
+      logout,
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Выйти" }));
+
+    expect(logout).toHaveBeenCalledOnce();
   });
 });

@@ -24,16 +24,7 @@ import { getPassStatusMessage, getApiErrorDetails } from "@/shared/api/statusMes
 import styles from "./ModifyPasses.module.css";
 import { cn } from "@/shared/lib/utils";
 import SelectGameSeason from "@/widgets/select-game/SelectGameSeason";
-
-interface PassBlock {
-  id: string;
-  playerName: string;
-  team: string;
-  mode: "add" | "remove";
-  hasError?: boolean;
-  errorMessage?: string;
-  fromUnresolved?: boolean;
-}
+import { createEmptyPassBlock, type PassBlock } from "./passBlock";
 
 interface ModifyPassProps {
   onFormChange?: (hasChanges: boolean) => void;
@@ -131,7 +122,7 @@ export default function ModifyPasses({ onFormChange }: ModifyPassProps) {
   // Подтягиваем сохранённые passes-изменения из общего стора
   useEffect(() => {
     if (!season || !gameNumber) {
-      setPassBlocks([{ id: generateId(), playerName: "", team: "", mode: "add" }]);
+      setPassBlocks([createEmptyPassBlock(generateId())]);
       return;
     }
 
@@ -143,7 +134,7 @@ export default function ModifyPasses({ onFormChange }: ModifyPassProps) {
     );
 
     if (!storedPasses.length) {
-      setPassBlocks([{ id: generateId(), playerName: "", team: "", mode: "add" }]);
+      setPassBlocks([createEmptyPassBlock(generateId())]);
       return;
     }
 
@@ -155,13 +146,7 @@ export default function ModifyPasses({ onFormChange }: ModifyPassProps) {
       fromUnresolved: ch.source === "unresolved",
     }));
 
-    // добавляем один пустой блок для ввода новых пропусков,
-    // сразу наследуя команду из последнего существующего блока
-    const lastTeam = mapped[mapped.length - 1]?.team ?? "";
-    setPassBlocks([
-      ...mapped,
-      { id: generateId(), playerName: "", team: lastTeam, mode: "add" },
-    ]);
+    setPassBlocks([...mapped, createEmptyPassBlock(generateId())]);
   }, [season, gameNumber, changesMap]);
 
   const validatePassBlocks = (): boolean => {
@@ -271,7 +256,7 @@ export default function ModifyPasses({ onFormChange }: ModifyPassProps) {
       }
       const next = prev.filter((_, i) => i !== index);
       if (next.length === 0) {
-        return [{ id: generateId(), playerName: "", team: removed.team, mode: removed.mode }];
+        return [createEmptyPassBlock(generateId(), removed.mode)];
       }
       return next;
     });
@@ -409,16 +394,12 @@ export default function ModifyPasses({ onFormChange }: ModifyPassProps) {
         );
 
         if (remaining.length === 0) {
-          // если всё успешно отправлено — создаём один новый блок,
-          // наследуя команду и режим из последнего успешно отправленного
           const lastSuccessful = filledBlocks[filledBlocks.length - 1];
           return [
-            {
-              id: generateId(),
-              playerName: "",
-              team: lastSuccessful?.team ?? "",
-              mode: lastSuccessful?.mode ?? "add",
-            },
+            createEmptyPassBlock(
+              generateId(),
+              lastSuccessful?.mode ?? "add",
+            ),
           ];
         }
 
@@ -430,17 +411,7 @@ export default function ModifyPasses({ onFormChange }: ModifyPassProps) {
           return remaining;
         }
 
-        const lastTeam = remaining[remaining.length - 1]?.team ?? "";
-
-        return [
-          ...remaining,
-          {
-            id: generateId(),
-            playerName: "",
-            team: lastTeam,
-            mode: "add",
-          },
-        ];
+        return [...remaining, createEmptyPassBlock(generateId())];
       });
 
       clearValidationErrors();
