@@ -4,14 +4,13 @@ import { Input } from "@/shared/ui";
 import { Label } from "@/shared/ui";
 import { useTeamStore } from "@/entities/team/model/team.store";
 import { Check, ChevronsUpDown } from "lucide-react";
-import {
-  Command,
+import {Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/shared/ui";
+} from "@/shared/ui/Command";
 import { generateSearchVariants } from "@features/searchUtils";
 import { useMemo } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui";

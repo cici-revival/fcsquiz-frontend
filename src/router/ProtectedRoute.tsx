@@ -3,7 +3,8 @@ import type { ReactElement } from "react";
 import { Navigate, useLocation } from 'react-router-dom';
 
 import { useAuth } from "@/shared/hooks/useAuth";
-import { Button, Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
+import { Button } from "@/shared/ui/Button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/Card";
 
 import styles from "./ProtectedRoute.module.css";
 

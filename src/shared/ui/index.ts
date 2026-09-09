@@ -61,17 +61,6 @@ export {
   ContextMenuSubTrigger,
   ContextMenuRadioGroup,
 } from './ContextMenu'
-export {
-  Command,
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-  CommandShortcut,
-} from './Command'
 
 
 export { Tabs, TabsContent, TabsList, TabsTrigger } from './Tabs'
