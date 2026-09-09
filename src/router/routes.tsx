@@ -1,14 +1,32 @@
-import { Landing, ModifyPage, Home, UploadPage, LoginPage, DistributePage, SignsPage } from '../pages';
-import { AdminLayout } from '@/widgets/admin-layout';
-import type { AppRoute } from './types';
+import { lazy } from 'react';
 import { Navigate } from 'react-router-dom';
-import Resolve from '../pages/modify/resolve/Resolve';
-import ModifyPlayers from '../pages/modify/modifyplayers/ModifyPlayers';
-import ModifyPasses from '../pages/modify/modifypasses/ModifyPasses';
-import AddTeam from '../pages/modify/addteam/AddTeam';
-import ModifyTeamName from '../pages/modify/modifyteamname/ModifyTeamName';
-import DeleteTeam from '../pages/modify/deleteteam/DeleteTeam';
-import ChangeCount from '../pages/modify/changecount/ChangeCount';
+import { Landing } from '../pages';
+import type { AppRoute } from './types';
+
+// Лендинг остаётся в основном чанке — это публичная точка входа.
+// Всё остальное грузится по требованию. Импорты идут прямыми путями
+// в обход барреля '../pages': импорт из него затянул бы все страницы разом.
+
+const LoginPage = lazy(() => import('../pages/login/ui/Login'));
+const AdminLayout = lazy(() => import('@/widgets/admin-layout/ui/AdminLayout'));
+
+const Home = lazy(() => import('../pages/home/ui/Home'));
+const UploadPage = lazy(() => import('../pages/upload/ui/Upload'));
+const ModifyPage = lazy(() => import('../pages/modify/ui/Modify'));
+const DistributePage = lazy(() => import('../pages/distribute/DistributePage'));
+
+// Единственная страница с именованным экспортом вместо default.
+const SignsPage = lazy(() =>
+  import('../pages/signs/ui/Signs').then((m) => ({ default: m.SignsPage })),
+);
+
+const Resolve = lazy(() => import('../pages/modify/resolve/Resolve'));
+const ModifyPlayers = lazy(() => import('../pages/modify/modifyplayers/ModifyPlayers'));
+const ModifyPasses = lazy(() => import('../pages/modify/modifypasses/ModifyPasses'));
+const AddTeam = lazy(() => import('../pages/modify/addteam/AddTeam'));
+const ModifyTeamName = lazy(() => import('../pages/modify/modifyteamname/ModifyTeamName'));
+const DeleteTeam = lazy(() => import('../pages/modify/deleteteam/DeleteTeam'));
+const ChangeCount = lazy(() => import('../pages/modify/changecount/ChangeCount'));
 
 export const routes: AppRoute[] = [
   {

@@ -1,0 +1,9 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+  padding: 32px;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.95rem;
+}
