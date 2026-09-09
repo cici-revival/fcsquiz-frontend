@@ -99,5 +99,3 @@ export { default as Badge } from './Badge'
 
 export { Skeleton } from './Skeleton'
 
-export { ChartContainer, ChartTooltipContent } from './Chart'
-export type { ChartConfig } from './Chart'

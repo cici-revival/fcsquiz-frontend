@@ -1,14 +1,10 @@
 import { useMemo } from "react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 import {
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
-  ChartContainer,
-  ChartTooltipContent,
-  type ChartConfig,
 } from "@shared/ui";
 import type { Team } from "@/types/api";
 import { getRosterDistribution } from "@entities/team/model/teamStats";
@@ -18,14 +14,18 @@ type RosterDistributionCardProps = {
   teams: Team[];
 };
 
-const chartConfig: ChartConfig = {
-  count: { label: "Команд", color: "var(--chart-1)" },
-};
-
 export default function RosterDistributionCard({
   teams,
 }: RosterDistributionCardProps) {
   const data = useMemo(() => getRosterDistribution(teams), [teams]);
+  const maxCount = useMemo(
+    () => data.reduce((max, bucket) => Math.max(max, bucket.count), 0),
+    [data],
+  );
+  const totalTeams = useMemo(
+    () => data.reduce((sum, bucket) => sum + bucket.count, 0),
+    [data],
+  );
 
   return (
     <Card className={styles.chartCard}>
@@ -36,37 +36,26 @@ export default function RosterDistributionCard({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className={styles.chartBox}>
-          <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-            <CartesianGrid vertical={false} strokeDasharray="3 3" />
-            <XAxis
-              dataKey="size"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-            />
-            <YAxis
-              allowDecimals={false}
-              tickLine={false}
-              axisLine={false}
-              width={32}
-            />
-            <Tooltip
-              cursor={{ fill: "hsl(var(--muted) / 0.4)" }}
-              content={
-                <ChartTooltipContent
-                  config={chartConfig}
-                  labelFormatter={(l) => `Состав: ${l} чел.`}
-                />
-              }
-            />
-            <Bar
-              dataKey="count"
-              fill="var(--color-count)"
-              radius={[4, 4, 0, 0]}
-            />
-          </BarChart>
-        </ChartContainer>
+        {totalTeams === 0 ? (
+          <p className={styles.muted}>Нет зарегистрированных команд</p>
+        ) : (
+          <ul className={styles.distList}>
+            {data.map(({ size, count }) => (
+              <li key={size} className={styles.distRow}>
+                <span className={styles.distLabel}>{size} чел.</span>
+                <span className={styles.distTrack}>
+                  <span
+                    className={styles.distBar}
+                    style={{
+                      width: maxCount > 0 ? `${(count / maxCount) * 100}%` : 0,
+                    }}
+                  />
+                </span>
+                <span className={styles.distValue}>{count}</span>
+              </li>
+            ))}
+          </ul>
+        )}
       </CardContent>
     </Card>
   );
