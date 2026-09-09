@@ -29,18 +29,13 @@ export default function Landing() {
       <div className={styles.container}>
         <header className={styles.header}>
           <div>
-            <div className={styles.title}>
-              Квиз
-              <br />
-              Компьютерных
-              <br />
-              Наук
-            </div>
+            <h1 className={styles.title}>Квиз Компьютерных Наук</h1>
 
             <div className={styles.register}>
               <a
                 href="https://cs.hse.ru/abitur/polls/1110068092.html"
                 target="_blank"
+                rel="noopener noreferrer"
               >
                 <Button variant="outline">Регистрация на игру</Button>
               </a>

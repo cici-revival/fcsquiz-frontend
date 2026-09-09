@@ -3,12 +3,18 @@
   /* border-top: 1px solid rgba(0, 0, 0, 0.06); */
 }
 
+@media (max-width: 768px) {
+  .section {
+    margin-top: 48px;
+  }
+}
+
 .titleRow {
   margin-bottom: 24px;
 }
 
 .title {
-  font-size: 56px;
+  font-size: clamp(32px, 8vw, 56px);
   line-height: 1;
   font-weight: 800;
   letter-spacing: -0.04em;
@@ -21,7 +27,9 @@
 
 .itemHeader {
   width: 100%;
+  /* Заголовок вопроса — тач-цель: 14px сверху и снизу дают ~48px высоты. */
   padding: 14px 0;
+  gap: 12px;
   border: none;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   background: transparent;
