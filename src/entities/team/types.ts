@@ -2,22 +2,38 @@ import { type Team } from "@/types/api";
 
 export type RosterTeam = Team & { id: string };
 
+/** Игра, к которой относится событие. Приходит в теле каждого события. */
+export type GameId = {
+  season: number;
+  game_number: number;
+};
+
 export type TeamEvent =
   | {
       type: "new_team";
-      body: { team: RosterTeam };
+      body: { team: RosterTeam; game_id?: GameId };
     }
   | {
       type: "change_players_count";
-      body: { team_id: string; team_name: string; players_count: number };
+      body: {
+        team_id: string;
+        team_name: string;
+        players_count: number;
+        game_id?: GameId;
+      };
     }
   | {
       type: "update_passes";
-      body: { team_id: string; team_name: string; passes: string[] };
+      body: {
+        team_id: string;
+        team_name: string;
+        passes: string[];
+        game_id?: GameId;
+      };
     }
   | {
       type: "remove_team";
-      body: { team_id: string; team_name: string };
+      body: { team_id: string; team_name: string; game_id?: GameId };
     };
 
 
