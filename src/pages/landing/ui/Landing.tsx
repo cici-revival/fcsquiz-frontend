@@ -1,28 +1,64 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styles from "./Landing.module.css";
 import { useTeamStore } from "@/entities/team/model/team.store";
 import { Button } from "@shared/ui/Button";
 import { Input } from "@shared/ui/Input";
 import TeamTable from "./TeamTable";
+import { displayName } from "./teamName";
+import { useIsMobile } from "@shared/hooks/useMediaQuery";
 import { Search, AlertCircle } from "lucide-react";
 import { TeamSeatingPlan } from "./TeamSeatingPlan";
 import { Faq } from "./Faq";
 import { restartTeams } from "@/entities/team/team.bootstrap";
 import { Alert, AlertTitle, AlertDescription } from "@shared/ui/Alert";
 
+const DESKTOP_PAGE_SIZE = 24;
+const MOBILE_PAGE_SIZE = 12;
+
 export default function Landing() {
   const teamsMap = useTeamStore((s) => s.teams);
   const status = useTeamStore((s) => s.status);
   const error = useTeamStore((s) => s.error);
   const [query, setQuery] = useState("");
+  const isMobile = useIsMobile();
 
-  const teamsArray = useMemo(() => Array.from(teamsMap.values()), [teamsMap]);
+  // На телефоне список идёт в одну колонку, поэтому первая порция меньше:
+  // иначе FAQ и рассадка уезжают за несколько экранов прокрутки.
+  const pageSize = isMobile ? MOBILE_PAGE_SIZE : DESKTOP_PAGE_SIZE;
+  const [visibleCount, setVisibleCount] = useState(pageSize);
+
+  // Смена брейкпоинта меняет размер порции — возвращаемся к первой.
+  useEffect(() => {
+    setVisibleCount(pageSize);
+  }, [pageSize]);
+
+  const teamsArray = useMemo(
+    () =>
+      // Порядок прихода из SSE произвольный, и список переставлялся на глазах
+      // при каждой новой регистрации. По алфавиту команду можно найти глазами.
+      Array.from(teamsMap.values()).sort((a, b) =>
+        displayName(a).localeCompare(displayName(b), "ru"),
+      ),
+    [teamsMap],
+  );
 
   const filteredTeams = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return teamsArray;
-    return teamsArray.filter((t) => t.name.toLowerCase().includes(q)).sort((a, b) => a.name.localeCompare(b.name));;
+
+    return teamsArray.filter((t) => displayName(t).toLowerCase().includes(q));
   }, [teamsArray, query]);
+
+  const isSearching = query.trim().length > 0;
+
+  // При поиске показываем все совпадения: человек ищет свою команду,
+  // и «показать ещё» на трёх результатах только мешает.
+  const visibleTeams = useMemo(
+    () => (isSearching ? filteredTeams : filteredTeams.slice(0, visibleCount)),
+    [filteredTeams, isSearching, visibleCount],
+  );
+
+  const hiddenCount = filteredTeams.length - visibleTeams.length;
 
   return (
     <div className={styles.page}>
@@ -85,7 +121,27 @@ export default function Landing() {
 
           {status === "connected" && (
             <div className={styles.tableWrap}>
-              <TeamTable query={query} teams={filteredTeams} />
+              <TeamTable query={query} teams={visibleTeams} />
+
+              {hiddenCount > 0 && (
+                <div className={styles.showMoreRow}>
+                  <Button
+                    variant="outline"
+                    onClick={() => setVisibleCount((n) => n + pageSize)}
+                  >
+                    Показать ещё {Math.min(hiddenCount, pageSize)}
+                  </Button>
+                  <span className={styles.showMoreHint}>
+                    {visibleTeams.length} из {filteredTeams.length}
+                  </span>
+                </div>
+              )}
+
+              {isSearching && filteredTeams.length === 0 && (
+                <p className={styles.emptyResult}>
+                  Ничего не нашлось по запросу «{query.trim()}»
+                </p>
+              )}
             </div>
           )}
 

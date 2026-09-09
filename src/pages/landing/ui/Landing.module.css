@@ -109,6 +109,25 @@
   min-width: 0;
 }
 
+.showMoreRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.showMoreHint {
+  color: var(--color-muted-foreground);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.emptyResult {
+  margin-top: 16px;
+  color: var(--color-muted-foreground);
+  font-size: 14px;
+}
+
 .cell {
   box-shadow: var(--shadow-sm);
   display: flex;
@@ -156,13 +175,31 @@
   background-color: #f3f4f6;
 }
 
-.tooltipCard {
-  min-width: 280px;
+/* Десктоп: TooltipContent по умолчанию тёмный и мелкий, поэтому детали
+   команды перекрывают его собственной светлой карточкой. */
+.detailsTooltip[data-slot="tooltip-content"] {
+  width: fit-content;
+  min-width: 260px;
+  max-width: min(320px, calc(100vw - 32px));
   padding: 12px;
   background-color: white;
+  color: var(--color-foreground);
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* Мобильный: PopoverContent уже рисует белую карточку с рамкой и тенью.
+   Сбрасываем только фиксированную ширину 288px — она была шире
+   содержимого и торчала из-под него. */
+.detailsPopover[data-slot="popover-content"] {
+  width: max-content;
+  min-width: 220px;
+  max-width: min(300px, calc(100vw - 24px));
+  padding: 12px;
+  cursor: default;
 }
 
 .tooltipTitle {
@@ -271,6 +308,16 @@
     flex-direction: column;
     align-items: stretch;
     gap: 8px;
+  }
+
+  .showMoreRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .showMoreHint {
+    text-align: center;
   }
 
   .searchField,

@@ -25,13 +25,13 @@ const TeamDetails = memo(({ team }: { team: RosterTeam }) => {
   }, [team.passes]);
 
   return (
-    <div className={styles.tooltipCard}>
+    <>
       <div className={styles.tooltipTitle}>{displayName(team)}</div>
       <div className={styles.tooltipMeta}>{team.players_count} человек</div>
 
       <div className={styles.tooltipBlockTitle}>Пропуски</div>
       <ul className={styles.tooltipList}>{passesList || <li>—</li>}</ul>
-    </div>
+    </>
   );
 });
 
@@ -77,7 +77,15 @@ function TeamDetailsDisclosure({
     return (
       <Popover>
         <PopoverTrigger asChild>{children}</PopoverTrigger>
-        <PopoverContent side="bottom" align="end" sideOffset={4}>
+        {/* Оформление карточки даёт сам PopoverContent, поэтому внутри
+            только содержимое: вторая обёртка давала белую подложку,
+            выступающую из-под первой. */}
+        <PopoverContent
+          side="bottom"
+          align="end"
+          sideOffset={4}
+          className={styles.detailsPopover}
+        >
           <TeamDetails team={team} />
         </PopoverContent>
       </Popover>
@@ -87,7 +95,7 @@ function TeamDetailsDisclosure({
   return (
     <Tooltip>
       <TooltipTrigger asChild>{children}</TooltipTrigger>
-      <TooltipContent side="right" sideOffset={5}>
+      <TooltipContent side="right" sideOffset={5} className={styles.detailsTooltip}>
         <TeamDetails team={team} />
       </TooltipContent>
     </Tooltip>
