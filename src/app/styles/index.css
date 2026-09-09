@@ -4,11 +4,11 @@
 /* shadcn-css globals (generated) */
 @import "../../../globals.css";
 
-@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Onest:wght@100..900&display=swap");
+/* Self-hosted Inter, только latin + кириллица */
+@import "./fonts.css";
 
 body {
-  /* font-family: 'Onest', sans-serif; */
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
 }
 
 :root {
