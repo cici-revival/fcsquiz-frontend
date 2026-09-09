@@ -1,5 +1,5 @@
 :root {
-  --font-sans: inter, serif;
+  --font-sans: 'Inter Variable', 'Inter', system-ui, sans-serif;
   --color-red-50: oklch(97.1% 0.013 17.38deg);
   --color-red-100: oklch(93.6% 0.032 17.717deg);
   --color-red-200: oklch(88.5% 0.062 18.334deg);
