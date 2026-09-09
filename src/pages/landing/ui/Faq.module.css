@@ -42,13 +42,62 @@
 }
 
 .itemContent {
-  padding: 8px 0 16px;
+  overflow: hidden;
   font-size: 14px;
   color: rgb(80, 80, 80);
+}
+
+.itemContent[data-state="open"] {
+  animation: faq-expand 220ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.itemContent[data-state="closed"] {
+  animation: faq-collapse 180ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.itemBody {
+  padding: 8px 0 16px;
+}
+
+@keyframes faq-expand {
+  from {
+    height: 0;
+    opacity: 0;
+  }
+
+  to {
+    height: var(--radix-collapsible-content-height);
+    opacity: 1;
+  }
+}
+
+@keyframes faq-collapse {
+  from {
+    height: var(--radix-collapsible-content-height);
+    opacity: 1;
+  }
+
+  to {
+    height: 0;
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .itemContent[data-state="open"],
+  .itemContent[data-state="closed"] {
+    animation: none;
+  }
 }
 
 .icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  color: rgb(120, 120, 120);
+}
+
+.itemHeader[data-state="open"] .icon {
+  transform: rotate(180deg);
 }

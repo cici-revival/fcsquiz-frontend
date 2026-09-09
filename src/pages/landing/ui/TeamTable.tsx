@@ -41,7 +41,6 @@ function HighlightText({ text, query }: { text: string; query: string }) {
   const trimmed = query.trim();
   if (!trimmed) return <>{text}</>;
 
-  // Экранируем спецсимволы: без этого ввод "(" в поиске роняет RegExp.
   const escaped = trimmed.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const parts = text.split(new RegExp(`(${escaped})`, "gi"));
 
@@ -60,10 +59,6 @@ function HighlightText({ text, query }: { text: string; query: string }) {
   );
 }
 
-/**
- * На десктопе детали раскрываются по наведению, на тач-экранах — по тапу:
- * hover там недоступен, и Tooltip остаётся незамеченным.
- */
 function TeamDetailsDisclosure({
   team,
   isMobile,
@@ -77,9 +72,6 @@ function TeamDetailsDisclosure({
     return (
       <Popover>
         <PopoverTrigger asChild>{children}</PopoverTrigger>
-        {/* Оформление карточки даёт сам PopoverContent, поэтому внутри
-            только содержимое: вторая обёртка давала белую подложку,
-            выступающую из-под первой. */}
         <PopoverContent
           side="bottom"
           align="end"

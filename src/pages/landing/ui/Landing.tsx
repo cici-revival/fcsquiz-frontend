@@ -22,20 +22,15 @@ export default function Landing() {
   const [query, setQuery] = useState("");
   const isMobile = useIsMobile();
 
-  // На телефоне список идёт в одну колонку, поэтому первая порция меньше:
-  // иначе FAQ и рассадка уезжают за несколько экранов прокрутки.
   const pageSize = isMobile ? MOBILE_PAGE_SIZE : DESKTOP_PAGE_SIZE;
   const [visibleCount, setVisibleCount] = useState(pageSize);
 
-  // Смена брейкпоинта меняет размер порции — возвращаемся к первой.
   useEffect(() => {
     setVisibleCount(pageSize);
   }, [pageSize]);
 
   const teamsArray = useMemo(
     () =>
-      // Порядок прихода из SSE произвольный, и список переставлялся на глазах
-      // при каждой новой регистрации. По алфавиту команду можно найти глазами.
       Array.from(teamsMap.values()).sort((a, b) =>
         displayName(a).localeCompare(displayName(b), "ru"),
       ),
@@ -51,8 +46,6 @@ export default function Landing() {
 
   const isSearching = query.trim().length > 0;
 
-  // При поиске показываем все совпадения: человек ищет свою команду,
-  // и «показать ещё» на трёх результатах только мешает.
   const visibleTeams = useMemo(
     () => (isSearching ? filteredTeams : filteredTeams.slice(0, visibleCount)),
     [filteredTeams, isSearching, visibleCount],
@@ -67,7 +60,7 @@ export default function Landing() {
           <div>
             <h1 className={styles.title}>Квиз Компьютерных Наук</h1>
 
-            <div className={styles.register}>
+            {/* <div className={styles.register}>
               <a
                 href="https://cs.hse.ru/abitur/polls/1110068092.html"
                 target="_blank"
@@ -75,7 +68,7 @@ export default function Landing() {
               >
                 <Button variant="outline">Регистрация на игру</Button>
               </a>
-            </div>
+            </div> */}
           </div>
         </header>
 
