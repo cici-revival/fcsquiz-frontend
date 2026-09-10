@@ -12,7 +12,6 @@ let source: EventSource | null = null;
 let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
 let reconnectAttempts = 0;
 
-/** Соединение приостановлено, потому что вкладка ушла в фон. */
 let isPausedByVisibility = false;
 let unsubscribeVisibility: (() => void) | null = null;
 
@@ -30,11 +29,6 @@ function closeSource() {
   }
 }
 
-/**
- * В фоне соединение не нужно: вкладка ничего не показывает, но продолжает
- * занимать коннект. При возврате подключаемся заново — первым сообщением
- * сервер присылает снимок, так что пропущенные события не теряются.
- */
 function watchVisibility() {
   if (unsubscribeVisibility) return;
 
@@ -62,9 +56,6 @@ function scheduleReconnect() {
 
   const store = useTeamStore.getState();
 
-  // После серии быстрых попыток показываем ошибку, но продолжаем
-  // переподключаться с большой задержкой — соединение восстановится само,
-  // когда сервер вернётся.
   store.setStatus(
     reconnectAttempts > FAST_RECONNECT_ATTEMPTS ? "error" : "connecting",
   );
@@ -84,9 +75,6 @@ export function connectTeamsSSE() {
 
   watchVisibility();
 
-  // После серии неудач статус остаётся "error", иначе каждая новая попытка
-  // затирала бы его на "connecting" и пользователь видел бы бесконечное
-  // "Подключение..." вместо честного "нет связи".
   if (reconnectAttempts <= FAST_RECONNECT_ATTEMPTS) {
     store.setStatus("connecting");
     store.setError(null);
@@ -122,7 +110,6 @@ export function connectTeamsSSE() {
   source.onerror = () => {
     closeSource();
 
-    // Вкладка ушла в фон — обрыв ожидаемый, переподключимся при возврате.
     if (isPausedByVisibility) return;
 
     scheduleReconnect();

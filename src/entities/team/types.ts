@@ -2,7 +2,6 @@ import { type Team } from "@/types/api";
 
 export type RosterTeam = Team & { id: string };
 
-/** Игра, к которой относится событие. Приходит в теле каждого события. */
 export type GameId = {
   season: number;
   game_number: number;
@@ -35,7 +34,6 @@ export type TeamEvent =
       type: "remove_team";
       body: { team_id: string; team_name: string; game_id?: GameId };
     };
-
 
 	export type TeamEventResponce = {
 		data: TeamEvent[];

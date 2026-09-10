@@ -13,7 +13,6 @@ let source: EventSource | null = null;
 let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
 let reconnectAttempts = 0;
 
-/** Соединение приостановлено, потому что вкладка ушла в фон. */
 let isPausedByVisibility = false;
 let unsubscribeVisibility: (() => void) | null = null;
 
@@ -66,8 +65,6 @@ function scheduleReconnect() {
   clearReconnectTimeout();
   reconnectTimeout = setTimeout(() => {
     reconnectTimeout = null;
-    // Стрим подписей требует авторизации: перед переподключением обновляем
-    // access-токен, иначе сервер закроет соединение сразу.
     void adminkaApiClient.tryRestoreSession().finally(() => {
       connectSignsSSE();
     });
@@ -81,9 +78,6 @@ export function connectSignsSSE() {
 
   watchVisibility();
 
-  // После серии неудач статус остаётся "error", иначе каждая новая попытка
-  // затирала бы его на "connecting" и пользователь видел бы бесконечное
-  // "Подключение..." вместо честного "нет связи".
   if (reconnectAttempts <= FAST_RECONNECT_ATTEMPTS) {
     store.setStatus("connecting");
     store.setError(null);
