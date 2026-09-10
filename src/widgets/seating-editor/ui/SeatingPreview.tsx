@@ -5,6 +5,7 @@ import { buildLayout, type LayoutTeam } from "@entities/seating/lib/buildLayout"
 import { clientToField } from "@entities/seating/lib/fieldCoords";
 import { resolveDrop } from "@entities/seating/lib/movePlacement";
 import type { PackedCircle } from "@entities/seating/lib/packSide";
+import { HallBounds } from "./HallBounds";
 import { useFieldScale } from "./useFieldScale";
 
 import styles from "./SeatingPreview.module.css";
@@ -19,6 +20,7 @@ type SeatingPreviewProps = {
   teams: SeatingTeamInput[];
   onDirtyChange?: (isDirty: boolean) => void;
   resetToken?: number;
+  showBounds?: boolean;
 };
 
 const DRAG_THRESHOLD = 3;
@@ -27,6 +29,7 @@ export function SeatingPreview({
   teams,
   onDirtyChange,
   resetToken = 0,
+  showBounds = false,
 }: SeatingPreviewProps) {
   const computed = useMemo(
     () => buildLayout(teams.map(({ teamId, size }): LayoutTeam => ({ teamId, size }))),
@@ -145,6 +148,8 @@ export function SeatingPreview({
             height: HALL.height - HALL.stageHeight,
           }}
         />
+
+        {showBounds && <HallBounds />}
 
         {circles.map((circle) => {
           const team = names.get(circle.teamId);

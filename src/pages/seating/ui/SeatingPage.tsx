@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { LayoutGrid, PencilRuler, RotateCcw } from "lucide-react";
+import { Frame, LayoutGrid, PencilRuler, RotateCcw } from "lucide-react";
 
 import { useTeamStore } from "@entities/team/model/team.store";
 import { displayName } from "@pages/landing/ui/teamName";
@@ -17,6 +17,7 @@ export default function SeatingPage() {
   const [mode, setMode] = useState<Mode>("seating");
   const [isDirty, setDirty] = useState(false);
   const [resetToken, setResetToken] = useState(0);
+  const [showBounds, setShowBounds] = useState(false);
   const teamsMap = useTeamStore((state) => state.teams);
   const status = useTeamStore((state) => state.status);
   const draft = useSlotDraft();
@@ -92,6 +93,15 @@ export default function SeatingPage() {
               <span className={styles.pending}>Данные ещё загружаются…</span>
             )}
 
+            <Button
+              variant={showBounds ? "default" : "outline"}
+              className={styles.reset}
+              onClick={() => setShowBounds((value) => !value)}
+            >
+              <Frame size={16} />
+              Границы зала
+            </Button>
+
             {isDirty && (
               <Button
                 variant="outline"
@@ -108,6 +118,7 @@ export default function SeatingPage() {
             teams={teams}
             onDirtyChange={handleDirtyChange}
             resetToken={resetToken}
+            showBounds={showBounds}
           />
         </>
       ) : (
