@@ -3,10 +3,6 @@ import { Navigate } from 'react-router-dom';
 import { Landing } from '../pages';
 import type { AppRoute } from './types';
 
-// Лендинг остаётся в основном чанке — это публичная точка входа.
-// Всё остальное грузится по требованию. Импорты идут прямыми путями
-// в обход барреля '../pages': импорт из него затянул бы все страницы разом.
-
 const LoginPage = lazy(() => import('../pages/login/ui/Login'));
 const AdminLayout = lazy(() => import('@/widgets/admin-layout/ui/AdminLayout'));
 
@@ -14,8 +10,8 @@ const Home = lazy(() => import('../pages/home/ui/Home'));
 const UploadPage = lazy(() => import('../pages/upload/ui/Upload'));
 const ModifyPage = lazy(() => import('../pages/modify/ui/Modify'));
 const DistributePage = lazy(() => import('../pages/distribute/DistributePage'));
+const SeatingPage = lazy(() => import('../pages/seating/ui/SeatingPage'));
 
-// Единственная страница с именованным экспортом вместо default.
 const SignsPage = lazy(() =>
   import('../pages/signs/ui/Signs').then((m) => ({ default: m.SignsPage })),
 );
@@ -62,6 +58,7 @@ export const routes: AppRoute[] = [
       },
       { path: 'distribute', element: <DistributePage /> },
       { path: 'signs', element: <SignsPage /> },
+      { path: 'seating', element: <SeatingPage /> },
     ],
   },
 ];

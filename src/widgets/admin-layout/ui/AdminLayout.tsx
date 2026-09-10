@@ -18,6 +18,7 @@ import {
   AlertCircle,
   RefreshCw,
   GalleryVerticalEnd,
+  LayoutGrid,
 } from "lucide-react";
 import { Button } from "@shared/ui/Button";
 import { cn } from "@shared/lib/utils";
@@ -79,10 +80,16 @@ export default function AdminLayout() {
       icon: GalleryVerticalEnd,
       id: "signs",
     },
+    {
+      href: "/admin/seating",
+      label: "Рассадка",
+      icon: LayoutGrid,
+      id: "seating",
+    },
   ];
 
   const handleReconnect = () => {
-    restartTeams(); // Используем новую функцию для переподключения
+    restartTeams();
   };
 
   return (
