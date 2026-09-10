@@ -70,6 +70,44 @@ describe("buildLayout", () => {
     }
   });
 
+  it("не допускает наложения столов", () => {
+    const sizes = [8, 8, 8, 7, 6, 6, 5, 4, 3, 2];
+    const mixed = Array.from({ length: 70 }, (_, i) => ({
+      teamId: `team-${String(i).padStart(3, "0")}`,
+      size: sizes[i % sizes.length],
+    }));
+
+    const result = buildLayout(mixed);
+    const all = result.placements;
+
+    for (let i = 0; i < all.length; i += 1) {
+      for (let j = i + 1; j < all.length; j += 1) {
+        const a = all[i].slot;
+        const b = all[j].slot;
+        const gap = Math.hypot(a.x - b.x, a.y - b.y) - a.radius - b.radius;
+
+        expect(gap).toBeGreaterThan(-1);
+      }
+    }
+  });
+
+  it("укладывает столы плотнее сетки", () => {
+    const extra = 24;
+    const result = buildLayout(teams(FIXED_SLOT_POINTS.length + extra, 6));
+    const generated = result.placements.slice(FIXED_SLOT_POINTS.length);
+
+    const lowestFixed = Math.max(
+      ...result.placements
+        .slice(0, FIXED_SLOT_POINTS.length)
+        .map((placement) => placement.slot.y),
+    );
+    const lowestGenerated = Math.max(
+      ...generated.map((placement) => placement.slot.y),
+    );
+
+    expect(lowestGenerated - lowestFixed).toBeLessThan(280);
+  });
+
   it("не выпускает столы за границы зала", () => {
     const result = buildLayout(teams(FIXED_SLOT_POINTS.length + 40, 8));
 
@@ -77,21 +115,6 @@ describe("buildLayout", () => {
       expect(slot.y + slot.radius).toBeLessThanOrEqual(HALL.height);
       expect(slot.x - slot.radius).toBeGreaterThanOrEqual(0);
       expect(slot.x + slot.radius).toBeLessThanOrEqual(HALL.width);
-    }
-  });
-
-  it("не накладывает достроенные столы друг на друга", () => {
-    const result = buildLayout(teams(90, 8));
-    const generated = result.placements.slice(FIXED_SLOT_POINTS.length);
-
-    for (let i = 0; i < generated.length; i += 1) {
-      for (let j = i + 1; j < generated.length; j += 1) {
-        const a = generated[i].slot;
-        const b = generated[j].slot;
-        const distance = Math.hypot(a.x - b.x, a.y - b.y);
-
-        expect(distance).toBeGreaterThanOrEqual(a.radius + b.radius);
-      }
     }
   });
 

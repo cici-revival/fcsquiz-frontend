@@ -16,20 +16,37 @@ export const HALL = {
 } as const;
 
 export const TABLE = {
-  minRadius: 30,
-  radiusPerPlayer: 3.5,
-  baseRadius: 22,
-  gap: 14,
+  minRadius: 26,
+  maxRadius: 43,
+  radiusPerPlayer: 2.5,
+  baseRadius: 23,
 } as const;
 
 export const HALL_GEOMETRY = {
   aisleLeft: 700,
   aisleRight: 800,
-  marginLeft: 131,
-  marginRight: 1249,
-  bottomMargin: 60,
-  rowGap: 26,
+  topLeft: 185,
+  topRight: 1279,
+  bottomLeft: 81,
+  bottomRight: 1299,
+  taperEndY: 600,
+  bottomMargin: 40,
 } as const;
+
+export function getHallBounds(y: number): { left: number; right: number } {
+  const start = HALL.stageHeight;
+  const end = HALL_GEOMETRY.taperEndY;
+  const progress = Math.min(1, Math.max(0, (y - start) / (end - start)));
+
+  return {
+    left:
+      HALL_GEOMETRY.topLeft +
+      (HALL_GEOMETRY.bottomLeft - HALL_GEOMETRY.topLeft) * progress,
+    right:
+      HALL_GEOMETRY.topRight +
+      (HALL_GEOMETRY.bottomRight - HALL_GEOMETRY.topRight) * progress,
+  };
+}
 
 export const FIXED_SLOT_POINTS: { x: number; y: number }[] = [
   { x: 235, y: 156 },
@@ -76,9 +93,7 @@ export const FIXED_SLOT_POINTS: { x: number; y: number }[] = [
 
 export function getTableRadius(playersCount: number): number {
   const size = Math.max(0, playersCount);
+  const radius = TABLE.baseRadius + size * TABLE.radiusPerPlayer;
 
-  return Math.max(
-    TABLE.minRadius,
-    TABLE.baseRadius + size * TABLE.radiusPerPlayer,
-  );
+  return Math.min(TABLE.maxRadius, Math.max(TABLE.minRadius, radius));
 }

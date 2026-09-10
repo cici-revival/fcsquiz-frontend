@@ -1,17 +1,15 @@
 import {
   FIXED_SLOT_POINTS,
-  HALL,
   HALL_GEOMETRY,
-  TABLE,
   getTableRadius,
   type SeatSlot,
 } from "../config/hall";
 import { assignRows } from "./assignRows";
+import type { LayoutTeam } from "./layoutTypes";
+import { packSide, type PackedCircle } from "./packSide";
+import { relaxCircles } from "./relaxCircles";
 
-export type LayoutTeam = {
-  teamId: string;
-  size: number;
-};
+export type { LayoutTeam };
 
 export type LayoutPlacement = {
   teamId: string;
@@ -28,186 +26,102 @@ export function buildLayout(teams: LayoutTeam[]): BuildLayoutResult {
     (a, b) => b.size - a.size || a.teamId.localeCompare(b.teamId),
   );
 
-  const fixed = orderFixedPoints();
-  const placements: LayoutPlacement[] = [];
+  const fixedPoints = orderFixedPoints();
+  const fixedCount = Math.min(fixedPoints.length, ordered.length);
 
-  const fixedCount = Math.min(fixed.length, ordered.length);
-
-  for (let index = 0; index < fixedCount; index += 1) {
-    const team = ordered[index];
-    const point = fixed[index];
-
-    placements.push({
+  const fixed: PackedCircle[] = ordered
+    .slice(0, fixedCount)
+    .map((team, index) => ({
       teamId: team.teamId,
-      slot: {
-        id: "",
-        x: point.x,
-        y: point.y,
-        row: 0,
-        order: 0,
-        radius: getTableRadius(team.size),
-      },
-    });
-  }
+      x: fixedPoints[index].x,
+      y: fixedPoints[index].y,
+      radius: getTableRadius(team.size),
+    }));
 
   const rest = ordered.slice(fixedCount);
-  const startY = fixed.length > 0 ? lowestFixedY(fixed) : HALL.stageHeight;
-  const { placed, overflow } = flowRemaining(rest, startY);
+  const { left, right } = splitBySide(rest);
+
+  const leftObstacles = fixed.filter((circle) => onSide(circle, true));
+  const rightObstacles = fixed.filter((circle) => onSide(circle, false));
+
+  const leftPack = packSide(left, { isLeft: true }, leftObstacles);
+  const rightPack = packSide(right, { isLeft: false }, rightObstacles);
+
+  const leftPacked = relaxCircles(leftPack.packed, leftObstacles, true);
+  const rightPacked = relaxCircles(rightPack.packed, rightObstacles, false);
 
   return {
-    placements: withIdentifiers([...placements, ...placed]),
-    overflow,
+    placements: withIdentifiers([...fixed, ...leftPacked, ...rightPacked]),
+    overflow: [...leftPack.overflow, ...rightPack.overflow],
   };
 }
 
-function orderFixedPoints(): { x: number; y: number }[] {
-  return [...FIXED_SLOT_POINTS].sort((a, b) => a.y - b.y || a.x - b.x);
+function onSide(circle: PackedCircle, isLeft: boolean): boolean {
+  const middle = (HALL_GEOMETRY.aisleLeft + HALL_GEOMETRY.aisleRight) / 2;
+  const overlapsLeft = circle.x - circle.radius < middle;
+  const overlapsRight = circle.x + circle.radius > middle;
+
+  return isLeft ? overlapsLeft : overlapsRight;
 }
 
-function lowestFixedY(points: { x: number; y: number }[]): number {
-  let lowest: number = HALL.stageHeight;
-
-  for (const point of points) {
-    lowest = Math.max(lowest, point.y);
-  }
-
-  return lowest;
-}
-
-function flowRemaining(
-  teams: LayoutTeam[],
-  startY: number,
-): { placed: LayoutPlacement[]; overflow: LayoutTeam[] } {
-  const placed: LayoutPlacement[] = [];
-  const queue = [...teams];
-
-  let previousRowBottom = startY + maxFixedRadius();
-
-  while (queue.length > 0) {
-    const row = takeRow(queue);
-
-    if (row.length === 0) {
-      break;
-    }
-
-    const rowRadius = Math.max(...row.map((team) => getTableRadius(team.size)));
-    const centerY = previousRowBottom + HALL_GEOMETRY.rowGap + rowRadius;
-
-    if (centerY + rowRadius > HALL.height - HALL_GEOMETRY.bottomMargin) {
-      return { placed, overflow: row.concat(queue) };
-    }
-
-    placeRow(row, centerY, placed);
-    previousRowBottom = centerY + rowRadius;
-  }
-
-  return { placed, overflow: [] };
-}
-
-function maxFixedRadius(): number {
-  return TABLE.baseRadius + 8 * TABLE.radiusPerPlayer;
-}
-
-function takeRow(queue: LayoutTeam[]): LayoutTeam[] {
-  const leftWidth = HALL_GEOMETRY.aisleLeft - HALL_GEOMETRY.marginLeft;
-  const rightWidth = HALL_GEOMETRY.marginRight - HALL_GEOMETRY.aisleRight;
-
-  const left = takeSide(queue, leftWidth);
-  const right = takeSide(queue, rightWidth);
-
-  return [...left, ...right];
-}
-
-function takeSide(queue: LayoutTeam[], available: number): LayoutTeam[] {
-  const side: LayoutTeam[] = [];
-  let used = 0;
-
-  while (queue.length > 0) {
-    const width = getTableRadius(queue[0].size) * 2;
-    const next = used === 0 ? width : used + TABLE.gap + width;
-
-    if (next > available) {
-      break;
-    }
-
-    used = next;
-    side.push(queue.shift() as LayoutTeam);
-  }
-
-  return side;
-}
-
-function placeRow(row: LayoutTeam[], centerY: number, placed: LayoutPlacement[]) {
-  const leftWidth = HALL_GEOMETRY.aisleLeft - HALL_GEOMETRY.marginLeft;
-  const half = splitBySide(row, leftWidth);
-
-  layoutSide(half.left, HALL_GEOMETRY.marginLeft, HALL_GEOMETRY.aisleLeft, centerY, placed);
-  layoutSide(half.right, HALL_GEOMETRY.aisleRight, HALL_GEOMETRY.marginRight, centerY, placed);
-}
-
-function splitBySide(row: LayoutTeam[], leftWidth: number) {
+function splitBySide(teams: LayoutTeam[]): {
+  left: LayoutTeam[];
+  right: LayoutTeam[];
+} {
   const left: LayoutTeam[] = [];
   const right: LayoutTeam[] = [];
-  let used = 0;
 
-  for (const team of row) {
-    const width = getTableRadius(team.size) * 2;
-    const next = used === 0 ? width : used + TABLE.gap + width;
+  let leftLoad = 0;
+  let rightLoad = 0;
 
-    if (next <= leftWidth && right.length === 0) {
-      used = next;
+  for (const team of teams) {
+    const load = getTableRadius(team.size) ** 2;
+
+    if (leftLoad <= rightLoad) {
       left.push(team);
+      leftLoad += load;
     } else {
       right.push(team);
+      rightLoad += load;
     }
   }
 
   return { left, right };
 }
 
-function layoutSide(
-  teams: LayoutTeam[],
-  from: number,
-  to: number,
-  centerY: number,
-  placed: LayoutPlacement[],
-) {
-  if (teams.length === 0) {
-    return;
-  }
-
-  const totalWidth = teams.reduce(
-    (sum, team, index) =>
-      sum + getTableRadius(team.size) * 2 + (index > 0 ? TABLE.gap : 0),
-    0,
-  );
-
-  let cursor = from + (to - from - totalWidth) / 2;
-
-  for (const team of teams) {
-    const radius = getTableRadius(team.size);
-
-    placed.push({
-      teamId: team.teamId,
-      slot: {
-        id: "",
-        x: Math.round(cursor + radius),
-        y: Math.round(centerY),
-        row: 0,
-        order: 0,
-        radius,
-      },
-    });
-
-    cursor += radius * 2 + TABLE.gap;
-  }
+function orderFixedPoints(): { x: number; y: number }[] {
+  return [...FIXED_SLOT_POINTS].sort((a, b) => a.y - b.y || a.x - b.x);
 }
 
-function withIdentifiers(placements: LayoutPlacement[]): LayoutPlacement[] {
-  const numbered = assignRows(placements.map((placement) => placement.slot));
+function withIdentifiers(circles: PackedCircle[]): LayoutPlacement[] {
+  const numbered = assignRows(
+    circles.map((circle) => ({
+      id: "",
+      x: circle.x,
+      y: circle.y,
+      row: 0,
+      order: 0,
+      radius: circle.radius,
+    })),
+  );
 
-  return placements.map((placement, index) => ({
-    teamId: placement.teamId,
-    slot: numbered[index] ?? placement.slot,
-  }));
+  const byPosition = new Map(
+    numbered.map((slot) => [`${slot.x}:${slot.y}`, slot]),
+  );
+
+  return circles.map((circle) => {
+    const slot = byPosition.get(`${circle.x}:${circle.y}`);
+
+    return {
+      teamId: circle.teamId,
+      slot: slot ?? {
+        id: "",
+        x: circle.x,
+        y: circle.y,
+        row: 0,
+        order: 0,
+        radius: circle.radius,
+      },
+    };
+  });
 }
