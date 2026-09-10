@@ -21,6 +21,7 @@ type SeatingPreviewProps = {
   onDirtyChange?: (isDirty: boolean) => void;
   resetToken?: number;
   showBounds?: boolean;
+  zoom?: number;
 };
 
 const DRAG_THRESHOLD = 3;
@@ -30,6 +31,7 @@ export function SeatingPreview({
   onDirtyChange,
   resetToken = 0,
   showBounds = false,
+  zoom = 1,
 }: SeatingPreviewProps) {
   const computed = useMemo(
     () => buildLayout(teams.map(({ teamId, size }): LayoutTeam => ({ teamId, size }))),
@@ -37,7 +39,7 @@ export function SeatingPreview({
   );
 
   const [moved, setMoved] = useState<Record<string, { x: number; y: number }>>({});
-  const { containerRef, fieldRef, scale } = useFieldScale();
+  const { containerRef, fieldRef, scale } = useFieldScale(zoom);
   const dragState = useRef<{ teamId: string; moved: boolean } | null>(null);
 
   useEffect(() => {
@@ -135,7 +137,13 @@ export function SeatingPreview({
         ref={fieldRef}
         style={{ width: HALL.width, height: HALL.height, transform: `scale(${scale})` }}
       >
-        <div className={styles.stage} style={{ height: HALL.stageHeight }}>
+        <div
+          className={styles.stage}
+          style={{
+            height: HALL.stageHeight + HALL.stageBulge,
+            borderRadius: `0 0 50% 50% / 0 0 ${HALL.stageBulge}px ${HALL.stageBulge}px`,
+          }}
+        >
           Сцена
         </div>
 

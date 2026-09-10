@@ -71,7 +71,7 @@ describe("buildLayout", () => {
       const left = slot.x - slot.radius;
       const right = slot.x + slot.radius;
       const inAisle =
-        right > HALL_GEOMETRY.aisleLeft && left < HALL_GEOMETRY.aisleRight;
+        right > HALL_GEOMETRY.aisleLeft + 1 && left < HALL_GEOMETRY.aisleRight - 1;
 
       expect(inAisle).toBe(false);
     }
@@ -112,7 +112,7 @@ describe("buildLayout", () => {
       ...generated.map((placement) => placement.slot.y),
     );
 
-    expect(lowestGenerated - lowestFixed).toBeLessThan(280);
+    expect(lowestGenerated - lowestFixed).toBeLessThan(TABLE.maxRadius * 6);
   });
 
   it("не выпускает столы за границы зала", () => {

@@ -29,14 +29,14 @@
   left: 0;
   right: 0;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  padding-top: 18px;
   background-color: hsl(var(--foreground) / 0.85);
   color: hsl(var(--background));
-  font-size: 28px;
+  font-size: 30px;
   letter-spacing: 0.3em;
   text-transform: uppercase;
-  border-radius: 8px 8px 0 0;
 }
 
 .slot {

@@ -22,12 +22,14 @@ export function clientToField(
   };
 }
 
-export function getFieldScale(containerWidth: number): number {
+export const ZOOM_LEVELS = [0.75, 1, 1.5, 2] as const;
+
+export function getFieldScale(containerWidth: number, zoom = 1): number {
   if (containerWidth <= 0) {
-    return 1;
+    return zoom;
   }
 
-  return Math.min(containerWidth / HALL.width, 1);
+  return Math.min(containerWidth / HALL.width, 1) * zoom;
 }
 
 export function clampToField(position: SeatingPosition): SeatingPosition {

@@ -13,6 +13,7 @@ export const HALL = {
   width: 1550,
   height: 1200,
   stageHeight: 80,
+  stageBulge: 46,
 } as const;
 
 export const TABLE = {

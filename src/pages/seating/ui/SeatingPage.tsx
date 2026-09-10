@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Frame, LayoutGrid, PencilRuler, RotateCcw } from "lucide-react";
+import {
+  Frame,
+  LayoutGrid,
+  PencilRuler,
+  RotateCcw,
+  ZoomIn,
+  ZoomOut,
+} from "lucide-react";
 
 import { useTeamStore } from "@entities/team/model/team.store";
 import { displayName } from "@pages/landing/ui/teamName";
@@ -8,6 +15,7 @@ import { LayoutEditorField } from "@widgets/seating-editor/ui/LayoutEditorField"
 import { LayoutToolbar } from "@widgets/seating-editor/ui/LayoutToolbar";
 import { SeatingPreview } from "@widgets/seating-editor/ui/SeatingPreview";
 import { Button } from "@shared/ui/Button";
+import { ZOOM_LEVELS } from "@entities/seating/lib/fieldCoords";
 
 import styles from "./SeatingPage.module.css";
 
@@ -18,6 +26,9 @@ export default function SeatingPage() {
   const [isDirty, setDirty] = useState(false);
   const [resetToken, setResetToken] = useState(0);
   const [showBounds, setShowBounds] = useState(false);
+  const [zoomIndex, setZoomIndex] = useState(
+    ZOOM_LEVELS.indexOf(1) === -1 ? 0 : ZOOM_LEVELS.indexOf(1),
+  );
   const teamsMap = useTeamStore((state) => state.teams);
   const status = useTeamStore((state) => state.status);
   const draft = useSlotDraft();
@@ -93,9 +104,32 @@ export default function SeatingPage() {
               <span className={styles.pending}>Данные ещё загружаются…</span>
             )}
 
+            <div className={styles.zoom}>
+              <Button
+                variant="outline"
+                onClick={() => setZoomIndex((index) => Math.max(0, index - 1))}
+                disabled={zoomIndex === 0}
+                aria-label="Уменьшить"
+              >
+                <ZoomOut size={16} />
+              </Button>
+              <span className={styles.zoomValue}>
+                {Math.round(ZOOM_LEVELS[zoomIndex] * 100)}%
+              </span>
+              <Button
+                variant="outline"
+                onClick={() =>
+                  setZoomIndex((index) => Math.min(ZOOM_LEVELS.length - 1, index + 1))
+                }
+                disabled={zoomIndex === ZOOM_LEVELS.length - 1}
+                aria-label="Увеличить"
+              >
+                <ZoomIn size={16} />
+              </Button>
+            </div>
+
             <Button
               variant={showBounds ? "default" : "outline"}
-              className={styles.reset}
               onClick={() => setShowBounds((value) => !value)}
             >
               <Frame size={16} />
@@ -119,6 +153,7 @@ export default function SeatingPage() {
             onDirtyChange={handleDirtyChange}
             resetToken={resetToken}
             showBounds={showBounds}
+            zoom={ZOOM_LEVELS[zoomIndex]}
           />
         </>
       ) : (

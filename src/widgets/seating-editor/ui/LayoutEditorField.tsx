@@ -93,7 +93,13 @@ export function LayoutEditorField({
           transform: `scale(${scale})`,
         }}
       >
-        <div className={styles.stage} style={{ height: HALL.stageHeight }}>
+        <div
+          className={styles.stage}
+          style={{
+            height: HALL.stageHeight + HALL.stageBulge,
+            borderRadius: `0 0 50% 50% / 0 0 ${HALL.stageBulge}px ${HALL.stageBulge}px`,
+          }}
+        >
           Сцена
         </div>
 
