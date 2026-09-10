@@ -4,15 +4,15 @@ import { parseSlots, serializeSlots } from "./slotDraftJson";
 import type { SeatSlot } from "@entities/seating/config/hall";
 
 const slots: SeatSlot[] = [
-  { id: "A1", x: 100, y: 100, row: 1, order: 1 },
-  { id: "A2", x: 300, y: 100, row: 1, order: 2 },
+  { id: "A1", x: 100, y: 100, row: 1, order: 1, radius: 30 },
+  { id: "A2", x: 300, y: 100, row: 1, order: 2, radius: 30 },
 ];
 
 describe("serializeSlots", () => {
   it("выдаёт литерал, готовый к вставке в код", () => {
     const result = serializeSlots(slots);
 
-    expect(result).toContain('{ id: "A1", x: 100, y: 100, row: 1, order: 1 },');
+    expect(result).toContain("{ x: 100, y: 100 },");
     expect(result.startsWith("[")).toBe(true);
     expect(result.endsWith("]")).toBe(true);
   });

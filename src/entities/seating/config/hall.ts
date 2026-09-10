@@ -1,11 +1,10 @@
-import { assignRows } from "../lib/assignRows";
-
 export type SeatSlot = {
   id: string;
   x: number;
   y: number;
   row: number;
   order: number;
+  radius: number;
 };
 
 export const DEFAULT_SEATING_COLOR = "#3B82F6";
@@ -14,12 +13,25 @@ export const HALL = {
   width: 1550,
   height: 1200,
   stageHeight: 80,
-  slotRadius: 38,
 } as const;
 
-export const HALL_VERSION = "2026-09-1";
+export const TABLE = {
+  minRadius: 30,
+  radiusPerPlayer: 3.5,
+  baseRadius: 22,
+  gap: 14,
+} as const;
 
-const SLOT_POINTS: { x: number; y: number }[] = [
+export const HALL_GEOMETRY = {
+  aisleLeft: 700,
+  aisleRight: 800,
+  marginLeft: 131,
+  marginRight: 1249,
+  bottomMargin: 60,
+  rowGap: 26,
+} as const;
+
+export const FIXED_SLOT_POINTS: { x: number; y: number }[] = [
   { x: 235, y: 156 },
   { x: 332, y: 161 },
   { x: 429, y: 164 },
@@ -60,74 +72,13 @@ const SLOT_POINTS: { x: number; y: number }[] = [
   { x: 1040, y: 458 },
   { x: 1148, y: 464 },
   { x: 1249, y: 455 },
-  { x: 131, y: 557 },
-  { x: 231, y: 557 },
-  { x: 331, y: 557 },
-  { x: 431, y: 557 },
-  { x: 531, y: 557 },
-  { x: 631, y: 557 },
-  { x: 842, y: 557 },
-  { x: 942, y: 557 },
-  { x: 1042, y: 557 },
-  { x: 1142, y: 557 },
-  { x: 1242, y: 557 },
-  { x: 131, y: 655 },
-  { x: 231, y: 655 },
-  { x: 331, y: 655 },
-  { x: 431, y: 655 },
-  { x: 531, y: 655 },
-  { x: 631, y: 655 },
-  { x: 842, y: 655 },
-  { x: 942, y: 655 },
-  { x: 1042, y: 655 },
-  { x: 1142, y: 655 },
-  { x: 1242, y: 655 },
-  { x: 131, y: 753 },
-  { x: 231, y: 753 },
-  { x: 331, y: 753 },
-  { x: 431, y: 753 },
-  { x: 531, y: 753 },
-  { x: 631, y: 753 },
-  { x: 842, y: 753 },
-  { x: 942, y: 753 },
-  { x: 1042, y: 753 },
-  { x: 1142, y: 753 },
-  { x: 1242, y: 753 },
-  { x: 131, y: 851 },
-  { x: 231, y: 851 },
-  { x: 331, y: 851 },
-  { x: 431, y: 851 },
-  { x: 531, y: 851 },
-  { x: 631, y: 851 },
-  { x: 842, y: 851 },
-  { x: 942, y: 851 },
-  { x: 1042, y: 851 },
-  { x: 1142, y: 851 },
-  { x: 1242, y: 851 },
-  { x: 131, y: 949 },
-  { x: 231, y: 949 },
-  { x: 331, y: 949 },
-  { x: 431, y: 949 },
-  { x: 531, y: 949 },
-  { x: 631, y: 949 },
-  { x: 842, y: 949 },
-  { x: 942, y: 949 },
-  { x: 1042, y: 949 },
-  { x: 1142, y: 949 },
-  { x: 1242, y: 949 },
-  { x: 131, y: 1047 },
-  { x: 231, y: 1047 },
-  { x: 331, y: 1047 },
-  { x: 431, y: 1047 },
-  { x: 531, y: 1047 },
-  { x: 631, y: 1047 },
-  { x: 842, y: 1047 },
-  { x: 942, y: 1047 },
-  { x: 1042, y: 1047 },
-  { x: 1142, y: 1047 },
-  { x: 1242, y: 1047 },
 ];
 
-export const SEAT_SLOTS: SeatSlot[] = assignRows(
-  SLOT_POINTS.map((point) => ({ ...point, id: "", row: 0, order: 0 })),
-);
+export function getTableRadius(playersCount: number): number {
+  const size = Math.max(0, playersCount);
+
+  return Math.max(
+    TABLE.minRadius,
+    TABLE.baseRadius + size * TABLE.radiusPerPlayer,
+  );
+}

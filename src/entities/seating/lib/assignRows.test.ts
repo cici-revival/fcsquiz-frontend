@@ -4,7 +4,7 @@ import { assignRows } from "./assignRows";
 import type { SeatSlot } from "../config/hall";
 
 function slot(x: number, y: number): SeatSlot {
-  return { id: "", x, y, row: 0, order: 0 };
+  return { id: "", x, y, row: 0, order: 0, radius: 30 };
 }
 
 describe("assignRows", () => {

@@ -4,9 +4,9 @@ import { findSlotAt, SNAP_TOLERANCE } from "./snapToSlot";
 import type { SeatSlot } from "../config/hall";
 
 const slots: SeatSlot[] = [
-  { id: "A1", x: 100, y: 100, row: 1, order: 1 },
-  { id: "A2", x: 300, y: 100, row: 1, order: 2 },
-  { id: "B1", x: 100, y: 300, row: 2, order: 1 },
+  { id: "A1", x: 100, y: 100, row: 1, order: 1, radius: 30 },
+  { id: "A2", x: 300, y: 100, row: 1, order: 2, radius: 30 },
+  { id: "B1", x: 100, y: 300, row: 2, order: 1, radius: 30 },
 ];
 
 describe("findSlotAt", () => {
@@ -29,8 +29,8 @@ describe("findSlotAt", () => {
   it("при равном расстоянии выбирает первый по порядку", () => {
     const middle = { x: 200, y: 100 };
     const wide: SeatSlot[] = [
-      { id: "A1", x: 190, y: 100, row: 1, order: 1 },
-      { id: "A2", x: 210, y: 100, row: 1, order: 2 },
+      { id: "A1", x: 190, y: 100, row: 1, order: 1, radius: 30 },
+      { id: "A2", x: 210, y: 100, row: 1, order: 2, radius: 30 },
     ];
 
     expect(findSlotAt(middle, wide)?.id).toBe("A1");

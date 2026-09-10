@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef } from "react";
 
 import { HALL, type SeatSlot } from "@entities/seating/config/hall";
-import { clientToField, getFieldScale } from "@entities/seating/lib/fieldCoords";
+import { clientToField } from "@entities/seating/lib/fieldCoords";
+import { useFieldScale } from "./useFieldScale";
 import type { SeatingPosition } from "@entities/seating/types";
 
 import styles from "./LayoutEditorField.module.css";
@@ -23,23 +24,8 @@ export function LayoutEditorField({
   onMoveSlot,
   onRemoveSlot,
 }: LayoutEditorFieldProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const fieldRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(1);
+  const { containerRef, fieldRef, scale } = useFieldScale();
   const dragState = useRef<{ slotId: string; moved: boolean } | null>(null);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const observer = new ResizeObserver(([entry]) => {
-      setScale(getFieldScale(entry.contentRect.width));
-    });
-
-    observer.observe(container);
-
-    return () => observer.disconnect();
-  }, []);
 
   const toFieldPoint = useCallback(
     (event: { clientX: number; clientY: number }): SeatingPosition | null => {
@@ -48,7 +34,7 @@ export function LayoutEditorField({
 
       return clientToField(event, field.getBoundingClientRect(), scale);
     },
-    [scale],
+    [fieldRef, scale],
   );
 
   const handleFieldPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -117,10 +103,10 @@ export function LayoutEditorField({
             type="button"
             className={styles.slot}
             style={{
-              left: slot.x - HALL.slotRadius,
-              top: slot.y - HALL.slotRadius,
-              width: HALL.slotRadius * 2,
-              height: HALL.slotRadius * 2,
+              left: slot.x - slot.radius,
+              top: slot.y - slot.radius,
+              width: slot.radius * 2,
+              height: slot.radius * 2,
             }}
             onPointerDown={(event) => handleSlotPointerDown(event, slot)}
             onPointerMove={handleSlotPointerMove}

@@ -1,11 +1,11 @@
-import { HALL, SEAT_SLOTS, type SeatSlot } from "../config/hall";
+import { TABLE, type SeatSlot } from "../config/hall";
 import type { SeatingPosition } from "../types";
 
-export const SNAP_TOLERANCE = HALL.slotRadius;
+export const SNAP_TOLERANCE = TABLE.minRadius;
 
 export function findSlotAt(
   position: SeatingPosition,
-  slots: SeatSlot[] = SEAT_SLOTS,
+  slots: SeatSlot[],
 ): SeatSlot | null {
   let best: SeatSlot | null = null;
   let bestDistance = Infinity;

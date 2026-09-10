@@ -22,3 +22,39 @@
   font-size: 0.9375rem;
   max-width: 70ch;
 }
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.modes {
+  display: flex;
+  gap: 8px;
+}
+
+.summary {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.count {
+  font-size: 1.5rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.label {
+  color: hsl(var(--muted-foreground));
+  font-size: 0.875rem;
+}
+
+.pending {
+  margin-left: 8px;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.8125rem;
+}

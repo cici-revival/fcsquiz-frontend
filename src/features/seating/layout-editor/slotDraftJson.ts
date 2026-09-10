@@ -1,10 +1,10 @@
 import { assignRows } from "@entities/seating/lib/assignRows";
-import type { SeatSlot } from "@entities/seating/config/hall";
+import { TABLE, type SeatSlot } from "@entities/seating/config/hall";
 
 export function serializeSlots(slots: SeatSlot[]): string {
   const lines = slots.map(
     (slot) =>
-      `  { id: "${slot.id}", x: ${slot.x}, y: ${slot.y}, row: ${slot.row}, order: ${slot.order} },`,
+      `  { x: ${slot.x}, y: ${slot.y} },`,
   );
 
   return `[\n${lines.join("\n")}\n]`;
@@ -18,7 +18,14 @@ export function parseSlots(raw: string): SeatSlot[] {
   }
 
   return assignRows(
-    numbers.map(({ x, y }) => ({ id: "", x, y, row: 0, order: 0 })),
+    numbers.map(({ x, y }) => ({
+      id: "",
+      x,
+      y,
+      row: 0,
+      order: 0,
+      radius: TABLE.minRadius,
+    })),
   );
 }
 
