@@ -70,3 +70,17 @@
   opacity: 0.75;
   font-variant-numeric: tabular-nums;
 }
+
+.deadZone {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: hsl(var(--muted-foreground) / 0.12);
+  border: 1px dashed hsl(var(--muted-foreground) / 0.4);
+  border-radius: 6px;
+  color: hsl(var(--muted-foreground));
+  font-size: 18px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}

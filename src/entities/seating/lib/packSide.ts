@@ -1,4 +1,10 @@
-import { HALL, HALL_GEOMETRY, getHallBounds, getTableRadius } from "../config/hall";
+import {
+  HALL,
+  HALL_GEOMETRY,
+  getHallBounds,
+  getTableRadius,
+  isInDeadZone,
+} from "../config/hall";
 import type { LayoutTeam } from "./layoutTypes";
 
 export type PackedCircle = {
@@ -8,7 +14,7 @@ export type PackedCircle = {
   radius: number;
 };
 
-export const PACK_MARGIN = 4;
+export const PACK_MARGIN = 2;
 const SCAN_STEP = 6;
 
 export type SideBounds = {
@@ -126,6 +132,10 @@ function fits(
   existing: PackedCircle[],
 ): boolean {
   if (y + radius > HALL.height - HALL_GEOMETRY.bottomMargin) {
+    return false;
+  }
+
+  if (isInDeadZone(x, y, radius)) {
     return false;
   }
 

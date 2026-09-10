@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 
-import { HALL, HALL_GEOMETRY } from "@entities/seating/config/hall";
+import { DEAD_ZONE, HALL, HALL_GEOMETRY } from "@entities/seating/config/hall";
 import { buildLayout, type LayoutTeam } from "@entities/seating/lib/buildLayout";
 import { useFieldScale } from "./useFieldScale";
 
@@ -43,6 +43,18 @@ export function SeatingPreview({ teams }: SeatingPreviewProps) {
             height: HALL.height - HALL.stageHeight,
           }}
         />
+
+        <div
+          className={styles.deadZone}
+          style={{
+            left: DEAD_ZONE.left,
+            top: DEAD_ZONE.top,
+            width: DEAD_ZONE.right - DEAD_ZONE.left,
+            height: DEAD_ZONE.bottom - DEAD_ZONE.top,
+          }}
+        >
+          колонки
+        </div>
 
         {layout.placements.map(({ teamId, slot }) => {
           const team = names.get(teamId);

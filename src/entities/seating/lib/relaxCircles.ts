@@ -1,4 +1,10 @@
-import { HALL, HALL_GEOMETRY, getHallBounds } from "../config/hall";
+import {
+  DEAD_ZONE,
+  HALL,
+  HALL_GEOMETRY,
+  getHallBounds,
+  isInDeadZone,
+} from "../config/hall";
 import { PACK_MARGIN, type PackedCircle } from "./packSide";
 
 const ITERATIONS = 300;
@@ -36,6 +42,10 @@ export function relaxCircles(
       }
 
       if (clampToHall(circle, isLeft)) {
+        settled = false;
+      }
+
+      if (pushOutOfDeadZone(circle)) {
         settled = false;
       }
     }
@@ -87,6 +97,16 @@ function separate(
 
   circle.x += nx * overlap * REPULSION * share;
   circle.y += ny * overlap * REPULSION * share;
+
+  return true;
+}
+
+function pushOutOfDeadZone(circle: PackedCircle): boolean {
+  if (!isInDeadZone(circle.x, circle.y, circle.radius)) {
+    return false;
+  }
+
+  circle.y = DEAD_ZONE.bottom + circle.radius;
 
   return true;
 }
@@ -168,6 +188,10 @@ function findFreeSpot(
 
     for (let x = from; x <= to; x += step) {
       const candidate = { ...circle, x, y };
+
+      if (isInDeadZone(x, y, circle.radius)) {
+        continue;
+      }
 
       if (!overlapsAny(candidate, others)) {
         return { x, y };

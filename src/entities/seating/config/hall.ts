@@ -17,9 +17,9 @@ export const HALL = {
 
 export const TABLE = {
   minRadius: 26,
-  maxRadius: 43,
-  radiusPerPlayer: 2.5,
-  baseRadius: 23,
+  maxRadius: 45,
+  radiusPerPlayer: 2.7,
+  baseRadius: 23.4,
 } as const;
 
 export const HALL_GEOMETRY = {
@@ -32,6 +32,22 @@ export const HALL_GEOMETRY = {
   taperEndY: 600,
   bottomMargin: 40,
 } as const;
+
+export const DEAD_ZONE = {
+  left: 682,
+  right: 974,
+  top: HALL.stageHeight,
+  bottom: 214,
+} as const;
+
+export function isInDeadZone(x: number, y: number, radius: number): boolean {
+  return (
+    x + radius > DEAD_ZONE.left &&
+    x - radius < DEAD_ZONE.right &&
+    y + radius > DEAD_ZONE.top &&
+    y - radius < DEAD_ZONE.bottom
+  );
+}
 
 export function getHallBounds(y: number): { left: number; right: number } {
   const start = HALL.stageHeight;

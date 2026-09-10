@@ -6,6 +6,8 @@ import {
   HALL,
   HALL_GEOMETRY,
   getTableRadius,
+  isInDeadZone,
+  TABLE,
 } from "../config/hall";
 
 function teams(count: number, size = 5): LayoutTeam[] {
@@ -21,7 +23,12 @@ describe("getTableRadius", () => {
   });
 
   it("не опускается ниже минимума для пустых команд", () => {
-    expect(getTableRadius(0)).toBe(getTableRadius(1));
+    expect(getTableRadius(0)).toBe(TABLE.minRadius);
+  });
+
+  it("не превышает максимум, заданный разметкой", () => {
+    expect(getTableRadius(8)).toBe(TABLE.maxRadius);
+    expect(getTableRadius(20)).toBe(TABLE.maxRadius);
   });
 });
 
@@ -115,6 +122,20 @@ describe("buildLayout", () => {
       expect(slot.y + slot.radius).toBeLessThanOrEqual(HALL.height);
       expect(slot.x - slot.radius).toBeGreaterThanOrEqual(0);
       expect(slot.x + slot.radius).toBeLessThanOrEqual(HALL.width);
+    }
+  });
+
+  it("не ставит столы в мёртвую зону под колонками", () => {
+    const sizes = [8, 6, 4, 3, 2];
+    const mixed = Array.from({ length: 80 }, (_, i) => ({
+      teamId: `team-${String(i).padStart(3, "0")}`,
+      size: sizes[i % sizes.length],
+    }));
+
+    const result = buildLayout(mixed);
+
+    for (const { slot } of result.placements) {
+      expect(isInDeadZone(slot.x, slot.y, slot.radius)).toBe(false);
     }
   });
 
