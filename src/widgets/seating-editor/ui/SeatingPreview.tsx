@@ -21,7 +21,6 @@ type SeatingPreviewProps = {
   onDirtyChange?: (isDirty: boolean) => void;
   resetToken?: number;
   showBounds?: boolean;
-  zoom?: number;
 };
 
 const DRAG_THRESHOLD = 3;
@@ -31,7 +30,6 @@ export function SeatingPreview({
   onDirtyChange,
   resetToken = 0,
   showBounds = false,
-  zoom = 1,
 }: SeatingPreviewProps) {
   const computed = useMemo(
     () => buildLayout(teams.map(({ teamId, size }): LayoutTeam => ({ teamId, size }))),
@@ -39,7 +37,7 @@ export function SeatingPreview({
   );
 
   const [moved, setMoved] = useState<Record<string, { x: number; y: number }>>({});
-  const { containerRef, fieldRef, scale } = useFieldScale(zoom);
+  const { containerRef, fieldRef, scale } = useFieldScale();
   const dragState = useRef<{ teamId: string; moved: boolean } | null>(null);
 
   useEffect(() => {

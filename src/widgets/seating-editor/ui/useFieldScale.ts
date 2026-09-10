@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { getFieldScale } from "@entities/seating/lib/fieldCoords";
 
-export function useFieldScale(zoom = 1) {
+export function useFieldScale() {
   const containerRef = useRef<HTMLDivElement>(null);
   const fieldRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
@@ -20,5 +20,5 @@ export function useFieldScale(zoom = 1) {
     return () => observer.disconnect();
   }, []);
 
-  return { containerRef, fieldRef, scale: getFieldScale(width, zoom) };
+  return { containerRef, fieldRef, scale: getFieldScale(width) };
 }
