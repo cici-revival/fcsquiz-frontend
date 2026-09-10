@@ -58,3 +58,7 @@
   color: hsl(var(--muted-foreground));
   font-size: 0.8125rem;
 }
+
+.reset {
+  margin-left: 8px;
+}

@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { LayoutGrid, PencilRuler } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { LayoutGrid, PencilRuler, RotateCcw } from "lucide-react";
 
 import { useTeamStore } from "@entities/team/model/team.store";
 import { displayName } from "@pages/landing/ui/teamName";
@@ -15,6 +15,8 @@ type Mode = "seating" | "layout";
 
 export default function SeatingPage() {
   const [mode, setMode] = useState<Mode>("seating");
+  const [isDirty, setDirty] = useState(false);
+  const [resetToken, setResetToken] = useState(0);
   const teamsMap = useTeamStore((state) => state.teams);
   const status = useTeamStore((state) => state.status);
   const draft = useSlotDraft();
@@ -31,6 +33,10 @@ export default function SeatingPage() {
         })),
     [teamsMap],
   );
+
+  const handleDirtyChange = useCallback((dirty: boolean) => {
+    setDirty(dirty);
+  }, []);
 
   useEffect(() => {
     if (mode !== "layout") return;
@@ -85,9 +91,24 @@ export default function SeatingPage() {
             {status !== "connected" && (
               <span className={styles.pending}>Данные ещё загружаются…</span>
             )}
+
+            {isDirty && (
+              <Button
+                variant="outline"
+                className={styles.reset}
+                onClick={() => setResetToken((token) => token + 1)}
+              >
+                <RotateCcw size={16} />
+                Рассадить заново
+              </Button>
+            )}
           </div>
 
-          <SeatingPreview teams={teams} />
+          <SeatingPreview
+            teams={teams}
+            onDirtyChange={handleDirtyChange}
+            resetToken={resetToken}
+          />
         </>
       ) : (
         <>
