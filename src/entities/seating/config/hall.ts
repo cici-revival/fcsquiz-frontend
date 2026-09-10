@@ -1,3 +1,5 @@
+import { assignRows } from "../lib/assignRows";
+
 export type SeatSlot = {
   id: string;
   x: number;
@@ -12,34 +14,120 @@ export const HALL = {
   width: 1550,
   height: 1200,
   stageHeight: 80,
-  slotRadius: 46,
+  slotRadius: 38,
 } as const;
 
-export const HALL_VERSION = "draft-1";
+export const HALL_VERSION = "2026-09-1";
 
-function buildDraftSlots(): SeatSlot[] {
-  const rows = 6;
-  const perRow = 8;
-  const marginX = 180;
-  const firstRowY = HALL.stageHeight + 160;
-  const rowGap = 150;
-  const stepX = (HALL.width - marginX * 2) / (perRow - 1);
+const SLOT_POINTS: { x: number; y: number }[] = [
+  { x: 235, y: 156 },
+  { x: 332, y: 161 },
+  { x: 429, y: 164 },
+  { x: 529, y: 167 },
+  { x: 629, y: 173 },
+  { x: 1027, y: 172 },
+  { x: 1129, y: 166 },
+  { x: 1229, y: 159 },
+  { x: 208, y: 253 },
+  { x: 313, y: 252 },
+  { x: 420, y: 263 },
+  { x: 522, y: 267 },
+  { x: 635, y: 277 },
+  { x: 842, y: 263 },
+  { x: 941, y: 266 },
+  { x: 1047, y: 273 },
+  { x: 1144, y: 271 },
+  { x: 1249, y: 265 },
+  { x: 152, y: 330 },
+  { x: 245, y: 349 },
+  { x: 343, y: 354 },
+  { x: 440, y: 363 },
+  { x: 536, y: 367 },
+  { x: 636, y: 373 },
+  { x: 836, y: 366 },
+  { x: 942, y: 369 },
+  { x: 1043, y: 363 },
+  { x: 1144, y: 370 },
+  { x: 1246, y: 362 },
+  { x: 131, y: 426 },
+  { x: 228, y: 446 },
+  { x: 330, y: 451 },
+  { x: 427, y: 465 },
+  { x: 533, y: 475 },
+  { x: 638, y: 473 },
+  { x: 842, y: 472 },
+  { x: 941, y: 469 },
+  { x: 1040, y: 458 },
+  { x: 1148, y: 464 },
+  { x: 1249, y: 455 },
+  { x: 131, y: 557 },
+  { x: 231, y: 557 },
+  { x: 331, y: 557 },
+  { x: 431, y: 557 },
+  { x: 531, y: 557 },
+  { x: 631, y: 557 },
+  { x: 842, y: 557 },
+  { x: 942, y: 557 },
+  { x: 1042, y: 557 },
+  { x: 1142, y: 557 },
+  { x: 1242, y: 557 },
+  { x: 131, y: 655 },
+  { x: 231, y: 655 },
+  { x: 331, y: 655 },
+  { x: 431, y: 655 },
+  { x: 531, y: 655 },
+  { x: 631, y: 655 },
+  { x: 842, y: 655 },
+  { x: 942, y: 655 },
+  { x: 1042, y: 655 },
+  { x: 1142, y: 655 },
+  { x: 1242, y: 655 },
+  { x: 131, y: 753 },
+  { x: 231, y: 753 },
+  { x: 331, y: 753 },
+  { x: 431, y: 753 },
+  { x: 531, y: 753 },
+  { x: 631, y: 753 },
+  { x: 842, y: 753 },
+  { x: 942, y: 753 },
+  { x: 1042, y: 753 },
+  { x: 1142, y: 753 },
+  { x: 1242, y: 753 },
+  { x: 131, y: 851 },
+  { x: 231, y: 851 },
+  { x: 331, y: 851 },
+  { x: 431, y: 851 },
+  { x: 531, y: 851 },
+  { x: 631, y: 851 },
+  { x: 842, y: 851 },
+  { x: 942, y: 851 },
+  { x: 1042, y: 851 },
+  { x: 1142, y: 851 },
+  { x: 1242, y: 851 },
+  { x: 131, y: 949 },
+  { x: 231, y: 949 },
+  { x: 331, y: 949 },
+  { x: 431, y: 949 },
+  { x: 531, y: 949 },
+  { x: 631, y: 949 },
+  { x: 842, y: 949 },
+  { x: 942, y: 949 },
+  { x: 1042, y: 949 },
+  { x: 1142, y: 949 },
+  { x: 1242, y: 949 },
+  { x: 131, y: 1047 },
+  { x: 231, y: 1047 },
+  { x: 331, y: 1047 },
+  { x: 431, y: 1047 },
+  { x: 531, y: 1047 },
+  { x: 631, y: 1047 },
+  { x: 842, y: 1047 },
+  { x: 942, y: 1047 },
+  { x: 1042, y: 1047 },
+  { x: 1142, y: 1047 },
+  { x: 1242, y: 1047 },
+];
 
-  const slots: SeatSlot[] = [];
-
-  for (let row = 0; row < rows; row += 1) {
-    for (let order = 0; order < perRow; order += 1) {
-      slots.push({
-        id: `${String.fromCharCode(65 + row)}${order + 1}`,
-        x: Math.round(marginX + stepX * order),
-        y: firstRowY + rowGap * row,
-        row: row + 1,
-        order: order + 1,
-      });
-    }
-  }
-
-  return slots;
-}
-
-export const SEAT_SLOTS: SeatSlot[] = buildDraftSlots();
+export const SEAT_SLOTS: SeatSlot[] = assignRows(
+  SLOT_POINTS.map((point) => ({ ...point, id: "", row: 0, order: 0 })),
+);
