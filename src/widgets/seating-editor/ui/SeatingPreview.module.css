@@ -30,8 +30,6 @@
   color: hsl(var(--background));
   font-size: 30px;
   letter-spacing: 0.3em;
-  /* letter-spacing вешает пробел и после последней буквы — компенсируем,
-     иначе надпись визуально уезжает влево. */
   text-indent: 0.3em;
   text-transform: uppercase;
 }
@@ -65,7 +63,7 @@
 }
 
 .tableName {
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 600;
   line-height: 1.1;
   max-width: 100%;

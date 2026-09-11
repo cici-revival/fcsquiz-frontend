@@ -374,7 +374,7 @@ export function SeatingPreview({
             borderRadius: `0 0 50% 50% / 0 0 ${HALL.stageBulge}px ${HALL.stageBulge}px`,
           }}
         >
-          Сцена
+          {/* Сцена */}
         </div>
 
         <div
@@ -382,7 +382,7 @@ export function SeatingPreview({
           style={{
             left: HALL_GEOMETRY.aisleLeft,
             width: HALL_GEOMETRY.aisleRight - HALL_GEOMETRY.aisleLeft,
-            top: HALL.stageHeight,
+            top: HALL.stageHeight + 40,
             height: HALL.height - HALL.stageHeight,
           }}
         />
