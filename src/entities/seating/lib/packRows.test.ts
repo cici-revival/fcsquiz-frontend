@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { packRows } from "./packRows";
+import { relaxPhysics } from "./relaxPhysics";
 import { HALL_GEOMETRY, TABLE_RING, getTableRadius } from "../config/hall";
 
 function teams(count: number, size = 6) {
@@ -20,9 +21,10 @@ describe("packRows", () => {
     expect(result.overflow).toHaveLength(0);
   });
 
-  it("столы не накладываются друг на друга", () => {
-    const result = packRows(teams(120, 8), START_Y);
-    const circles = result.packed;
+  it("после утряски физикой столы не накладываются", () => {
+    // packRows кладёт вплотную и намеренно внахлёст — раздвигает их
+    // relaxPhysics. Проверяем связку целиком, она и работает в buildLayout.
+    const circles = relaxPhysics(packRows(teams(120, 8), START_Y).packed);
 
     for (let a = 0; a < circles.length; a += 1) {
       for (let b = a + 1; b < circles.length; b += 1) {

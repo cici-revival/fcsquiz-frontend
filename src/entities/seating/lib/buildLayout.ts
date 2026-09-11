@@ -8,6 +8,7 @@ import {
 import { assignRows } from "./assignRows";
 import type { LayoutTeam } from "./layoutTypes";
 import { packRows } from "./packRows";
+import { relaxPhysics } from "./relaxPhysics";
 import type { PackedCircle } from "./layoutTypes";
 
 export type { LayoutTeam };
@@ -70,8 +71,12 @@ export function buildLayout(
 
   const rows = packRows(rest, startY);
 
+  // Плотную укладку утрясаем физикой: столы расталкивают друг друга и
+  // подстраиваются под соседей. Уже стоящие — препятствия, их не двигаем.
+  const relaxed = relaxPhysics(rows.packed, standing);
+
   return {
-    placements: withIdentifiers([...fixed, ...rows.packed]),
+    placements: withIdentifiers([...fixed, ...relaxed]),
     overflow: rows.overflow,
   };
 }

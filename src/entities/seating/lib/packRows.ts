@@ -10,15 +10,20 @@ import type { LayoutTeam } from "./layoutTypes";
 import type { PackedCircle } from "./layoutTypes";
 
 /**
- * Раскладка рядами для команд, которым не хватило вкоммиченных мест.
+ * Плотная начальная укладка для команд, которым не хватило вкоммиченных мест.
  *
- * В отличие от поиска свободного места, здесь у каждой команды своя ячейка
- * в ряду, поэтому наложения невозможны по построению, а ряды получаются
- * ровными. Глубина не ограничена: ряды идут вниз, пока есть команды.
+ * Столы кладутся впритык слева направо, стороны чередуются для баланса.
+ * Ровных рядов тут не получается и не нужно: результат потом утрясает
+ * relaxPhysics, и рассадка выходит «живой», а не расчерченной по линейке.
+ * Глубина не ограничена: ряды идут вниз, пока есть команды.
  */
 
-/** Шаг между рядами: самый крупный стол плюс зазор и кольца. */
-const ROW_STEP = TABLE.maxRadius * 2 + TABLE_GAP + TABLE_RING * 2;
+/**
+ * Шаг между рядами берём по среднему столу, а не по самому крупному: ряды
+ * заходят друг на друга, и физике есть что расталкивать. Из этого и рождается
+ * «живая» рассадка вместо расчерченной сетки.
+ */
+const ROW_STEP = (TABLE.maxRadius + TABLE.minRadius) * 0.9;
 
 type SideKey = "left" | "right";
 
@@ -31,9 +36,15 @@ function sideRange(y: number, isLeft: boolean): { from: number; to: number } {
 }
 
 /** Сколько столов влезает в ряд на этой глубине. */
+/**
+ * Сколько столов реально влезает в ряд. Считаем по финальному размеру
+ * (диаметр + зазор + кольца), а не по плотной укладке: иначе в ряд попадает
+ * больше столов, чем сторона может вместить, и физике их некуда раздвинуть —
+ * они остаются внахлёст.
+ */
 function capacity(y: number, isLeft: boolean): number {
   const { from, to } = sideRange(y, isLeft);
-  const cell = TABLE.maxRadius * 2 + TABLE_GAP;
+  const cell = TABLE.maxRadius * 2 + TABLE_GAP + TABLE_RING * 2;
 
   return Math.max(1, Math.floor((to - from) / cell));
 }
@@ -69,14 +80,17 @@ export function packRows(
       const row = queue.splice(0, slots);
       if (row.length === 0) break;
 
-      const { from, to } = sideRange(y, isLeft);
-      const step = (to - from) / row.length;
+      const { from } = sideRange(y, isLeft);
+      let cursor = from;
 
-      row.forEach((team, index) => {
+      row.forEach((team) => {
         const radius = getTableRadius(team.size);
-        const x = from + step * (index + 0.5);
 
-        packed.push({ teamId: team.teamId, x: Math.round(x), y: Math.round(y), radius });
+        // Впритык, а не по равным ячейкам: физика потом раздвинет как нужно,
+        // а равные ячейки давали бы искусственно ровные ряды.
+        cursor += radius;
+        packed.push({ teamId: team.teamId, x: Math.round(cursor), y: Math.round(y), radius });
+        cursor += radius;
       });
     }
 
