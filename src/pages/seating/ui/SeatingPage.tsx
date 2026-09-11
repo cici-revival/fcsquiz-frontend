@@ -71,19 +71,53 @@ export default function SeatingPage() {
 
   const previewRef = useRef<SeatingPreviewControl>(null);
 
-  const pooledTeams = useMemo(
-    () => teams.filter((team) => !seatingTeams.get(team.teamId)?.position),
-    [teams, seatingTeams],
-  );
+  const pooledTeams = useMemo(() => {
+    const pooled = teams.filter((team) => !seatingTeams.get(team.teamId)?.position);
+
+    // Команда может быть в игре, но отсутствовать в составе из SSE (например,
+    // без названия). Её тоже показываем: иначе она молча блокирует публикацию.
+    const known = new Set(teams.map((team) => team.teamId));
+    for (const team of seatingTeams.values()) {
+      if (team.position || known.has(team.team_id)) continue;
+
+      pooled.push({
+        teamId: team.team_id,
+        name: "Без названия",
+        size: team.size,
+      });
+    }
+
+    return pooled;
+  }, [teams, seatingTeams]);
+
+  // Поле рисует только те команды, которые пришли пропсом, поэтому
+  // добавляем к составу и тех, кто есть в рассадке, но не в составе.
+  const fieldTeams = useMemo(() => {
+    const known = new Set(teams.map((team) => team.teamId));
+    const strays = Array.from(seatingTeams.values())
+      .filter((team) => !known.has(team.team_id))
+      .map((team) => ({
+        teamId: team.team_id,
+        name: "Без названия",
+        size: team.size,
+      }));
+
+    return strays.length > 0 ? [...teams, ...strays] : teams;
+  }, [teams, seatingTeams]);
 
   const handleDropFromPool = useCallback(
     (teamId: string, client: { clientX: number; clientY: number }) => {
-      const team = teams.find((item) => item.teamId === teamId);
-      if (!team) return;
+      // Размер ищем и в составе, и в сторе рассадки: команды без названия
+      // в составе из SSE может не быть.
+      const size =
+        pooledTeams.find((item) => item.teamId === teamId)?.size ??
+        useSeatingStore.getState().teams.get(teamId)?.size;
 
-      previewRef.current?.seatTeamFromClient(teamId, client, team.size);
+      if (size === undefined) return;
+
+      previewRef.current?.seatTeamFromClient(teamId, client, size);
     },
-    [teams],
+    [pooledTeams],
   );
 
   // Алгоритм считает раскладку для всего состава сразу, поэтому автопосадка
@@ -103,8 +137,20 @@ export default function SeatingPage() {
         radius: getTableRadius(sizeById.get(team.team_id) ?? team.size),
       }));
 
+    // Публикацию проверяет бэк по своему снимку, а он включает всех, кто есть
+    // в игре — в том числе команды, которых нет в составе из SSE (например,
+    // без названия). Если раскладывать только по составу, такая команда
+    // навсегда останется непосаженной и заблокирует публикацию.
+    const known = new Set(teams.map((team) => team.teamId));
+    const strays = Array.from(store.teams.values())
+      .filter((team) => !known.has(team.team_id))
+      .map(({ team_id, size }): LayoutTeam => ({ teamId: team_id, size }));
+
     const layout = buildLayout(
-      teams.map(({ teamId, size }): LayoutTeam => ({ teamId, size })),
+      [
+        ...teams.map(({ teamId, size }): LayoutTeam => ({ teamId, size })),
+        ...strays,
+      ],
       occupied,
     );
 
@@ -255,7 +301,7 @@ export default function SeatingPage() {
       <TeamPool teams={pooledTeams} onDropTeam={handleDropFromPool} />
 
       <SeatingPreview
-        teams={teams}
+        teams={fieldTeams}
         resetToken={resetToken}
         showBounds={showBounds}
         controlRef={previewRef}

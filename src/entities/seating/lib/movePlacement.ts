@@ -1,5 +1,4 @@
 import {
-  HALL,
   HALL_GEOMETRY,
   getHallBounds,
   isInDeadZone,
@@ -31,10 +30,9 @@ function clampToHall(
 ): { x: number; y: number } {
   const hall = getHallBounds(point.y);
 
-  const y = Math.min(
-    Math.max(point.y, getSeatingTop() + TABLE_GAP + radius),
-    HALL.height - HALL_GEOMETRY.bottomMargin - radius,
-  );
+  // Снизу не ограничиваем: ряды авторасстановки уходят ниже номинальной
+  // высоты зала, и туда должно быть можно перетащить стол.
+  const y = Math.max(point.y, getSeatingTop() + TABLE_GAP + radius);
 
   const middle = (HALL_GEOMETRY.aisleLeft + HALL_GEOMETRY.aisleRight) / 2;
   const isLeft = point.x <= middle;

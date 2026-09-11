@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import { resolveDrop } from "./movePlacement";
-import { DEAD_ZONE, HALL, HALL_GEOMETRY, isInDeadZone } from "../config/hall";
+import {
+  DEAD_ZONE,
+  getSeatingTop,
+  HALL,
+  HALL_GEOMETRY,
+  isInDeadZone,
+} from "../config/hall";
 import type { PackedCircle } from "./layoutTypes";
 
 function circle(x: number, y: number, radius = 40): PackedCircle {
@@ -50,9 +56,17 @@ describe("resolveDrop", () => {
     expect(Math.hypot(result.x - 310, result.y - 500)).toBeLessThan(120);
   });
 
-  it("не опускает команду ниже пола зала", () => {
+  it("не поднимает команду на сцену", () => {
+    const result = resolveDrop(circle(200, 400), { x: 300, y: -500 }, []);
+
+    expect(result.y - 40).toBeGreaterThanOrEqual(getSeatingTop());
+  });
+
+  it("позволяет опустить команду ниже номинальной высоты зала", () => {
+    // Ряды авторасстановки уходят вниз без ограничения, и перетащить туда
+    // стол тоже должно быть можно.
     const result = resolveDrop(circle(200, 400), { x: 300, y: HALL.height + 500 }, []);
 
-    expect(result.y + 40).toBeLessThanOrEqual(HALL.height);
+    expect(result.y).toBeGreaterThan(HALL.height);
   });
 });
