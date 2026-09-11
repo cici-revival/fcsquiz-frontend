@@ -98,40 +98,38 @@ export function TeamPool({ teams, onDropTeam }: TeamPoolProps) {
 
   const draggingTeam = teams.find((team) => team.teamId === draggingId);
 
+  // Пустой пул не показываем: пустая плашка «все на местах» только занимает место.
+  if (teams.length === 0) {
+    return null;
+  }
+
   return (
     <div className={styles.pool}>
       <div className={styles.header}>
         <span className={styles.count}>{teams.length}</span>
         <span className={styles.label}>не рассажено</span>
-        <span className={styles.hint}>
-          Перетащите команду на поле. ПКМ по столу — вернуть в пул.
-        </span>
       </div>
 
-      {teams.length === 0 ? (
-        <p className={styles.empty}>Все команды на местах.</p>
-      ) : (
-        <div className={styles.list}>
-          {teams.map((team) => (
-            <button
-              key={team.teamId}
-              type="button"
-              className={`${styles.chip} ${
-                draggingId === team.teamId ? styles.chipDragging : ""
-              }`.trim()}
-              onPointerDown={(event) => handlePointerDown(event, team.teamId)}
-              onPointerMove={handlePointerMove}
-              onPointerUp={handlePointerUp}
-              onPointerCancel={handlePointerUp}
-            >
-              <span className={styles.chipName} title={team.name}>
-                {team.name}
-              </span>
-              <span className={styles.chipSize}>{team.size}</span>
-            </button>
-          ))}
-        </div>
-      )}
+      <div className={styles.list}>
+        {teams.map((team) => (
+          <button
+            key={team.teamId}
+            type="button"
+            className={`${styles.chip} ${
+              draggingId === team.teamId ? styles.chipDragging : ""
+            }`.trim()}
+            onPointerDown={(event) => handlePointerDown(event, team.teamId)}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerUp}
+          >
+            <span className={styles.chipName} title={team.name}>
+              {team.name}
+            </span>
+            <span className={styles.chipSize}>{team.size}</span>
+          </button>
+        ))}
+      </div>
 
       {draggingTeam && (
         <div className={styles.ghost} ref={ghostRef}>

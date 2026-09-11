@@ -1,44 +1,26 @@
 .page {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
+  height: 100%;
   padding: 30px;
 }
 
-.header {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
+/* Заголовок как на остальных страницах админки — см. DistributePage. */
 .title {
-  font-size: 2rem;
-  font-weight: 700;
-  line-height: 1.1;
+  font-size: 32px;
+  font-weight: 600;
 }
 
-.description {
-  color: hsl(var(--muted-foreground));
-  font-size: 0.9375rem;
-  max-width: 70ch;
-}
-
-.header {
+.toolbar {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 24px;
+  align-items: center;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
-.summary {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-
 .count {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
@@ -48,13 +30,23 @@
   font-size: 0.875rem;
 }
 
-.pending {
-  margin-left: 8px;
+.status {
   color: hsl(var(--muted-foreground));
   font-size: 0.8125rem;
 }
 
-.reset {
-  margin-left: 8px;
-	gap: 10px;
+.published {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background-color: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+  font-size: 0.75rem;
+}
+
+/* Действия прижаты вправо, а счётчик остаётся слева. */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
 }

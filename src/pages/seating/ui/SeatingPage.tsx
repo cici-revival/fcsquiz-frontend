@@ -284,66 +284,61 @@ export default function SeatingPage() {
 
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <div>
-          <h1 className={styles.title}>Рассадка</h1>
-          <p className={styles.description}>
-            Перетащите команду из пула на место. ПКМ по столу возвращает её в пул.
-          </p>
-        </div>
-      </header>
+      <h1 className={styles.title}>Рассадка</h1>
 
-      <div className={styles.summary}>
+      <div className={styles.toolbar}>
         <span className={styles.count}>{teams.length}</span>
-        <span className={styles.label}>команд в игре</span>
-        {status !== "connected" && (
-          <span className={styles.pending}>Данные ещё загружаются…</span>
-        )}
+        <span className={styles.label}>команд</span>
+
+        {status !== "connected" && <span className={styles.status}>загрузка…</span>}
         {status === "connected" && seatingStatus !== "connected" && (
-          <span className={styles.pending}>Рассадка подключается…</span>
+          <span className={styles.status}>подключение…</span>
         )}
-        {isPublished && <span className={styles.pending}>Опубликована</span>}
+        {isPublished && <span className={styles.published}>опубликована</span>}
 
-        <Button
-          variant={showBounds ? "default" : "outline"}
-          className={styles.reset}
-          onClick={() => setShowBounds((value) => !value)}
-        >
-          <Frame size={16} />
-          Границы зала
-        </Button>
-
-        {pooledTeams.length > 0 && (
+        <div className={styles.actions}>
           <Button
-            className={styles.reset}
-            onClick={handleAutoSeat}
-            disabled={isAutoSeating || seatingStatus !== "connected"}
+            size="sm"
+            variant={showBounds ? "secondary" : "ghost"}
+            onClick={() => setShowBounds((value) => !value)}
+            title="Показать границы зала"
           >
-            <Wand2 size={16} />
-            Рассадить автоматически
+            <Frame size={15} />
           </Button>
-        )}
 
-        {hasPlacedTeams && (
+          {pooledTeams.length > 0 && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleAutoSeat}
+              disabled={isAutoSeating || seatingStatus !== "connected"}
+            >
+              <Wand2 size={15} />
+              Рассадить
+            </Button>
+          )}
+
+          {hasPlacedTeams && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={handleReset}
+              disabled={isResetting || seatingStatus !== "connected"}
+              title="Убрать все команды в пул"
+            >
+              <RotateCcw size={15} />
+            </Button>
+          )}
+
           <Button
-            variant="outline"
-            className={styles.reset}
-            onClick={handleReset}
-            disabled={isResetting || seatingStatus !== "connected"}
+            size="sm"
+            onClick={handlePublish}
+            disabled={isPublishing || seatingStatus !== "connected"}
           >
-            <RotateCcw size={16} />
-            Убрать всех в пул
+            <CloudUpload size={15} />
+            {isPublished ? "Опубликовать заново" : "Опубликовать"}
           </Button>
-        )}
-
-        <Button
-          className={styles.reset}
-          onClick={handlePublish}
-          disabled={isPublishing || seatingStatus !== "connected"}
-        >
-          <CloudUpload size={16} />
-          {isPublished ? "Опубликовать заново" : "Опубликовать"}
-        </Button>
+        </div>
       </div>
 
       <TeamPool teams={pooledTeams} onDropTeam={handleDropFromPool} />

@@ -39,10 +39,10 @@ describe("TeamPool", () => {
     expect(screen.getByText("Бета")).toBeInTheDocument();
   });
 
-  it("сообщает, когда пул пуст", () => {
-    render(<TeamPool teams={[]} onDropTeam={vi.fn()} />);
+  it("не занимает место, когда пул пуст", () => {
+    const { container } = render(<TeamPool teams={[]} onDropTeam={vi.fn()} />);
 
-    expect(screen.getByText("Все команды на местах.")).toBeInTheDocument();
+    expect(container).toBeEmptyDOMElement();
   });
 
   it("клик без перетаскивания не сажает команду", () => {
