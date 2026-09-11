@@ -16,6 +16,8 @@ let reconnectAttempts = 0;
 
 let isPausedByVisibility = false;
 let unsubscribeVisibility: (() => void) | null = null;
+/** Отличает отказ сервера при подключении от обрыва уже живого потока. */
+let hasEverOpened = false;
 
 function clearReconnectTimeout() {
   if (reconnectTimeout) {
@@ -92,6 +94,7 @@ export function connectSignsSSE() {
     store.setStatus("connected");
     store.setError(null);
     reconnectAttempts = 0;
+    hasEverOpened = true;
   };
 
   source.onmessage = (event) => {
@@ -107,9 +110,23 @@ export function connectSignsSSE() {
   };
 
   source.onerror = () => {
+    // Поток ни разу не открылся и соединение закрыто — значит сервер отверг
+    // запрос, а не оборвал его. Роут требует заголовок Authorization, который
+    // EventSource задавать не умеет, поэтому переподключаться бессмысленно:
+    // см. BACKEND-REQUESTS.md. Данные страница всё равно берёт обычным
+    // GET /v1/signs, теряется только живая синхронизация между админами.
+    const isRejected = !hasEverOpened && source?.readyState === EventSource.CLOSED;
+
     closeSource();
 
     if (isPausedByVisibility) return;
+
+    if (isRejected) {
+      store.setStatus("error");
+      store.setError("Живые обновления табличек недоступны");
+
+      return;
+    }
 
     scheduleReconnect();
   };
@@ -121,6 +138,7 @@ export function disconnectSignsSSE() {
   clearReconnectTimeout();
   reconnectAttempts = 0;
   isPausedByVisibility = false;
+  hasEverOpened = false;
 
   unsubscribeVisibility?.();
   unsubscribeVisibility = null;
