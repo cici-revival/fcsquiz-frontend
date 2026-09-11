@@ -57,6 +57,7 @@ type SeatingPreviewProps = {
 // одного события: при медленном ведении каждое событие даёт 1-2px, и порог
 // по дельте не преодолевался никогда — стол просто не начинал тащиться.
 const DRAG_THRESHOLD = 3;
+const HOVER_DELAY_MS = 250;
 
 export function SeatingPreview({
   teams,
@@ -128,6 +129,34 @@ export function SeatingPreview({
   // Подсказку ведём сами: Radix-триггер вешает свои onPointerMove/Down на ту
   // же кнопку, за которую тащат стол, и ломает перетаскивание.
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const hoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const cancelHover = useCallback(() => {
+    if (hoverTimeout.current) {
+      clearTimeout(hoverTimeout.current);
+      hoverTimeout.current = null;
+    }
+  }, []);
+
+  // Показываем не сразу: курсор постоянно проезжает над чужими столами,
+  // и без задержки подсказка мигала бы на каждом проходе.
+  const scheduleHover = useCallback(
+    (teamId: string) => {
+      cancelHover();
+      hoverTimeout.current = setTimeout(() => {
+        hoverTimeout.current = null;
+        setHoveredId(teamId);
+      }, HOVER_DELAY_MS);
+    },
+    [cancelHover],
+  );
+
+  const hideHover = useCallback(() => {
+    cancelHover();
+    setHoveredId(null);
+  }, [cancelHover]);
+
+  useEffect(() => cancelHover, [cancelHover]);
 
   // Пока тащат стол, подсказка только мешает: она перехватывала бы курсор
   // и мигала при проходе над соседями.
@@ -228,6 +257,8 @@ export function SeatingPreview({
       state.point = point;
       state.moved = true;
       dragTeamRef.current = state.teamId;
+      // Отложенная подсказка не должна всплыть посреди перетаскивания.
+      hideHover();
       setDragActive(true);
     }
 
@@ -388,8 +419,8 @@ export function SeatingPreview({
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerUp}
               onPointerCancel={handlePointerUp}
-              onPointerEnter={() => setHoveredId(circle.teamId)}
-              onPointerLeave={() => setHoveredId(null)}
+              onPointerEnter={() => scheduleHover(circle.teamId)}
+              onPointerLeave={hideHover}
               onContextMenu={(event) => handleContextMenu(event, circle.teamId)}
             >
               <span className={styles.tableName}>{team?.name ?? "—"}</span>
