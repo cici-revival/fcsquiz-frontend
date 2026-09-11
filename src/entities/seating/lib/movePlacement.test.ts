@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { resolveDrop } from "./movePlacement";
 import { DEAD_ZONE, HALL, HALL_GEOMETRY, isInDeadZone } from "../config/hall";
-import type { PackedCircle } from "./packSide";
+import type { PackedCircle } from "./layoutTypes";
 
 function circle(x: number, y: number, radius = 40): PackedCircle {
   return { teamId: "moved", x, y, radius };

@@ -1,14 +1,14 @@
 import {
   FIXED_SLOT_POINTS,
-  HALL_GEOMETRY,
-  getPackedTableRadius,
+  getSeatingTop,
   getTableRadius,
+  TABLE_GAP,
   type SeatSlot,
 } from "../config/hall";
 import { assignRows } from "./assignRows";
 import type { LayoutTeam } from "./layoutTypes";
-import { packSide, type PackedCircle } from "./packSide";
-import { relaxCircles } from "./relaxCircles";
+import { packRows } from "./packRows";
+import type { PackedCircle } from "./layoutTypes";
 
 export type { LayoutTeam };
 
@@ -59,55 +59,21 @@ export function buildLayout(
     }));
 
   const rest = ordered.slice(fixedCount);
-  const { left, right } = splitBySide(rest);
 
-  const blocking = [...fixed, ...occupied];
-  const leftObstacles = blocking.filter((circle) => onSide(circle, true));
-  const rightObstacles = blocking.filter((circle) => onSide(circle, false));
+  // Ряды начинаем ниже всего, что уже стоит: и вкоммиченной сетки, и столов,
+  // которые админ поставил руками.
+  const standing = [...fixed, ...occupied];
+  const startY = standing.reduce(
+    (lowest, circle) => Math.max(lowest, circle.y + circle.radius + TABLE_GAP),
+    getSeatingTop(),
+  );
 
-  const leftPack = packSide(left, { isLeft: true }, leftObstacles);
-  const rightPack = packSide(right, { isLeft: false }, rightObstacles);
-
-  const leftPacked = relaxCircles(leftPack.packed, leftObstacles, true);
-  const rightPacked = relaxCircles(rightPack.packed, rightObstacles, false);
+  const rows = packRows(rest, startY);
 
   return {
-    placements: withIdentifiers([...fixed, ...leftPacked, ...rightPacked]),
-    overflow: [...leftPack.overflow, ...rightPack.overflow],
+    placements: withIdentifiers([...fixed, ...rows.packed]),
+    overflow: rows.overflow,
   };
-}
-
-function onSide(circle: PackedCircle, isLeft: boolean): boolean {
-  const middle = (HALL_GEOMETRY.aisleLeft + HALL_GEOMETRY.aisleRight) / 2;
-  const overlapsLeft = circle.x - circle.radius < middle;
-  const overlapsRight = circle.x + circle.radius > middle;
-
-  return isLeft ? overlapsLeft : overlapsRight;
-}
-
-function splitBySide(teams: LayoutTeam[]): {
-  left: LayoutTeam[];
-  right: LayoutTeam[];
-} {
-  const left: LayoutTeam[] = [];
-  const right: LayoutTeam[] = [];
-
-  let leftLoad = 0;
-  let rightLoad = 0;
-
-  for (const team of teams) {
-    const load = getPackedTableRadius(team.size) ** 2;
-
-    if (leftLoad <= rightLoad) {
-      left.push(team);
-      leftLoad += load;
-    } else {
-      right.push(team);
-      rightLoad += load;
-    }
-  }
-
-  return { left, right };
 }
 
 function orderFixedPoints(): { x: number; y: number }[] {

@@ -118,13 +118,14 @@ describe("buildLayout", () => {
     expect(lowestGenerated - lowestFixed).toBeLessThan(330);
   });
 
-  it("не выпускает столы за границы зала", () => {
+  it("не выпускает столы за боковые границы зала", () => {
     const result = buildLayout(teams(FIXED_SLOT_POINTS.length + 40, 8));
 
+    // По вертикали зал не ограничен: ряды идут вниз, пока есть команды.
     for (const { slot } of result.placements) {
-      expect(slot.y + slot.radius).toBeLessThanOrEqual(HALL.height);
       expect(slot.x - slot.radius).toBeGreaterThanOrEqual(0);
       expect(slot.x + slot.radius).toBeLessThanOrEqual(HALL.width);
+      expect(slot.y).toBeGreaterThan(0);
     }
   });
 

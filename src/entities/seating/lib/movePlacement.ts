@@ -4,8 +4,9 @@ import {
   getHallBounds,
   isInDeadZone,
   getSeatingTop,
+  TABLE_GAP,
 } from "../config/hall";
-import { PACK_MARGIN, type PackedCircle } from "./packSide";
+import type { PackedCircle } from "./layoutTypes";
 
 const SEARCH_STEP = 6;
 const MAX_SEARCH_RADIUS = 400;
@@ -31,7 +32,7 @@ function clampToHall(
   const hall = getHallBounds(point.y);
 
   const y = Math.min(
-    Math.max(point.y, getSeatingTop() + PACK_MARGIN + radius),
+    Math.max(point.y, getSeatingTop() + TABLE_GAP + radius),
     HALL.height - HALL_GEOMETRY.bottomMargin - radius,
   );
 
@@ -56,7 +57,7 @@ function isFree(
   return others.every((other) => {
     const distance = Math.hypot(other.x - point.x, other.y - point.y);
 
-    return distance >= other.radius + radius + PACK_MARGIN;
+    return distance >= other.radius + radius + TABLE_GAP;
   });
 }
 

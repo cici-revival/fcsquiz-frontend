@@ -17,7 +17,7 @@ import {
   layoutSignature,
   teamSetSignature,
 } from "@entities/seating/lib/layoutSignature";
-import type { PackedCircle } from "@entities/seating/lib/packSide";
+import type { PackedCircle } from "@entities/seating/lib/layoutTypes";
 import { DEFAULT_SEATING_COLOR } from "@entities/seating/config/hall";
 import { useSeatingStore } from "@entities/seating/model/seating.store";
 import {
@@ -124,6 +124,17 @@ export function SeatingPreview({
 
   // seatTeamAt читает актуальные круги через ref: иначе колбэк пришлось бы
   // пересоздавать на каждое движение и переустанавливать imperative handle.
+  // Зал растягивается под раскладку: рядов может быть больше, чем влезает
+  // в номинальную высоту, и обрезать их нельзя.
+  const fieldHeight = useMemo(() => {
+    const lowest = circles.reduce(
+      (bottom, circle) => Math.max(bottom, circle.y + circle.radius),
+      0,
+    );
+
+    return Math.max(HALL.height, Math.ceil(lowest + HALL_GEOMETRY.bottomMargin));
+  }, [circles]);
+
   const circlesRef = useRef(circles);
   circlesRef.current = circles;
 
@@ -374,7 +385,7 @@ export function SeatingPreview({
       <div
         className={styles.field}
         ref={fieldRef}
-        style={{ width: HALL.width, height: HALL.height, transform: `scale(${scale})` }}
+        style={{ width: HALL.width, height: fieldHeight, transform: `scale(${scale})` }}
       >
         <div
           className={styles.stage}
@@ -392,7 +403,7 @@ export function SeatingPreview({
             left: HALL_GEOMETRY.aisleLeft,
             width: HALL_GEOMETRY.aisleRight - HALL_GEOMETRY.aisleLeft,
             top: HALL.stageHeight + 40,
-            height: HALL.height - HALL.stageHeight,
+            height: fieldHeight - HALL.stageHeight,
           }}
         />
 
@@ -459,7 +470,7 @@ export function SeatingPreview({
 
       <div
         className={styles.spacer}
-        style={{ width: HALL.width * scale, height: HALL.height * scale }}
+        style={{ width: HALL.width * scale, height: fieldHeight * scale }}
       />
     </div>
   );
