@@ -5,6 +5,7 @@ import {
   FAST_RECONNECT_ATTEMPTS,
   getReconnectDelay,
   getReconnectMessage,
+  HIDDEN_GRACE_MS,
 } from "@shared/lib/sseBackoff";
 import { onVisibilityChange } from "@shared/lib/documentVisibility";
 
@@ -48,7 +49,7 @@ function watchVisibility() {
       reconnectAttempts = 0;
       connectTeamsSSE();
     },
-  });
+  }, HIDDEN_GRACE_MS);
 }
 
 function scheduleReconnect() {
@@ -99,9 +100,7 @@ export function connectTeamsSSE() {
         store.setGameMeta(gameId.season, gameId.game_number);
       }
 
-      for (const ev of events) {
-        store.applyEvent(ev);
-      }
+      store.applyEvents(events);
     } catch (error) {
       console.error("Не удалось разобрать событие game state:", error);
     }

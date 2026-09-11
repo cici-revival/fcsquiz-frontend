@@ -58,6 +58,8 @@ export default defineConfig(({ mode }) => {
         "/api": {
           target: env.API_PROXY_TARGET,
           changeOrigin: true,
+          // WebSocket рассадки живёт на том же /api — проксируем явно.
+          ws: true,
         },
       },
     },

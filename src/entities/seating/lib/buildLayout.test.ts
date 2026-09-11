@@ -8,6 +8,7 @@ import {
   getTableRadius,
   isInDeadZone,
   TABLE,
+  TABLE_RING,
 } from "../config/hall";
 
 function teams(count: number, size = 5): LayoutTeam[] {
@@ -112,7 +113,9 @@ describe("buildLayout", () => {
       ...generated.map((placement) => placement.slot.y),
     );
 
-    expect(lowestGenerated - lowestFixed).toBeLessThan(TABLE.maxRadius * 6);
+    // Порог в абсолютных пикселях: раньше он был завязан на maxRadius и
+    // «двигался» вместе с ним, маскируя реальное расползание раскладки.
+    expect(lowestGenerated - lowestFixed).toBeLessThan(330);
   });
 
   it("не выпускает столы за границы зала", () => {
@@ -162,4 +165,84 @@ describe("buildLayout", () => {
   it("возвращает пустой результат для пустого списка", () => {
     expect(buildLayout([])).toEqual({ placements: [], overflow: [] });
   });
+
+
+  it("не сажает пул поверх уже занятых мест", () => {
+    const teams = Array.from({ length: 12 }, (_, i) => ({
+      teamId: `t${i}`,
+      size: 8,
+    }));
+
+    // Половина уже сидит по своим координатам — алгоритм не должен ни
+    // переставлять их, ни сажать остальных на эти места.
+    const occupied = teams.slice(0, 6).map((team, i) => ({
+      teamId: team.teamId,
+      x: 300 + i * 95,
+      y: 300,
+      radius: 45,
+    }));
+
+    const result = buildLayout(teams, occupied);
+
+    const placedIds = result.placements.map((p) => p.teamId);
+    for (const circle of occupied) {
+      expect(placedIds).not.toContain(circle.teamId);
+    }
+
+    for (const placement of result.placements) {
+      for (const circle of occupied) {
+        const distance = Math.hypot(
+          placement.slot.x - circle.x,
+          placement.slot.y - circle.y,
+        );
+
+        expect(distance).toBeGreaterThanOrEqual(
+          placement.slot.radius + circle.radius - 1,
+        );
+      }
+    }
+  });
+
+  it("раскладка влезает в зал и столы не слипаются", () => {
+    const sizes = [
+      8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+      8, 7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 5, 5, 5, 4, 4, 3, 3, 3, 3, 2,
+    ];
+    const result = buildLayout(
+      sizes.map((size, index) => ({ teamId: `t${index}`, size })),
+    );
+
+    const lowest = Math.max(
+      ...result.placements.map((placement) => placement.slot.y + placement.slot.radius),
+    );
+
+    expect(lowest).toBeLessThan(HALL.height - HALL_GEOMETRY.bottomMargin);
+    expect(result.overflow).toHaveLength(0);
+
+    const points = result.placements;
+    const onGrid = new Set(
+      FIXED_SLOT_POINTS.map((point) => `${point.x}:${point.y}`),
+    );
+
+    for (let a = 0; a < points.length; a += 1) {
+      for (let b = a + 1; b < points.length; b += 1) {
+        const distance = Math.hypot(
+          points[a].slot.x - points[b].slot.x,
+          points[a].slot.y - points[b].slot.y,
+        );
+        const gap =
+          distance - points[a].slot.radius - points[b].slot.radius - TABLE_RING * 2;
+
+        // Сетка у сцены намеренно плотная — там хватает отсутствия наложения.
+        // Столам вне сетки нужен видимый зазор, иначе они читаются слипшимися.
+        const bothOnGrid =
+          onGrid.has(`${points[a].slot.x}:${points[a].slot.y}`) &&
+          onGrid.has(`${points[b].slot.x}:${points[b].slot.y}`);
+
+        expect(gap).toBeGreaterThan(bothOnGrid ? 0 : 6);
+      }
+    }
+  });
+
+
 });

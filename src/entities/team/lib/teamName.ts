@@ -1,4 +1,4 @@
-import type { RosterTeam } from "@/entities/team/types";
+import type { RosterTeam } from "../types";
 
 const _UNNAMED_TEAM_PLACEHOLDER = "Без названия";
 

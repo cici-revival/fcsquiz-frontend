@@ -4,6 +4,8 @@ export const MAX_RECONNECT_DELAY = 30_000;
 
 export const FAST_RECONNECT_ATTEMPTS = 5;
 
+export const HIDDEN_GRACE_MS = 30_000;
+
 const JITTER_RATIO = 0.25;
 
 export function getReconnectDelay(attempt: number): number {

@@ -4,7 +4,7 @@ import { useTeamStore } from "@/entities/team/model/team.store";
 import { Button } from "@shared/ui/Button";
 import { Input } from "@shared/ui/Input";
 import TeamTable from "./TeamTable";
-import { displayName } from "./teamName";
+import { displayName } from "@entities/team/lib/teamName";
 import { useIsMobile } from "@shared/hooks/useMediaQuery";
 import { Search, AlertCircle } from "lucide-react";
 import { TeamSeatingPlan } from "./TeamSeatingPlan";

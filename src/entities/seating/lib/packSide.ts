@@ -2,8 +2,10 @@ import {
   HALL,
   HALL_GEOMETRY,
   getHallBounds,
-  getTableRadius,
+  getPackedTableRadius,
   isInDeadZone,
+  getSeatingTop,
+  TABLE_GAP,
 } from "../config/hall";
 import type { LayoutTeam } from "./layoutTypes";
 
@@ -14,7 +16,7 @@ export type PackedCircle = {
   radius: number;
 };
 
-export const PACK_MARGIN = 2;
+export const PACK_MARGIN = TABLE_GAP;
 const SCAN_STEP = 6;
 
 export type SideBounds = {
@@ -31,7 +33,7 @@ export function packSide(
   const tiers: PackedCircle[][] = [];
 
   for (const team of teams) {
-    const radius = getTableRadius(team.size);
+    const radius = getPackedTableRadius(team.size);
     const circle = placeCircle(radius, team.teamId, tiers, side, [
       ...obstacles,
       ...packed,
@@ -62,7 +64,7 @@ function placeCircle(
   side: SideBounds,
   existing: PackedCircle[],
 ): PackedCircle | null {
-  const topY = HALL.stageHeight + PACK_MARGIN + radius;
+  const topY = getSeatingTop() + PACK_MARGIN + radius;
 
   for (const tier of tiers) {
     const last = tier[tier.length - 1];

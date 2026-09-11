@@ -18,7 +18,7 @@ export type SeatingTeam = {
 
 export type SeatingSnapshot = {
   is_published: boolean;
-  teams: SeatingTeam[];
+  teams: SeatingTeam[] | null;
 };
 
 export const SEATING_EVENT = {
@@ -37,7 +37,7 @@ export type SeatingEvent =
 export type GameSelectedMessage = {
   type: "game_selected";
   game_id: GameId;
-  snapshot: SeatingSnapshot;
+  snapshot: SeatingSnapshot | null;
 };
 
 export type CommandAcceptedMessage = {
@@ -63,6 +63,7 @@ export type ServerMessage =
 
 export type SeatingErrorCode =
   | "revision_conflict"
+  | "invalid_game"
   | "seating_incomplete"
   | "not_found"
   | "invalid_input"
@@ -89,7 +90,7 @@ export type OutgoingCommand =
       request_id: string;
       game_id: GameId;
       team_id: string;
-      color: string;
+      color?: string;
       position: null;
       expected_revision: number;
     }

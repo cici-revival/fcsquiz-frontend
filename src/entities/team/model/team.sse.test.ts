@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { connectTeamsSSE, disconnectTeamsSSE } from "./team.sse";
 import { useTeamStore } from "./team.store";
+import { HIDDEN_GRACE_MS } from "@shared/lib/sseBackoff";
 
 type FakeSource = {
   close: ReturnType<typeof vi.fn>;
@@ -103,15 +104,30 @@ describe("connectTeamsSSE", () => {
     const source = lastSource();
 
     setHidden(true);
+    vi.advanceTimersByTime(HIDDEN_GRACE_MS);
 
     expect(source.close).toHaveBeenCalled();
     expect(useTeamStore.getState().status).toBe("disconnected");
     expect(created).toHaveLength(1);
   });
 
+  it("не рвёт соединение, если вкладка вернулась до конца отсрочки", () => {
+    connectTeamsSSE();
+    const source = lastSource();
+
+    setHidden(true);
+    vi.advanceTimersByTime(HIDDEN_GRACE_MS - 1000);
+    setHidden(false);
+    vi.advanceTimersByTime(HIDDEN_GRACE_MS);
+
+    expect(source.close).not.toHaveBeenCalled();
+    expect(created).toHaveLength(1);
+  });
+
   it("переподключается при возврате вкладки", () => {
     connectTeamsSSE();
     setHidden(true);
+    vi.advanceTimersByTime(HIDDEN_GRACE_MS);
     setHidden(false);
 
     expect(created).toHaveLength(2);
@@ -121,6 +137,7 @@ describe("connectTeamsSSE", () => {
   it("не переподключается по ошибке, если вкладка в фоне", () => {
     connectTeamsSSE();
     setHidden(true);
+    vi.advanceTimersByTime(HIDDEN_GRACE_MS);
 
     lastSource().onerror?.();
     vi.advanceTimersByTime(60_000);

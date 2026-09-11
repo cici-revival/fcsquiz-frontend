@@ -31,11 +31,6 @@
   flex-wrap: wrap;
 }
 
-.modes {
-  display: flex;
-  gap: 8px;
-}
-
 .summary {
   display: flex;
   align-items: baseline;
@@ -61,4 +56,5 @@
 
 .reset {
   margin-left: 8px;
+	gap: 10px;
 }

@@ -48,6 +48,17 @@ export const adminkaApi = {
     });
   },
 
+  // Одноразовый тикет на WebSocket рассадки: обычный Authorization в
+  // конструктор WebSocket не передать, поэтому бэк меняет токен на тикет.
+  issueWebSocketTicket() {
+    return adminkaApiClient.request<{
+      ticket: string;
+      expires_in: number;
+    }>("/v1/adminka/ws-ticket", {
+      method: "POST",
+    });
+  },
+
   // GAME STATE
 
   getGameState() {

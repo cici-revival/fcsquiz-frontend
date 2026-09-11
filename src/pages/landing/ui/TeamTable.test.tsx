@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
 import TeamTable from "./TeamTable";
-import { displayName } from "./teamName";
+import { displayName } from "@entities/team/lib/teamName";
 import { type RosterTeam } from "@/entities/team/types";
 
 function team(overrides: Partial<RosterTeam> = {}): RosterTeam {

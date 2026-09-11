@@ -29,8 +29,75 @@ type TeamState = {
 
   setInitial: (teams: RosterTeam[]) => void;
   applyEvent: (event: TeamEvent) => void;
+  applyEvents: (events: TeamEvent[]) => void;
   clear: () => void;
 };
+
+function samePasses(a?: string[], b?: string[]): boolean {
+  if (a === b) return true;
+  if (!a || !b) return (a?.length ?? 0) === (b?.length ?? 0);
+
+  return a.length === b.length && a.every((value, index) => value === b[index]);
+}
+
+function sameTeam(a: RosterTeam, b: RosterTeam): boolean {
+  return (
+    a.id === b.id &&
+    a.name === b.name &&
+    a.tg === b.tg &&
+    a.captain === b.captain &&
+    a.players_count === b.players_count &&
+    a.is_ready_to_accept_players === b.is_ready_to_accept_players &&
+    a.division === b.division &&
+    samePasses(a.passes, b.passes)
+  );
+}
+
+function reduce(
+  teams: Map<string, RosterTeam>,
+  event: TeamEvent,
+): Map<string, RosterTeam> | null {
+  switch (event.type) {
+    case "new_team": {
+      const incoming = event.body.team;
+      const existing = teams.get(incoming.id);
+      if (existing && sameTeam(existing, incoming)) return null;
+
+      const next = new Map(teams);
+      next.set(incoming.id, incoming);
+      return next;
+    }
+
+    case "change_players_count": {
+      const team = teams.get(event.body.team_id);
+      if (!team || team.players_count === event.body.players_count) return null;
+
+      const next = new Map(teams);
+      next.set(event.body.team_id, {
+        ...team,
+        players_count: event.body.players_count,
+      });
+      return next;
+    }
+
+    case "update_passes": {
+      const team = teams.get(event.body.team_id);
+      if (!team || samePasses(team.passes, event.body.passes)) return null;
+
+      const next = new Map(teams);
+      next.set(event.body.team_id, { ...team, passes: event.body.passes });
+      return next;
+    }
+
+    case "remove_team": {
+      if (!teams.has(event.body.team_id)) return null;
+
+      const next = new Map(teams);
+      next.delete(event.body.team_id);
+      return next;
+    }
+  }
+}
 
 export const useTeamStore = create<TeamState>((set, get) => ({
   teams: new Map(),
@@ -64,42 +131,24 @@ export const useTeamStore = create<TeamState>((set, get) => ({
     set({ teams: map });
   },
 
-  applyEvent: (event: TeamEvent) => {
-    const current = new Map(get().teams);
+  applyEvent: (event: TeamEvent) => get().applyEvents([event]),
 
-    switch (event.type) {
-      case "new_team":
-        current.set(event.body.team.id, event.body.team);
-        break;
+  applyEvents: (events: TeamEvent[]) => {
+    let teams = get().teams;
+    let changed = false;
 
-      case "change_players_count": {
-        const team = current.get(event.body.team_id);
-        if (team) {
-          current.set(event.body.team_id, {
-            ...team,
-            players_count: event.body.players_count,
-          });
-        }
-        break;
+    for (const event of events) {
+      const next = reduce(teams, event);
+
+      if (next) {
+        teams = next;
+        changed = true;
       }
-
-      case "update_passes": {
-        const team = current.get(event.body.team_id);
-        if (team) {
-          current.set(event.body.team_id, {
-            ...team,
-            passes: event.body.passes,
-          });
-        }
-        break;
-      }
-
-      case "remove_team":
-        current.delete(event.body.team_id);
-        break;
     }
 
-    set({ teams: current });
+    if (changed) {
+      set({ teams });
+    }
   },
 
   clear: () => set({ teams: new Map(), status: "idle", error: null }),

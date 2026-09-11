@@ -10,18 +10,55 @@ export type SeatSlot = {
 export const DEFAULT_SEATING_COLOR = "#3B82F6";
 
 export const HALL = {
-  width: 1550,
-  height: 1200,
-  stageHeight: 80,
-  stageBulge: 46,
+  // Ширина задаёт масштаб: поле вписывается в контейнер по ширине, поэтому чем
+  // уже зал, тем крупнее столы на экране. Правее ~1300 всё равно пусто —
+  // getHallBounds не выпускает столы дальше topRight/bottomRight.
+  width: 1360,
+  height: 900,
+  stageHeight: 64,
+  stageBulge: 38,
 } as const;
 
+// Столы отсчитываются от нижней точки выпуклости сцены, а не от её прямого
+// края: раньше нижняя дуга налезала на первый ряд. FIXED_SLOT_POINTS заданы
+// вручную и начинаются с y=156, поэтому запас держим ниже их верхней кромки.
+export const STAGE_CLEARANCE = HALL.stageBulge;
+
+export function getSeatingTop(): number {
+  return HALL.stageHeight + STAGE_CLEARANCE;
+}
+
+// Размеры столов у сцены: 40 точек FIXED_SLOT_POINTS расставлены вручную под
+// реальный зал, поэтому столы на них должны плотно занимать сетку — просветы
+// там заданы самой разметкой, а не алгоритмом.
 export const TABLE = {
-  minRadius: 26,
-  maxRadius: 45,
-  radiusPerPlayer: 2.7,
-  baseRadius: 23.4,
+  minRadius: 30,
+  maxRadius: 43,
+  radiusPerPlayer: 2.9,
+  baseRadius: 25,
 } as const;
+
+// Столы, которые алгоритм расставляет сам (за пределами сетки), делаем мельче:
+// они стоят свободно, и им нужен видимый зазор, иначе читаются как слипшиеся.
+export const PACKED_TABLE = {
+  minRadius: 26,
+  maxRadius: 36,
+  radiusPerPlayer: 2.5,
+  baseRadius: 21,
+} as const;
+
+/** Минимальное расстояние между вкоммиченными точками зала. */
+export const FIXED_POINT_SPACING = 90.1;
+
+/** Кольцо .tableMoved рисуется снаружи круга — учитываем в зазорах. */
+export const TABLE_RING = 1;
+
+/**
+ * Зазор между краями столов, которые расставляет алгоритм.
+ * К вкоммиченным FIXED_SLOT_POINTS он не применяется — там расстояние задано
+ * жёстко (FIXED_POINT_SPACING), и зазор регулируется только через maxRadius.
+ */
+export const TABLE_GAP = 12;
 
 export const HALL_GEOMETRY = {
   aisleLeft: 700,
@@ -108,9 +145,22 @@ export const FIXED_SLOT_POINTS: { x: number; y: number }[] = [
   { x: 1249, y: 455 },
 ];
 
-export function getTableRadius(playersCount: number): number {
+function radiusFrom(
+  scale: { baseRadius: number; radiusPerPlayer: number; minRadius: number; maxRadius: number },
+  playersCount: number,
+): number {
   const size = Math.max(0, playersCount);
-  const radius = TABLE.baseRadius + size * TABLE.radiusPerPlayer;
+  const radius = scale.baseRadius + size * scale.radiusPerPlayer;
 
-  return Math.min(TABLE.maxRadius, Math.max(TABLE.minRadius, radius));
+  return Math.min(scale.maxRadius, Math.max(scale.minRadius, radius));
+}
+
+/** Радиус стола на вкоммиченной точке у сцены. */
+export function getTableRadius(playersCount: number): number {
+  return radiusFrom(TABLE, playersCount);
+}
+
+/** Радиус стола, который расставляет алгоритм за пределами сетки. */
+export function getPackedTableRadius(playersCount: number): number {
+  return radiusFrom(PACKED_TABLE, playersCount);
 }

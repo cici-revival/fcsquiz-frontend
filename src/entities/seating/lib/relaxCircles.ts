@@ -4,11 +4,14 @@ import {
   HALL_GEOMETRY,
   getHallBounds,
   isInDeadZone,
+  getSeatingTop,
 } from "../config/hall";
 import { PACK_MARGIN, type PackedCircle } from "./packSide";
 
-const ITERATIONS = 300;
-const REPULSION = 0.5;
+const ITERATIONS = 600;
+// Разводим почти на всю величину перекрытия: при 0.5 круги успокаивались, не
+// добрав зазор до PACK_MARGIN, и визуально слипались.
+const REPULSION = 0.9;
 const STAGE_PULL = 0.05;
 const SETTLE_EPSILON = 0.5;
 
@@ -65,7 +68,7 @@ export function relaxCircles(
 }
 
 function pullToStage(circle: PackedCircle): boolean {
-  const target = HALL.stageHeight + PACK_MARGIN + circle.radius;
+  const target = getSeatingTop() + PACK_MARGIN + circle.radius;
 
   if (circle.y <= target) {
     return false;
@@ -128,7 +131,7 @@ function clampToHall(circle: PackedCircle, isLeft: boolean): boolean {
     adjusted = true;
   }
 
-  const topLimit = HALL.stageHeight + PACK_MARGIN + circle.radius;
+  const topLimit = getSeatingTop() + PACK_MARGIN + circle.radius;
   const bottomLimit = HALL.height - HALL_GEOMETRY.bottomMargin - circle.radius;
 
   if (circle.y < topLimit) {

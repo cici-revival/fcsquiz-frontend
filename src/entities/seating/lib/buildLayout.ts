@@ -1,6 +1,7 @@
 import {
   FIXED_SLOT_POINTS,
   HALL_GEOMETRY,
+  getPackedTableRadius,
   getTableRadius,
   type SeatSlot,
 } from "../config/hall";
@@ -21,12 +22,31 @@ export type BuildLayoutResult = {
   overflow: LayoutTeam[];
 };
 
-export function buildLayout(teams: LayoutTeam[]): BuildLayoutResult {
-  const ordered = [...teams].sort(
-    (a, b) => b.size - a.size || a.teamId.localeCompare(b.teamId),
-  );
+export function buildLayout(
+  teams: LayoutTeam[],
+  occupied: PackedCircle[] = [],
+): BuildLayoutResult {
+  // Уже посаженные столы стоят по своим координатам, а не по слотам алгоритма.
+  // Их нужно и исключить из расстановки, и передать как препятствия — иначе
+  // алгоритм посадит пул на места, которые на самом деле заняты.
+  const occupiedIds = new Set(occupied.map((circle) => circle.teamId));
 
-  const fixedPoints = orderFixedPoints();
+  const ordered = [...teams]
+    .filter((team) => !occupiedIds.has(team.teamId))
+    .sort((a, b) => b.size - a.size || a.teamId.localeCompare(b.teamId));
+
+  const takenPoints = new Set<string>();
+  for (const circle of occupied) {
+    for (const point of FIXED_SLOT_POINTS) {
+      if (Math.hypot(point.x - circle.x, point.y - circle.y) < circle.radius) {
+        takenPoints.add(`${point.x}:${point.y}`);
+      }
+    }
+  }
+
+  const fixedPoints = orderFixedPoints().filter(
+    (point) => !takenPoints.has(`${point.x}:${point.y}`),
+  );
   const fixedCount = Math.min(fixedPoints.length, ordered.length);
 
   const fixed: PackedCircle[] = ordered
@@ -41,8 +61,9 @@ export function buildLayout(teams: LayoutTeam[]): BuildLayoutResult {
   const rest = ordered.slice(fixedCount);
   const { left, right } = splitBySide(rest);
 
-  const leftObstacles = fixed.filter((circle) => onSide(circle, true));
-  const rightObstacles = fixed.filter((circle) => onSide(circle, false));
+  const blocking = [...fixed, ...occupied];
+  const leftObstacles = blocking.filter((circle) => onSide(circle, true));
+  const rightObstacles = blocking.filter((circle) => onSide(circle, false));
 
   const leftPack = packSide(left, { isLeft: true }, leftObstacles);
   const rightPack = packSide(right, { isLeft: false }, rightObstacles);
@@ -75,7 +96,7 @@ function splitBySide(teams: LayoutTeam[]): {
   let rightLoad = 0;
 
   for (const team of teams) {
-    const load = getTableRadius(team.size) ** 2;
+    const load = getPackedTableRadius(team.size) ** 2;
 
     if (leftLoad <= rightLoad) {
       left.push(team);

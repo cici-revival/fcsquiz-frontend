@@ -1,27 +1,61 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Frame, LayoutGrid, PencilRuler, RotateCcw } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import toast from "react-hot-toast";
+import { CloudUpload, Frame, RotateCcw, Wand2 } from "lucide-react";
 
 import { useTeamStore } from "@entities/team/model/team.store";
-import { displayName } from "@pages/landing/ui/teamName";
-import { useSlotDraft } from "@features/seating/layout-editor/useSlotDraft";
-import { LayoutEditorField } from "@widgets/seating-editor/ui/LayoutEditorField";
-import { LayoutToolbar } from "@widgets/seating-editor/ui/LayoutToolbar";
-import { SeatingPreview } from "@widgets/seating-editor/ui/SeatingPreview";
+import { useSeatingStore } from "@entities/seating/model/seating.store";
+import {
+  publishSeating,
+  unplaceTeamSeating,
+  updateTeamSeating,
+} from "@entities/seating/model/seating.ws";
+import {
+  DEFAULT_SEATING_COLOR,
+  getTableRadius,
+} from "@entities/seating/config/hall";
+import {
+  buildLayout,
+  type LayoutTeam,
+} from "@entities/seating/lib/buildLayout";
+import {
+  bootstrapSeating,
+  shutdownSeating,
+} from "@entities/seating/seating.bootstrap";
+import { getSeatingErrorMessage } from "@shared/api/statusMessages";
+import { displayName } from "@entities/team/lib/teamName";
+import {
+  SeatingPreview,
+  type SeatingPreviewControl,
+} from "@widgets/seating-editor/ui/SeatingPreview";
+import { TeamPool } from "@widgets/seating-editor/ui/TeamPool";
 import { Button } from "@shared/ui/Button";
 
 import styles from "./SeatingPage.module.css";
 
-type Mode = "seating" | "layout";
-
 export default function SeatingPage() {
-  const [mode, setMode] = useState<Mode>("seating");
-  const [isDirty, setDirty] = useState(false);
   const [resetToken, setResetToken] = useState(0);
   const [showBounds, setShowBounds] = useState(false);
+  const [isPublishing, setPublishing] = useState(false);
+  const [isResetting, setResetting] = useState(false);
+  const [isAutoSeating, setAutoSeating] = useState(false);
   const teamsMap = useTeamStore((state) => state.teams);
   const status = useTeamStore((state) => state.status);
-  const draft = useSlotDraft();
-  const { undo } = draft;
+  const seatingStatus = useSeatingStore((state) => state.status);
+  const isPublished = useSeatingStore((state) => state.isPublished);
+  const seatingTeams = useSeatingStore((state) => state.teams);
+  const hasPlacedTeams = useSeatingStore((state) => {
+    for (const team of state.teams.values()) {
+      if (team.position) return true;
+    }
+
+    return false;
+  });
+
+  useEffect(() => {
+    bootstrapSeating();
+
+    return () => shutdownSeating();
+  }, []);
 
   const teams = useMemo(
     () =>
@@ -35,24 +69,124 @@ export default function SeatingPage() {
     [teamsMap],
   );
 
-  const handleDirtyChange = useCallback((dirty: boolean) => {
-    setDirty(dirty);
+  const previewRef = useRef<SeatingPreviewControl>(null);
+
+  const pooledTeams = useMemo(
+    () => teams.filter((team) => !seatingTeams.get(team.teamId)?.position),
+    [teams, seatingTeams],
+  );
+
+  const handleDropFromPool = useCallback(
+    (teamId: string, client: { clientX: number; clientY: number }) => {
+      const team = teams.find((item) => item.teamId === teamId);
+      if (!team) return;
+
+      previewRef.current?.seatTeamFromClient(teamId, client, team.size);
+    },
+    [teams],
+  );
+
+  // Алгоритм считает раскладку для всего состава сразу, поэтому автопосадка
+  // берёт координаты из него и шлёт только для тех, кто ещё в пуле.
+  const handleAutoSeat = useCallback(async () => {
+    setAutoSeating(true);
+
+    const store = useSeatingStore.getState();
+    const sizeById = new Map(teams.map((team) => [team.teamId, team.size]));
+
+    const occupied = Array.from(store.teams.values())
+      .filter((team) => team.position && sizeById.has(team.team_id))
+      .map((team) => ({
+        teamId: team.team_id,
+        x: team.position!.x,
+        y: team.position!.y,
+        radius: getTableRadius(sizeById.get(team.team_id) ?? team.size),
+      }));
+
+    const layout = buildLayout(
+      teams.map(({ teamId, size }): LayoutTeam => ({ teamId, size })),
+      occupied,
+    );
+
+    const pending = layout.placements;
+
+    const failed = (
+      await Promise.all(
+        pending.map(({ teamId, slot }) =>
+          updateTeamSeating({
+            teamId,
+            color: store.teams.get(teamId)?.color || DEFAULT_SEATING_COLOR,
+            position: { x: slot.x, y: slot.y },
+            expectedRevision: store.teams.get(teamId)?.revision ?? 0,
+          }),
+        ),
+      )
+    ).filter((ack) => !ack.ok);
+
+    setAutoSeating(false);
+
+    if (layout.overflow.length > 0) {
+      toast.error(`Не хватило места командам: ${layout.overflow.length}`);
+    }
+
+    if (failed.length > 0) {
+      toast.error(`Не удалось посадить команд: ${failed.length}`);
+    }
+  }, [teams]);
+
+  const handleReset = useCallback(async () => {
+    setResetting(true);
+
+    const seated = Array.from(useSeatingStore.getState().teams.values()).filter(
+      (team) => team.position,
+    );
+
+    const failed = (
+      await Promise.all(
+        seated.map((team) =>
+          unplaceTeamSeating({
+            teamId: team.team_id,
+            expectedRevision: team.revision,
+          }),
+        ),
+      )
+    ).filter((ack) => !ack.ok);
+
+    setResetting(false);
+    setResetToken((token) => token + 1);
+
+    if (failed.length > 0) {
+      toast.error(`Не удалось снять с мест команд: ${failed.length}`);
+    }
   }, []);
 
-  useEffect(() => {
-    if (mode !== "layout") return;
+  const handlePublish = useCallback(async () => {
+    setPublishing(true);
 
-    const handler = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z") {
-        event.preventDefault();
-        undo();
-      }
-    };
+    const ack = await publishSeating();
 
-    window.addEventListener("keydown", handler);
+    setPublishing(false);
 
-    return () => window.removeEventListener("keydown", handler);
-  }, [mode, undo]);
+    if (ack.ok) {
+      toast.success("Рассадка опубликована");
+
+      return;
+    }
+
+    if (ack.code === "seating_incomplete") {
+      const count = ack.details?.unplaced_team_ids?.length ?? 0;
+
+      toast.error(
+        count > 0
+          ? `Не рассажено команд: ${count}`
+          : getSeatingErrorMessage(ack.code),
+      );
+
+      return;
+    }
+
+    toast.error(getSeatingErrorMessage(ack.code));
+  }, []);
 
   return (
     <div className={styles.page}>
@@ -60,87 +194,72 @@ export default function SeatingPage() {
         <div>
           <h1 className={styles.title}>Рассадка</h1>
           <p className={styles.description}>
-            {mode === "seating"
-              ? "Команды текущей игры на местах: крупные — у сцены, остальные по геометрии зала."
-              : "Расставьте столы так, как они стоят в зале, и скопируйте разметку."}
+            Перетащите команду из пула на место. ПКМ по столу возвращает её в пул.
           </p>
-        </div>
-
-        <div className={styles.modes}>
-          <Button
-            variant={mode === "seating" ? "default" : "outline"}
-            onClick={() => setMode("seating")}
-          >
-            <LayoutGrid size={16} />
-            Рассадка
-          </Button>
-          <Button
-            variant={mode === "layout" ? "default" : "outline"}
-            onClick={() => setMode("layout")}
-          >
-            <PencilRuler size={16} />
-            Разметка столов
-          </Button>
         </div>
       </header>
 
-      {mode === "seating" ? (
-        <>
-          <div className={styles.summary}>
-            <span className={styles.count}>{teams.length}</span>
-            <span className={styles.label}>команд в игре</span>
-            {status !== "connected" && (
-              <span className={styles.pending}>Данные ещё загружаются…</span>
-            )}
+      <div className={styles.summary}>
+        <span className={styles.count}>{teams.length}</span>
+        <span className={styles.label}>команд в игре</span>
+        {status !== "connected" && (
+          <span className={styles.pending}>Данные ещё загружаются…</span>
+        )}
+        {status === "connected" && seatingStatus !== "connected" && (
+          <span className={styles.pending}>Рассадка подключается…</span>
+        )}
+        {isPublished && <span className={styles.pending}>Опубликована</span>}
 
-            <Button
-              variant={showBounds ? "default" : "outline"}
-              className={styles.reset}
-              onClick={() => setShowBounds((value) => !value)}
-            >
-              <Frame size={16} />
-              Границы зала
-            </Button>
+        <Button
+          variant={showBounds ? "default" : "outline"}
+          className={styles.reset}
+          onClick={() => setShowBounds((value) => !value)}
+        >
+          <Frame size={16} />
+          Границы зала
+        </Button>
 
-            {isDirty && (
-              <Button
-                variant="outline"
-                className={styles.reset}
-                onClick={() => setResetToken((token) => token + 1)}
-              >
-                <RotateCcw size={16} />
-                Рассадить заново
-              </Button>
-            )}
-          </div>
+        {pooledTeams.length > 0 && (
+          <Button
+            className={styles.reset}
+            onClick={handleAutoSeat}
+            disabled={isAutoSeating || seatingStatus !== "connected"}
+          >
+            <Wand2 size={16} />
+            Рассадить автоматически
+          </Button>
+        )}
 
-          <SeatingPreview
-            teams={teams}
-            onDirtyChange={handleDirtyChange}
-            resetToken={resetToken}
-            showBounds={showBounds}
-          />
-        </>
-      ) : (
-        <>
-          <LayoutToolbar
-            slots={draft.slots}
-            canUndo={draft.canUndo}
-            onUndo={draft.undo}
-            onRenumber={draft.renumber}
-            onClear={draft.clear}
-            onReplaceAll={draft.replaceAll}
-          />
+        {hasPlacedTeams && (
+          <Button
+            variant="outline"
+            className={styles.reset}
+            onClick={handleReset}
+            disabled={isResetting || seatingStatus !== "connected"}
+          >
+            <RotateCcw size={16} />
+            Убрать всех в пул
+          </Button>
+        )}
 
-          <LayoutEditorField
-            slots={draft.slots}
-            onAddSlot={draft.addSlot}
-            onBeginMove={draft.beginMove}
-            onMoveSlot={draft.moveSlot}
-            onRemoveSlot={draft.removeSlot}
-          />
-        </>
-      )}
+        <Button
+          className={styles.reset}
+          onClick={handlePublish}
+          disabled={isPublishing || seatingStatus !== "connected"}
+        >
+          <CloudUpload size={16} />
+          {isPublished ? "Опубликовать заново" : "Опубликовать"}
+        </Button>
+      </div>
+
+      <TeamPool teams={pooledTeams} onDropTeam={handleDropFromPool} />
+
+      <SeatingPreview
+        teams={teams}
+        resetToken={resetToken}
+        showBounds={showBounds}
+        controlRef={previewRef}
+      />
     </div>
   );
 }

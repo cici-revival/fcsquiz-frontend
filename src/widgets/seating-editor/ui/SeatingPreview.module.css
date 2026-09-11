@@ -30,6 +30,9 @@
   color: hsl(var(--background));
   font-size: 30px;
   letter-spacing: 0.3em;
+  /* letter-spacing вешает пробел и после последней буквы — компенсируем,
+     иначе надпись визуально уезжает влево. */
+  text-indent: 0.3em;
   text-transform: uppercase;
 }
 
@@ -86,6 +89,8 @@
   outline-offset: 2px;
 }
 
+/* Толщина кольца зафиксирована в TABLE_RING (hall.ts): зазоры между столами
+   рассчитаны с её учётом, менять только вместе с ней. */
 .tableMoved {
-  box-shadow: 0 0 0 3px hsl(var(--background)), 0 0 0 5px hsl(var(--primary) / 0.5);
+  box-shadow: 0 0 0 1px hsl(var(--primary) / 0.55);
 }

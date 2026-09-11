@@ -3,6 +3,7 @@ import {
   HALL_GEOMETRY,
   getHallBounds,
   isInDeadZone,
+  getSeatingTop,
 } from "../config/hall";
 import { PACK_MARGIN, type PackedCircle } from "./packSide";
 
@@ -30,7 +31,7 @@ function clampToHall(
   const hall = getHallBounds(point.y);
 
   const y = Math.min(
-    Math.max(point.y, HALL.stageHeight + PACK_MARGIN + radius),
+    Math.max(point.y, getSeatingTop() + PACK_MARGIN + radius),
     HALL.height - HALL_GEOMETRY.bottomMargin - radius,
   );
 

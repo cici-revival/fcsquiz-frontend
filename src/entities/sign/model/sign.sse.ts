@@ -6,6 +6,7 @@ import {
   FAST_RECONNECT_ATTEMPTS,
   getReconnectDelay,
   getReconnectMessage,
+  HIDDEN_GRACE_MS,
 } from "@shared/lib/sseBackoff";
 import { onVisibilityChange } from "@shared/lib/documentVisibility";
 
@@ -49,7 +50,7 @@ function watchVisibility() {
       reconnectAttempts = 0;
       connectSignsSSE();
     },
-  });
+  }, HIDDEN_GRACE_MS);
 }
 
 function scheduleReconnect() {

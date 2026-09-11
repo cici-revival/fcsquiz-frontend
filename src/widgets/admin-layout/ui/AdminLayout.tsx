@@ -1,7 +1,6 @@
 // src/widgets/admin-layout/index.tsx
 import { Suspense, useEffect } from "react";
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { useTeamExport } from "@/features/team/csvExporter";
 
 import {
   bootstrapTeams,
@@ -31,7 +30,6 @@ import { Stats } from "./Stats";
 export default function AdminLayout() {
   const location = useLocation();
   const stats = useTeamStats();
-	const { exportToCSV, teamsCount } = useTeamExport();
 
   // Инициализация SSE при монтировании компонента
   useEffect(() => {
@@ -201,9 +199,6 @@ export default function AdminLayout() {
             </div>
           )}
         </div>
-        <Button variant="outline" onClick={() => exportToCSV()} disabled={teamsCount === 0}>
-          Скачать CSV
-        </Button>
       </div>
 
       <main className={styles.main}>

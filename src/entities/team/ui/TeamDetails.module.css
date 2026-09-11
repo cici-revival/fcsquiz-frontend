@@ -1,0 +1,47 @@
+.tooltip[data-slot="tooltip-content"] {
+  width: fit-content;
+  min-width: 260px;
+  max-width: min(320px, calc(100vw - 32px));
+  padding: 12px;
+  background-color: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  box-shadow: 0 8px 24px hsl(var(--foreground) / 0.12);
+}
+
+.popover[data-slot="popover-content"] {
+  width: max-content;
+  min-width: 220px;
+  max-width: min(300px, calc(100vw - 24px));
+  padding: 12px;
+  cursor: default;
+}
+
+.title {
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.meta {
+  color: hsl(var(--muted-foreground));
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
+.blockTitle {
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.list {
+  color: hsl(var(--muted-foreground));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 2px;
+  font-size: 12px;
+}
