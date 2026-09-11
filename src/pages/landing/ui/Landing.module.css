@@ -231,13 +231,10 @@
   opacity: 0.9;
 }
 
+/* Высоту задаёт сама схема (спейсер внутри виджета), фон рисует поле. */
 .seatingPlan {
   max-width: 1400px;
-  height: 80vh;
-  background-color: rgb(219, 219, 219);
   margin: 30px auto;
-  align-content: center;
-  text-align: center;
 }
 
 /* ---------- Адаптив ---------- */
@@ -268,7 +265,6 @@
   }
 
   .seatingPlan {
-    height: 240px;
     margin: 24px auto;
   }
 
@@ -339,9 +335,5 @@
     flex-direction: column !important;
     align-items: flex-start;
     gap: 8px;
-  }
-
-  .seatingPlan {
-    height: 180px;
   }
 }
