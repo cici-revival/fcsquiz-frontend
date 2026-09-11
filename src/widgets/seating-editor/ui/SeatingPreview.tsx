@@ -25,8 +25,8 @@ import {
   updateTeamSeating,
 } from "@entities/seating/model/seating.ws";
 import { getSeatingErrorMessage } from "@shared/api/statusMessages";
-// import { useTeamStore } from "@entities/team/model/team.store";
-// import { TeamDetailsDisclosure } from "@entities/team/ui/TeamDetails";
+import { useTeamStore } from "@entities/team/model/team.store";
+import { TeamDetails } from "@entities/team/ui/TeamDetails";
 import { HallBounds } from "./HallBounds";
 import { useFieldScale } from "./useFieldScale";
 
@@ -123,12 +123,27 @@ export function SeatingPreview({
   );
 
   // Подробности (пропуски) живут в сторе составов, а не в пропсах виджета.
-  // const rosterTeams = useTeamStore((state) => state.teams);
+  const rosterTeams = useTeamStore((state) => state.teams);
+
+  // Подсказку ведём сами: Radix-триггер вешает свои onPointerMove/Down на ту
+  // же кнопку, за которую тащат стол, и ломает перетаскивание.
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   // Пока тащат стол, подсказка только мешает: она перехватывала бы курсор
   // и мигала при проходе над соседями.
-  // isDragActive нужен только подсказке — она временно отключена.
-  const [, setDragActive] = useState(false);
+  const [isDragActive, setDragActive] = useState(false);
+
+  // Во время перетаскивания подсказка только мешает.
+  const hovered = useMemo(() => {
+    if (isDragActive || !hoveredId) return null;
+
+    const team = rosterTeams.get(hoveredId);
+    const circle = circles.find((item) => item.teamId === hoveredId);
+
+    if (!team || !circle) return null;
+
+    return { team, circle };
+  }, [isDragActive, hoveredId, rosterTeams, circles]);
   // Стол, который сейчас тащат, рисуется по стилю, выставленному вручную:
   // React не должен перетирать его координатами из circles на ререндере.
   const dragTeamRef = useRef<string | null>(null);
@@ -345,7 +360,6 @@ export function SeatingPreview({
 
         {circles.map((circle) => {
           const team = names.get(circle.teamId);
-          // const roster = rosterTeams.get(circle.teamId);
           const isMoved =
             circle.teamId in dragging || Boolean(seatingTeams.get(circle.teamId)?.position);
 
@@ -374,6 +388,8 @@ export function SeatingPreview({
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerUp}
               onPointerCancel={handlePointerUp}
+              onPointerEnter={() => setHoveredId(circle.teamId)}
+              onPointerLeave={() => setHoveredId(null)}
               onContextMenu={(event) => handleContextMenu(event, circle.teamId)}
             >
               <span className={styles.tableName}>{team?.name ?? "—"}</span>
@@ -382,23 +398,23 @@ export function SeatingPreview({
           );
 
           return table;
-
-          // Временно отключено: проверяем, не из-за подсказки ли багается
-          // перетаскивание (она оборачивает ту же кнопку через asChild).
-          // if (!roster) return table;
-          //
-          // return (
-          //   <TeamDetailsDisclosure
-          //     key={circle.teamId}
-          //     team={roster}
-          //     side="top"
-          //     delayDuration={250}
-          //     disabled={isDragActive}
-          //   >
-          //     {table}
-          //   </TeamDetailsDisclosure>
-          // );
         })}
+
+        {hovered && (
+          <div
+            className={styles.details}
+            style={{
+              left: hovered.circle.x,
+              top: hovered.circle.y - hovered.circle.radius - 10,
+              // Поле отмасштабировано целиком, поэтому подсказку возвращаем
+              // к единице: иначе текст в ней мельчает вместе со столами.
+              transform: `translate(-50%, -100%) scale(${1 / scale})`,
+              transformOrigin: "bottom center",
+            }}
+          >
+            <TeamDetails team={hovered.team} />
+          </div>
+        )}
       </div>
 
       <div

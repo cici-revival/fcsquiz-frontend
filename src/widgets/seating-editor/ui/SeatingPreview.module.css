@@ -94,3 +94,21 @@
 .tableMoved {
   box-shadow: 0 0 0 1px hsl(var(--primary) / 0.55);
 }
+
+/* Подсказку рисуем сами, а не через Radix: его триггер вешает свои
+   обработчики указателя на ту же кнопку, за которую тащат стол. */
+.details {
+  position: absolute;
+  z-index: 20;
+  width: max-content;
+  min-width: 240px;
+  max-width: 320px;
+  padding: 12px;
+  background-color: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  box-shadow: 0 8px 24px hsl(var(--foreground) / 0.18);
+  /* transform задаётся инлайном: он гасит масштаб поля. */
+  pointer-events: none;
+}
