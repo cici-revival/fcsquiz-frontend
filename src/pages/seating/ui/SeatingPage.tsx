@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
-import { CloudUpload, Frame, RotateCcw, Wand2 } from "lucide-react";
+import { Check, CloudUpload, Frame, RotateCcw, Wand2 } from "lucide-react";
 
 import { useTeamStore } from "@entities/team/model/team.store";
 import { useSeatingStore } from "@entities/seating/model/seating.store";
@@ -287,14 +287,22 @@ export default function SeatingPage() {
       <h1 className={styles.title}>Рассадка</h1>
 
       <div className={styles.toolbar}>
-        <span className={styles.count}>{teams.length}</span>
-        <span className={styles.label}>команд</span>
+        {/* Число команд и так есть в сайдбаре, поэтому здесь важнее прогресс
+            рассадки: именно он решает, можно ли публиковать. */}
+        <span className={styles.progress}>
+          Рассажено {teams.length - pooledTeams.length} из {teams.length}
+        </span>
 
         {status !== "connected" && <span className={styles.status}>загрузка…</span>}
         {status === "connected" && seatingStatus !== "connected" && (
           <span className={styles.status}>подключение…</span>
         )}
-        {isPublished && <span className={styles.published}>опубликована</span>}
+        {isPublished && (
+          <span className={styles.published}>
+            <Check size={13} />
+            Опубликована
+          </span>
+        )}
 
         <div className={styles.actions}>
           <Button
