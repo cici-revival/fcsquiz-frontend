@@ -96,21 +96,30 @@ export function SeatingPreview({
   }, [resetToken, teamSetKey]);
 
   // На поле показываем только посаженные столы: остальные ждут в пуле.
+  const sizeById = useMemo(
+    () => new Map(teams.map((team) => [team.teamId, team.size])),
+    [teams],
+  );
+
   const circles = useMemo<PackedCircle[]>(
     () =>
       computed.placements
         .filter(({ teamId }) => Boolean(seatingTeams.get(teamId)?.position))
         .map(({ teamId, slot }) => {
           const saved = seatingTeams.get(teamId)?.position;
+          const size = sizeById.get(teamId);
 
           return {
             teamId,
             x: dragging[teamId]?.x ?? saved?.x ?? slot.x,
             y: dragging[teamId]?.y ?? saved?.y ?? slot.y,
-            radius: slot.radius,
+            // Радиус считаем от состава, а не берём из слота раскладки: слот
+            // пересчитывается при смене состава, и сохранённый стол начинал
+            // рисоваться чужим размером, наезжая на соседей.
+            radius: size === undefined ? slot.radius : getTableRadius(size),
           };
         }),
-    [computed.placements, dragging, seatingTeams],
+    [computed.placements, dragging, seatingTeams, sizeById],
   );
 
   // seatTeamAt читает актуальные круги через ref: иначе колбэк пришлось бы

@@ -1,5 +1,4 @@
 import {
-  HALL,
   HALL_GEOMETRY,
   getHallBounds,
   getPackedTableRadius,
@@ -133,9 +132,8 @@ function fits(
   radius: number,
   existing: PackedCircle[],
 ): boolean {
-  if (y + radius > HALL.height - HALL_GEOMETRY.bottomMargin) {
-    return false;
-  }
+  // Высота зала не ограничивает раскладку: поле растягивается под состав,
+  // а не выбрасывает команды в overflow.
 
   if (isInDeadZone(x, y, radius)) {
     return false;

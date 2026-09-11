@@ -142,11 +142,12 @@ describe("buildLayout", () => {
     }
   });
 
-  it("сообщает о командах, которым не хватило места", () => {
+  it("сажает всех: высота зала раскладку не ограничивает", () => {
     const result = buildLayout(teams(400, 8));
 
-    expect(result.overflow.length).toBeGreaterThan(0);
-    expect(result.placements.length + result.overflow.length).toBe(400);
+    // Поле растягивается под состав, а не выбрасывает команды в overflow.
+    expect(result.overflow).toHaveLength(0);
+    expect(result.placements).toHaveLength(400);
   });
 
   it("даёт одинаковый результат при одинаковом входе", () => {
@@ -245,4 +246,18 @@ describe("buildLayout", () => {
   });
 
 
+
+  it("радиус стола зависит только от размера команды, а не от способа посадки", () => {
+    // Команда может попасть и на сетку, и в авторасстановку — в зависимости
+    // от того, сколько всего команд. Радиус при этом обязан не меняться:
+    // иначе сохранённый стол после смены состава наедет на соседей.
+    const small = buildLayout(teams(5, 8));
+    const large = buildLayout(teams(60, 8));
+
+    const onGrid = small.placements[0].slot.radius;
+    const packed = large.placements[large.placements.length - 1].slot.radius;
+
+    expect(packed).toBe(onGrid);
+    expect(onGrid).toBe(getTableRadius(8));
+  });
 });

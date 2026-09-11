@@ -36,9 +36,12 @@ describe("геометрия зала", () => {
     expect(gap).toBeGreaterThan(0);
   });
 
-  it("столы вне сетки мельче — им нужен видимый зазор", () => {
-    expect(PACKED_TABLE.maxRadius).toBeLessThan(TABLE.maxRadius);
-    expect(getPackedTableRadius(8)).toBeLessThan(getTableRadius(8));
+  it("шкала радиусов одна: размер стола не зависит от способа расстановки", () => {
+    // Иначе команда, сохранённая по координатам одной раскладки, после смены
+    // состава рисовалась бы радиусом другой — и наезжала на соседей.
+    expect(PACKED_TABLE.maxRadius).toBe(TABLE.maxRadius);
+    expect(getPackedTableRadius(8)).toBe(getTableRadius(8));
+    expect(getPackedTableRadius(3)).toBe(getTableRadius(3));
   });
 
   it("радиус растёт с размером команды и упирается в границы", () => {
