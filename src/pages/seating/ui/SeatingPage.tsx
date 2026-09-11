@@ -263,36 +263,24 @@ export default function SeatingPage() {
         return;
       }
 
-      // Бэк проверяет по своему снимку. Если он требует команду, которой у нас
-      // нет ни в составе, ни в рассадке, посадить её из интерфейса нельзя —
-      // и об этом нужно сказать прямо, а не показывать общее «не рассажено».
-      const store = useSeatingStore.getState();
-      const known = new Set(teams.map((team) => team.teamId));
-      const invisible = ids.filter(
-        (id) => !known.has(id) && !store.teams.has(id),
+      // Бэк называет id тех, кого не хватает. Сажаем их вслепую: команда может
+      // быть фантомной строкой в quiz.games (например, с нулевым uuid) — тогда
+      // её не выбрать в интерфейсе, но команду по team_id бэк принимает.
+      console.warn("Не рассажены:", ids);
+
+      const failed = await seatUnplacedById(ids);
+
+      toast[failed > 0 ? "error" : "success"](
+        failed > 0
+          ? `Не удалось посадить команд: ${failed} из ${ids.length}`
+          : `Посажено: ${ids.length}. Нажмите «Опубликовать» ещё раз`,
       );
-
-      console.warn("Не рассажены:", ids, "из них невидимых фронту:", invisible);
-
-      if (invisible.length > 0) {
-        const failed = await seatUnplacedById(invisible);
-
-        toast[failed > 0 ? "error" : "success"](
-          failed > 0
-            ? `Не удалось посадить команд: ${failed}`
-            : `Посажено вслепую: ${invisible.length}. Нажмите «Опубликовать» ещё раз`,
-        );
-
-        return;
-      }
-
-      toast.error(`Не рассажено команд: ${ids.length}`);
 
       return;
     }
 
     toast.error(getSeatingErrorMessage(ack.code));
-  }, [teams, seatUnplacedById]);
+  }, [seatUnplacedById]);
 
   return (
     <div className={styles.page}>
