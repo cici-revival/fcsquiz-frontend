@@ -206,6 +206,41 @@ export default function SeatingPage() {
     }
   }, []);
 
+  // Аварийный выход: если бэк требует команду, которой нет ни в составе, ни
+  // в рассадке, посадить её обычным способом нельзя. Команду update_team бэк
+  // принимает по любому известному ему team_id, поэтому сажаем вслепую.
+  const seatUnplacedById = useCallback(async (ids: string[]) => {
+    const store = useSeatingStore.getState();
+    const occupied = Array.from(store.teams.values())
+      .filter((team) => team.position)
+      .map((team) => ({
+        teamId: team.team_id,
+        x: team.position!.x,
+        y: team.position!.y,
+        radius: getTableRadius(team.size),
+      }));
+
+    const layout = buildLayout(
+      ids.map((teamId): LayoutTeam => ({ teamId, size: 0 })),
+      occupied,
+    );
+
+    const failed = (
+      await Promise.all(
+        layout.placements.map(({ teamId, slot }) =>
+          updateTeamSeating({
+            teamId,
+            color: store.teams.get(teamId)?.color || DEFAULT_SEATING_COLOR,
+            position: { x: slot.x, y: slot.y },
+            expectedRevision: store.teams.get(teamId)?.revision ?? 0,
+          }),
+        ),
+      )
+    ).filter((ack) => !ack.ok);
+
+    return failed.length;
+  }, []);
+
   const handlePublish = useCallback(async () => {
     setPublishing(true);
 
@@ -220,19 +255,44 @@ export default function SeatingPage() {
     }
 
     if (ack.code === "seating_incomplete") {
-      const count = ack.details?.unplaced_team_ids?.length ?? 0;
+      const ids = ack.details?.unplaced_team_ids ?? [];
 
-      toast.error(
-        count > 0
-          ? `Не рассажено команд: ${count}`
-          : getSeatingErrorMessage(ack.code),
+      if (ids.length === 0) {
+        toast.error(getSeatingErrorMessage(ack.code));
+
+        return;
+      }
+
+      // Бэк проверяет по своему снимку. Если он требует команду, которой у нас
+      // нет ни в составе, ни в рассадке, посадить её из интерфейса нельзя —
+      // и об этом нужно сказать прямо, а не показывать общее «не рассажено».
+      const store = useSeatingStore.getState();
+      const known = new Set(teams.map((team) => team.teamId));
+      const invisible = ids.filter(
+        (id) => !known.has(id) && !store.teams.has(id),
       );
+
+      console.warn("Не рассажены:", ids, "из них невидимых фронту:", invisible);
+
+      if (invisible.length > 0) {
+        const failed = await seatUnplacedById(invisible);
+
+        toast[failed > 0 ? "error" : "success"](
+          failed > 0
+            ? `Не удалось посадить команд: ${failed}`
+            : `Посажено вслепую: ${invisible.length}. Нажмите «Опубликовать» ещё раз`,
+        );
+
+        return;
+      }
+
+      toast.error(`Не рассажено команд: ${ids.length}`);
 
       return;
     }
 
     toast.error(getSeatingErrorMessage(ack.code));
-  }, []);
+  }, [teams, seatUnplacedById]);
 
   return (
     <div className={styles.page}>
