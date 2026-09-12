@@ -12,7 +12,9 @@ RUN npm run build
 
 FROM nginx:alpine
 
-COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
+ENV GATEWAY_HOST=gateway
+
+COPY deploy/nginx.conf /etc/nginx/templates/default.conf.template
 
 WORKDIR /usr/share/nginx/html
 
