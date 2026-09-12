@@ -6,10 +6,12 @@ import {
 } from "@shared/ui/Collapsible";
 import styles from "./Faq.module.css";
 
+const NO_DETECT = "⁠";
+
 const ITEMS = [
   {
     question: "Сколько длится квиз?",
-    answer: "Обычно игра занимает около 2–3 часов вместе с перерывами.",
+    answer: `Обычно игра занимает около 2${NO_DETECT}–${NO_DETECT}3 часов вместе с перерывами.`,
   },
   {
     question: "Какие есть дивизионы?",

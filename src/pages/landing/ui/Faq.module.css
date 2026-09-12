@@ -59,6 +59,19 @@
   padding: 8px 0 16px;
 }
 
+/* Ответы содержат «2–3 часов» и «до восьми человек» — Safari на iOS считает это
+   датой/телефоном, сам оборачивает в ссылку и красит синим. Глобальный сброс
+   в index.css не достаёт до внутренней ссылки детектора, поэтому цвет
+   дожимается здесь, на всём, что лежит внутри ответа. */
+.itemBody a,
+.itemBody a:visited,
+.itemBody [x-apple-data-detectors] {
+  color: inherit !important;
+  text-decoration: none !important;
+  -webkit-text-decoration-color: inherit !important;
+  pointer-events: none;
+}
+
 @keyframes faq-expand {
   from {
     height: 0;
