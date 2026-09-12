@@ -1,23 +1,11 @@
 import { useState } from "react";
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-} from "recharts";
-import {
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
-  CardFooter,
   Button,
-  ChartContainer,
-  ChartTooltipContent,
-  type ChartConfig,
 } from "@shared/ui";
 import { adminkaApi } from "@shared/api/adminkaApi";
 import { NotFoundError } from "@shared/api/errors";
@@ -35,11 +23,6 @@ type SeasonPoint = {
   teams: number;
 };
 
-const chartConfig: ChartConfig = {
-  players: { label: "Человек", color: "var(--chart-2)" },
-  teams: { label: "Команд", color: "var(--chart-3)" },
-};
-
 export default function SeasonRegistrationsCard({
   season,
   maxGameNumber,
@@ -50,7 +33,7 @@ export default function SeasonRegistrationsCard({
 
   const canBuild = season > 0 && maxGameNumber > 0;
 
-  async function buildChart() {
+  async function loadSeason() {
     if (!canBuild) return;
 
     setLoading(true);
@@ -86,11 +69,21 @@ export default function SeasonRegistrationsCard({
 
       setData(points.sort((a, b) => a.game - b.game));
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Не удалось построить график");
+      setError(e instanceof Error ? e.message : "Не удалось загрузить данные");
     } finally {
       setLoading(false);
     }
   }
+
+  const totals = data
+    ? data.reduce(
+        (acc, point) => ({
+          players: acc.players + point.players,
+          teams: acc.teams + point.teams,
+        }),
+        { players: 0, teams: 0 },
+      )
+    : null;
 
   return (
     <Card className={styles.chartCard}>
@@ -101,62 +94,52 @@ export default function SeasonRegistrationsCard({
             Динамика по всем играм сезона {season || "—"}
           </CardDescription>
         </div>
-        <Button onClick={buildChart} disabled={!canBuild || loading}>
-          {loading ? "Загрузка…" : "Построить график регистраций"}
+        <Button onClick={loadSeason} disabled={!canBuild || loading}>
+          {loading ? "Загрузка…" : "Показать регистрации"}
         </Button>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className={styles.chartBox}>
-          <LineChart
-            data={data ?? []}
-            margin={{ top: 8, right: 12, left: 0, bottom: 0 }}
-          >
-            <CartesianGrid vertical={false} strokeDasharray="3 3" />
-            <XAxis
-              dataKey="game"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-            />
-            <YAxis
-              allowDecimals={false}
-              tickLine={false}
-              axisLine={false}
-              width={36}
-            />
-            <Tooltip
-              content={
-                <ChartTooltipContent
-                  config={chartConfig}
-                  labelFormatter={(l) => `Игра ${l}`}
-                />
-              }
-            />
-            <Line
-              type="monotone"
-              dataKey="players"
-              stroke="#fba068"
-              strokeWidth={2}
-              dot={{ r: 3 }}
-            />
-            <Line
-              type="monotone"
-              dataKey="teams"
-              stroke="black"
-              strokeWidth={2}
-              dot={{ r: 3 }}
-            />
-          </LineChart>
-        </ChartContainer>
-        {/* {!data && !loading && (
-          <p className={styles.chartHint}>
-            Нажмите «Построить график», чтобы загрузить данные по всем играм
+        {!data && !loading && !error && (
+          <p className={styles.muted}>
+            Нажмите «Показать регистрации», чтобы загрузить данные по всем играм
             сезона.
           </p>
-        )} */}
+        )}
+
+        {data && totals && (
+          <>
+            <div className={styles.summaryRow}>
+              <div className={styles.summaryItem}>
+                <span className={styles.summaryValue}>{totals.teams}</span>
+                <span className={styles.summaryLabel}>команд за сезон</span>
+              </div>
+              <div className={styles.summaryItem}>
+                <span className={styles.summaryValue}>{totals.players}</span>
+                <span className={styles.summaryLabel}>человек за сезон</span>
+              </div>
+              <div className={styles.summaryItem}>
+                <span className={styles.summaryValue}>{data.length}</span>
+                <span className={styles.summaryLabel}>игр в сезоне</span>
+              </div>
+            </div>
+
+            <ul className={styles.seasonList}>
+              {data.map((point) => (
+                <li key={point.game} className={styles.seasonRow}>
+                  <span className={styles.seasonGame}>Игра {point.game}</span>
+                  <span className={styles.seasonValues}>
+                    <span>{point.teams} команд</span>
+                    <span className={styles.muted}>·</span>
+                    <span>{point.players} чел.</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+
         {error && <p className={styles.chartError}>{error}</p>}
       </CardContent>
-      <CardFooter></CardFooter>
     </Card>
   );
 }

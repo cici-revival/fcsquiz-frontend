@@ -1,0 +1,108 @@
+.container {
+  position: relative;
+  width: 100%;
+}
+
+.field {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: top left;
+  background-color: hsl(var(--muted) / 0.35);
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+}
+
+/* .field вынесен из потока, поэтому место под схему держит спейсер. */
+.spacer {
+  pointer-events: none;
+}
+
+.stage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 18px;
+  background-color: hsl(var(--foreground) / 0.85);
+  color: hsl(var(--background));
+  font-size: 30px;
+  letter-spacing: 0.3em;
+  text-indent: 0.3em;
+  text-transform: uppercase;
+}
+
+.aisle {
+  position: absolute;
+  background-color: hsl(var(--background) / 0.6);
+  border-left: 1px dashed hsl(var(--border));
+  border-right: 1px dashed hsl(var(--border));
+}
+
+.table {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 4px;
+  border: none;
+  border-radius: 50%;
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  overflow: hidden;
+  text-align: center;
+  transition:
+    opacity 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.tableName {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.1;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Найденный стол выделяем, остальные приглушаем — так глаз находит его сразу. */
+.tableFound {
+  background-color: hsl(var(--primary));
+  box-shadow:
+    0 0 0 3px hsl(var(--background)),
+    0 0 0 7px hsl(var(--primary));
+  z-index: 2;
+}
+
+.tableDimmed {
+  opacity: 0.3;
+}
+
+.found {
+  margin: 12px auto 0;
+  text-align: center;
+  font-size: 0.9375rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.foundName {
+  font-weight: 700;
+  color: hsl(var(--foreground));
+}
+
+/*
+  На узком экране зал сжимается до ~0.3, и подпись 13px превращается
+  в нечитаемые 4px. Показываем схему без подписей: найденную команду
+  подсвечиваем, её название выводим строкой под схемой.
+*/
+@media (max-width: 768px) {
+  .tableName {
+    display: none;
+  }
+}

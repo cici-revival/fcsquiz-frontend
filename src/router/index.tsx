@@ -5,8 +5,9 @@ import { ProtectedRoute } from './ProtectedRoute';
 import { PublicRoute } from './PublicRoute';
 import { routes } from './routes';
 import type {AppRoute} from './types';
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Toaster } from 'react-hot-toast';
+import { RouteFallback } from './RouteFallback';
 
 const renderRoutes = (routes: AppRoute[], basePath = '') =>
   routes.map(({ path, element, protected: isProtected, publicOnly, children }) => {
@@ -49,9 +50,11 @@ export const AppRouter = () => (
           },
         }}
       />
-    <Routes>
-      {renderRoutes(routes)}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <Suspense fallback={<RouteFallback />}>
+      <Routes>
+        {renderRoutes(routes)}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
   </AuthProvider>
 );

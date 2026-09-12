@@ -1,0 +1,20 @@
+.root {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.area {
+  fill: none;
+  stroke: hsl(var(--primary) / 0.45);
+  stroke-width: 3;
+  stroke-dasharray: 12 8;
+}
+
+.blocked {
+  fill: hsl(var(--destructive) / 0.08);
+  stroke: hsl(var(--destructive) / 0.35);
+  stroke-width: 2;
+  stroke-dasharray: 8 6;
+}

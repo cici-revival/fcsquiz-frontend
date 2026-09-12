@@ -1,22 +1,31 @@
 import { connectTeamsSSE, disconnectTeamsSSE } from './model/team.sse';
 
-let isInitialized = false;
+let subscribers = 0;
 
 export function bootstrapTeams() {
-  if (isInitialized) {
-    return;
-  }
+  subscribers += 1;
 
-  isInitialized = true;
-  connectTeamsSSE();
+  if (subscribers === 1) {
+    connectTeamsSSE();
+  }
 }
 
 export function shutdownTeams() {
-  disconnectTeamsSSE();
-  isInitialized = false;
+  if (subscribers === 0) {
+    return;
+  }
+
+  subscribers -= 1;
+
+  if (subscribers === 0) {
+    disconnectTeamsSSE();
+  }
 }
 
 export function restartTeams() {
   disconnectTeamsSSE();
-  connectTeamsSSE();
+
+  if (subscribers > 0) {
+    connectTeamsSSE();
+  }
 }

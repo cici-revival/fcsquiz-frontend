@@ -6,14 +6,13 @@ import { useTeamStore, useTeamsByName } from "@/entities/team/model/team.store";
 import { useChangesStore } from "@/entities/change/model/change.store";
 import type { CountStoredChange } from "@/entities/change/types";
 import { Check, ChevronsUpDown, Plus, Minus } from "lucide-react";
-import {
-  Command,
+import {Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/shared/ui";
+} from "@/shared/ui/Command";
 import {
   Select,
   SelectContent,

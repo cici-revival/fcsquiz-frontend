@@ -1,50 +1,74 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styles from "./Landing.module.css";
 import { useTeamStore } from "@/entities/team/model/team.store";
 import { Button } from "@shared/ui/Button";
 import { Input } from "@shared/ui/Input";
 import TeamTable from "./TeamTable";
+import { displayName } from "@entities/team/lib/teamName";
+import { useIsMobile } from "@shared/hooks/useMediaQuery";
 import { Search, AlertCircle } from "lucide-react";
 import { TeamSeatingPlan } from "./TeamSeatingPlan";
 import { Faq } from "./Faq";
 import { restartTeams } from "@/entities/team/team.bootstrap";
 import { Alert, AlertTitle, AlertDescription } from "@shared/ui/Alert";
 
+const DESKTOP_PAGE_SIZE = 24;
+const MOBILE_PAGE_SIZE = 12;
+
 export default function Landing() {
   const teamsMap = useTeamStore((s) => s.teams);
   const status = useTeamStore((s) => s.status);
   const error = useTeamStore((s) => s.error);
   const [query, setQuery] = useState("");
+  const isMobile = useIsMobile();
 
-  const teamsArray = useMemo(() => Array.from(teamsMap.values()), [teamsMap]);
+  const pageSize = isMobile ? MOBILE_PAGE_SIZE : DESKTOP_PAGE_SIZE;
+  const [visibleCount, setVisibleCount] = useState(pageSize);
+
+  useEffect(() => {
+    setVisibleCount(pageSize);
+  }, [pageSize]);
+
+  const teamsArray = useMemo(
+    () =>
+      Array.from(teamsMap.values()).sort((a, b) =>
+        displayName(a).localeCompare(displayName(b), "ru"),
+      ),
+    [teamsMap],
+  );
 
   const filteredTeams = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return teamsArray;
-    return teamsArray.filter((t) => t.name.toLowerCase().includes(q)).sort((a, b) => a.name.localeCompare(b.name));;
+
+    return teamsArray.filter((t) => displayName(t).toLowerCase().includes(q));
   }, [teamsArray, query]);
+
+  const isSearching = query.trim().length > 0;
+
+  const visibleTeams = useMemo(
+    () => (isSearching ? filteredTeams : filteredTeams.slice(0, visibleCount)),
+    [filteredTeams, isSearching, visibleCount],
+  );
+
+  const hiddenCount = filteredTeams.length - visibleTeams.length;
 
   return (
     <div className={styles.page}>
       <div className={styles.container}>
         <header className={styles.header}>
           <div>
-            <div className={styles.title}>
-              Квиз
-              <br />
-              Компьютерных
-              <br />
-              Наук
-            </div>
+            <h1 className={styles.title}>Квиз Компьютерных Наук</h1>
 
-            <div className={styles.register}>
+            {/* <div className={styles.register}>
               <a
                 href="https://cs.hse.ru/abitur/polls/1110068092.html"
                 target="_blank"
+                rel="noopener noreferrer"
               >
                 <Button variant="outline">Регистрация на игру</Button>
               </a>
-            </div>
+            </div> */}
           </div>
         </header>
 
@@ -90,11 +114,31 @@ export default function Landing() {
 
           {status === "connected" && (
             <div className={styles.tableWrap}>
-              <TeamTable query={query} teams={filteredTeams} />
+              <TeamTable query={query} teams={visibleTeams} />
+
+              {hiddenCount > 0 && (
+                <div className={styles.showMoreRow}>
+                  <Button
+                    variant="outline"
+                    onClick={() => setVisibleCount((n) => n + pageSize)}
+                  >
+                    Показать ещё {Math.min(hiddenCount, pageSize)}
+                  </Button>
+                  <span className={styles.showMoreHint}>
+                    {visibleTeams.length} из {filteredTeams.length}
+                  </span>
+                </div>
+              )}
+
+              {isSearching && filteredTeams.length === 0 && (
+                <p className={styles.emptyResult}>
+                  Ничего не нашлось по запросу «{query.trim()}»
+                </p>
+              )}
             </div>
           )}
 
-          <TeamSeatingPlan />
+          <TeamSeatingPlan query={query} />
           <Faq />
         </main>
       </div>

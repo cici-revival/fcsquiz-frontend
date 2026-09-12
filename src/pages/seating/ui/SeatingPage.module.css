@@ -1,0 +1,49 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  height: 100%;
+  padding: 30px;
+}
+
+/* Заголовок как на остальных страницах админки — см. DistributePage. */
+.title {
+  font-size: 32px;
+  font-weight: 600;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.progress {
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+  font-variant-numeric: tabular-nums;
+}
+
+.status {
+  color: hsl(var(--muted-foreground));
+  font-size: 0.8125rem;
+}
+
+/* Статус публикации — строка с галочкой, а не цветная пилюля:
+   в админке нет других бейджей, и пилюля выбивалась из набора. */
+.published {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.875rem;
+  color: hsl(var(--foreground));
+}
+
+/* Действия прижаты вправо, а счётчик остаётся слева. */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}

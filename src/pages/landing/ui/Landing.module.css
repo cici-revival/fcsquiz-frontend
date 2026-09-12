@@ -16,10 +16,20 @@
 }
 
 .title {
-  font-size: 92px;
+  /* Плавно вместо ступенек: на 375px даёт ~45px, на десктопе упирается в 92px. */
+  font-size: clamp(44px, 12vw, 92px);
   line-height: 0.95;
   letter-spacing: -0.04em;
   font-weight: 700;
+  /* Переносы задаёт ширина, а не <br/>: на узком экране жёсткие переносы
+     оставляли рваные строки. На десктопе слова ложатся в три строки. */
+  max-width: 7ch;
+}
+
+@media (max-width: 768px) {
+  .title {
+    max-width: 100%;
+  }
 }
 
 .actions {
@@ -81,27 +91,50 @@
 .tableWrap {
   max-width: 100%;
   width: 100%;
-  overflow-x: auto;
   margin-top: 16px;
 }
 
-.tableWrap table {
-  width: 100%;
-  table-layout: fixed;
-  border-collapse: collapse;
-  border-spacing: 0;
+/* Число колонок задаётся здесь, а не нарезкой массива в JS,
+   поэтому раскладка меняется одним медиазапросом. */
+.teamGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
-.tableWrap td {
-  width: calc(33.33% - 4px);
-  min-width: 200px;
-  padding: 4px;
-  border: none;
+.teamGridItem {
+  min-width: 0;
+}
+
+.showMoreRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.showMoreHint {
+  color: var(--color-muted-foreground);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.emptyResult {
+  margin-top: 16px;
+  color: var(--color-muted-foreground);
+  font-size: 14px;
 }
 
 .cell {
   box-shadow: var(--shadow-sm);
-  padding: 0px 0px 0px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 4px 0 8px;
   width: 100%;
   height: 36px;
   background: white;
@@ -110,14 +143,16 @@
   font-size: 13px;
 }
 
-
-.tableWrap tr {
-  height: auto;
+.teamName {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
-.tableWrap tbody tr {
-  margin-bottom: 4px;
-  display: table-row;
+.highlight {
+  background-color: yellow;
 }
 
 .kebab {
@@ -140,13 +175,31 @@
   background-color: #f3f4f6;
 }
 
-.tooltipCard {
-  min-width: 280px;
+/* Десктоп: TooltipContent по умолчанию тёмный и мелкий, поэтому детали
+   команды перекрывают его собственной светлой карточкой. */
+.detailsTooltip[data-slot="tooltip-content"] {
+  width: fit-content;
+  min-width: 260px;
+  max-width: min(320px, calc(100vw - 32px));
   padding: 12px;
   background-color: white;
+  color: var(--color-foreground);
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* Мобильный: PopoverContent уже рисует белую карточку с рамкой и тенью.
+   Сбрасываем только фиксированную ширину 288px — она была шире
+   содержимого и торчала из-под него. */
+.detailsPopover[data-slot="popover-content"] {
+  width: max-content;
+  min-width: 220px;
+  max-width: min(300px, calc(100vw - 24px));
+  padding: 12px;
+  cursor: default;
 }
 
 .tooltipTitle {
@@ -178,11 +231,109 @@
   opacity: 0.9;
 }
 
+/* Высоту задаёт сама схема (спейсер внутри виджета), фон рисует поле. */
 .seatingPlan {
   max-width: 1400px;
-  height: 80vh;
-  background-color: rgb(219, 219, 219);
   margin: 30px auto;
-  align-content: center;
-  text-align: center;
+}
+
+/* ---------- Адаптив ---------- */
+
+/* Планшет: три колонки становятся тесными. */
+@media (max-width: 1024px) {
+  .content {
+    margin-top: 96px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 20px 20px 16px;
+  }
+
+  .teamGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .content {
+    /* 150px отступа на узком экране — это пустой первый экран. */
+    margin-top: 56px;
+  }
+
+  .sectionTitle {
+    font-size: 24px;
+  }
+
+  .seatingPlan {
+    margin: 24px auto;
+  }
+
+  /* Порог комфортного касания — 44px. */
+  .kebab {
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+  }
+
+  .cell {
+    height: 44px;
+    padding-right: 0;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 16px 16px 12px;
+  }
+
+  .teamGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .content {
+    margin-top: 40px;
+  }
+
+  .sectionTitle {
+    font-size: 20px;
+  }
+
+  /* Поиск и счётчик в колонку: в строку они не помещаются. */
+  .searchRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .showMoreRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .showMoreHint {
+    text-align: center;
+  }
+
+  .searchField,
+  .searchInput {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .register a {
+    display: block;
+  }
+
+  .register button {
+    width: 100%;
+  }
+
+  /* Кнопка «Попробовать снова» не помещается рядом с текстом ошибки. */
+  .fetchAlert {
+    flex-direction: column !important;
+    align-items: flex-start;
+    gap: 8px;
+  }
 }

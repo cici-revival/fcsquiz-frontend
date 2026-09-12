@@ -13,14 +13,13 @@ import type { StructureStoredChange } from "@/entities/change/types";
 import SelectGameSeason from "@widgets/select-game/SelectGameSeason";
 
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui";
-import {
-  Command,
+import {Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/shared/ui";
+} from "@/shared/ui/Command";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { adminkaApi } from "@/shared/api/adminkaApi";

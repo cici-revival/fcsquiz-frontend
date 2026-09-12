@@ -8,14 +8,13 @@ import { useChangesStore } from "@/entities/change/model/change.store";
 import type { PassesStoredChange } from "@/entities/change/types";
 import type { PassInput, PassStatus } from "@/types/api";
 import type { RosterTeam } from "@/entities/team/types";
-import {
-  Command,
+import {Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/shared/ui";
+} from "@/shared/ui/Command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui";
 import { useEffect, useRef, useState, useMemo } from "react";
 import toast from "react-hot-toast";

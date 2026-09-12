@@ -42,7 +42,7 @@ export function Faq() {
               </span>
             </CollapsibleTrigger>
             <CollapsibleContent className={styles.itemContent}>
-              {item.answer}
+              <div className={styles.itemBody}>{item.answer}</div>
             </CollapsibleContent>
           </Collapsible>
         ))}

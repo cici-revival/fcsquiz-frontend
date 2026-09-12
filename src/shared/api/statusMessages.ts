@@ -118,3 +118,25 @@ export function getApiErrorDetails(error: unknown): string {
   }
   return "Неизвестная ошибка";
 }
+
+/** Коды ошибок WebSocket рассадки (/v1/adminka/seating/ws) */
+export const seatingErrorMessages: Record<string, string> = {
+  revision_conflict: "Место уже изменили в другой вкладке — обновили на актуальное",
+  seating_incomplete: "Не все команды рассажены",
+  not_found: "Команда не найдена в рассадке",
+  invalid_input: "Некорректные данные рассадки",
+  invalid_command: "Неизвестная команда",
+  invalid_game: "Игра не выбрана",
+  game_not_selected: "Игра ещё не выбрана",
+  game_mismatch: "Игра изменилась, переподключаемся",
+  invalid_team_id: "Некорректный идентификатор команды",
+  invalid_argument: "Некорректный запрос",
+  internal: "Внутренняя ошибка сервера",
+  timeout: "Сервер не ответил вовремя",
+  disconnected: "Нет соединения с сервером",
+  unknown: "Неизвестная ошибка рассадки",
+};
+
+export function getSeatingErrorMessage(code: string): string {
+  return seatingErrorMessages[code] ?? seatingErrorMessages.unknown;
+}

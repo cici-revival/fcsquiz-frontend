@@ -21,6 +21,29 @@ export default defineConfig(({ mode }) => {
       },
     },
 
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            // Вся React-экосистема одной группой: она стабильна между
+            // релизами, поэтому браузер переиспользует её из кэша.
+            // Дробить её по отдельным чанкам нельзя — между ними возникает
+            // порядок инициализации и получается "Cannot access before
+            // initialization", причём только в prod-сборке.
+            // Якоря [\\/] обязательны: без них под правило попали бы
+            // react-hot-toast, react-widgets, @radix-ui/react-* и т.п.
+            if (
+              /[\\/]node_modules[\\/](react|react-dom|react-router|react-router-dom|scheduler)[\\/]/.test(
+                id,
+              )
+            ) {
+              return "react-vendor";
+            }
+          },
+        },
+      },
+    },
+
     server: {
       host: true,
       port: 5173,
@@ -35,6 +58,8 @@ export default defineConfig(({ mode }) => {
         "/api": {
           target: env.API_PROXY_TARGET,
           changeOrigin: true,
+          // WebSocket рассадки живёт на том же /api — проксируем явно.
+          ws: true,
         },
       },
     },

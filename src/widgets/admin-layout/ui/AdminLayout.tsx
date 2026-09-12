@@ -1,7 +1,6 @@
 // src/widgets/admin-layout/index.tsx
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { useTeamExport } from "@/features/team/csvExporter";
 
 import {
   bootstrapTeams,
@@ -9,6 +8,7 @@ import {
   restartTeams,
 } from "@entities/team/team.bootstrap"; // Добавили shutdownTeams и restartTeams
 import { useTeamStats } from "@/entities/team/model/useTeamStats";
+import { RouteFallback } from "@/router/RouteFallback";
 import {
   Upload,
   Edit,
@@ -17,6 +17,7 @@ import {
   AlertCircle,
   RefreshCw,
   GalleryVerticalEnd,
+  LayoutGrid,
 } from "lucide-react";
 import { Button } from "@shared/ui/Button";
 import { cn } from "@shared/lib/utils";
@@ -29,7 +30,6 @@ import { Stats } from "./Stats";
 export default function AdminLayout() {
   const location = useLocation();
   const stats = useTeamStats();
-	const { exportToCSV, teamsCount } = useTeamExport();
 
   // Инициализация SSE при монтировании компонента
   useEffect(() => {
@@ -78,10 +78,16 @@ export default function AdminLayout() {
       icon: GalleryVerticalEnd,
       id: "signs",
     },
+    {
+      href: "/admin/seating",
+      label: "Рассадка",
+      icon: LayoutGrid,
+      id: "seating",
+    },
   ];
 
   const handleReconnect = () => {
-    restartTeams(); // Используем новую функцию для переподключения
+    restartTeams();
   };
 
   return (
@@ -193,13 +199,15 @@ export default function AdminLayout() {
             </div>
           )}
         </div>
-        <Button variant="outline" onClick={() => exportToCSV()} disabled={teamsCount === 0}>
-          Скачать CSV
-        </Button>
       </div>
 
       <main className={styles.main}>
-        <Outlet />
+        {/* Своя граница Suspense: без неё загрузка чанка дочерней страницы
+            заставила бы suspend'иться внешнюю границу, AdminLayout бы
+            размонтировался и его cleanup оборвал бы SSE на каждой навигации. */}
+        <Suspense fallback={<RouteFallback />}>
+          <Outlet />
+        </Suspense>
       </main>
     </div>
   );

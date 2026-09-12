@@ -110,15 +110,108 @@
   min-width: 0;
 }
 
-.chartBox {
-  height: 260px;
-	padding: 0 5px;
+/* Распределение по составам: горизонтальные полоски */
+.distList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.chartHint {
-  margin-top: 12px;
-  font-size: 0.85rem;
+.distRow {
+  display: grid;
+  grid-template-columns: 60px 1fr 32px;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.875rem;
+}
+
+.distLabel {
   color: hsl(var(--muted-foreground));
+}
+
+.distTrack {
+  background-color: hsl(var(--muted));
+  border-radius: 4px;
+  height: 20px;
+  overflow: hidden;
+}
+
+.distBar {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  background-color: hsl(var(--primary));
+  border-radius: 4px;
+  transition: width 200ms ease;
+}
+
+.distValue {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  text-align: right;
+}
+
+/* Сводка по сезону */
+.summaryRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.summaryItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.summaryValue {
+  font-size: 1.5rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.summaryLabel {
+  font-size: 0.8125rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.seasonList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 260px;
+  overflow: auto;
+  scrollbar-width: thin;
+}
+
+.seasonRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 6px 0;
+  font-size: 0.875rem;
+  border-bottom: 1px solid hsl(var(--border) / 0.5);
+}
+
+.seasonRow:last-child {
+  border-bottom: none;
+}
+
+.seasonGame {
+  color: hsl(var(--muted-foreground));
+}
+
+.seasonValues {
+  display: flex;
+  gap: 8px;
+  font-variant-numeric: tabular-nums;
 }
 
 .chartError {
@@ -151,7 +244,7 @@
 }
 
 .skChart {
-  height: 260px;
+  height: 220px;
   width: 100%;
 }
 
