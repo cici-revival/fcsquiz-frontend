@@ -7,6 +7,7 @@ import styles from "./Landing.module.css";
 type TeamTableProps = {
   teams: RosterTeam[];
   query: string;
+  seatNumbers?: Map<string, number>;
 };
 
 function HighlightText({ text, query }: { text: string; query: string }) {
@@ -31,7 +32,7 @@ function HighlightText({ text, query }: { text: string; query: string }) {
   );
 }
 
-function TeamTable({ teams, query }: TeamTableProps) {
+function TeamTable({ teams, query, seatNumbers }: TeamTableProps) {
   return (
     <ul className={styles.teamGrid}>
       {teams.map((team) => (
@@ -41,7 +42,10 @@ function TeamTable({ teams, query }: TeamTableProps) {
               <HighlightText text={displayName(team)} query={query} />
             </span>
 
-            <TeamDetailsDisclosure team={team}>
+            <TeamDetailsDisclosure
+              team={team}
+              seatNumber={seatNumbers?.get(team.id) ?? null}
+            >
               <button
                 type="button"
                 className={styles.kebab}

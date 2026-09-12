@@ -114,6 +114,25 @@ describe("Landing", () => {
     expect(screen.getByText(/Ничего не нашлось/)).toBeInTheDocument();
   });
 
+  it("показывает скелет, пока соединение не установлено", () => {
+    useTeamStore.getState().setStatus("connecting");
+
+    render(<Landing />);
+
+    expect(screen.getByLabelText("Загрузка списка команд")).toBeInTheDocument();
+    expect(screen.queryAllByRole("listitem")).toHaveLength(0);
+  });
+
+  it("скрывает скелет, когда команды пришли", () => {
+    seedTeams(["Альфа"]);
+
+    render(<Landing />);
+
+    expect(
+      screen.queryByLabelText("Загрузка списка команд"),
+    ).not.toBeInTheDocument();
+  });
+
   it("на мобильном показывает меньшую порцию", () => {
     stubMatchMedia(true);
     seedTeams(Array.from({ length: 60 }, (_, i) => `Команда ${i + 1}`));

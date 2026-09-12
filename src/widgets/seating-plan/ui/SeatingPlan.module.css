@@ -56,9 +56,32 @@
   color: hsl(var(--primary-foreground));
   overflow: hidden;
   text-align: center;
+  cursor: pointer;
+  font: inherit;
   transition:
     opacity 150ms ease,
     box-shadow 150ms ease;
+}
+
+.table:hover {
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.35);
+}
+
+.table:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/*
+  Попап рендерится в портал у body, а не внутри поля, поэтому масштаб
+  поля на него не влияет и гасить его не нужно.
+*/
+.details[data-slot="popover-content"] {
+  width: max-content;
+  min-width: 240px;
+  max-width: min(320px, calc(100vw - 24px));
+  padding: 12px;
+  text-align: left;
 }
 
 .tableName {
@@ -69,6 +92,15 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Номер нужен только там, где не помещается название: на десктопе подпись
+   читается, и цифра рядом с ней была бы шумом. */
+.tableNumber {
+  display: none;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Найденный стол выделяем, остальные приглушаем — так глаз находит его сразу. */
@@ -104,5 +136,16 @@
 @media (max-width: 768px) {
   .tableName {
     display: none;
+  }
+
+  /*
+    Размер считается в координатах зала, а не экрана: поле целиком
+    отмасштабировано (~0.26 на 375px), поэтому обычные 16px дали бы 4px.
+    44px внутри поля превращаются в ~11px на экране и влезают в стол
+    диаметром 15-22px.
+  */
+  .tableNumber {
+    display: block;
+    font-size: 44px;
   }
 }

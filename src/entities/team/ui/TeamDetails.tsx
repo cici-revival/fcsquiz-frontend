@@ -11,7 +11,13 @@ import styles from "./TeamDetails.module.css";
 
 const _MAX_VISIBLE_PASSES = 6;
 
-export const TeamDetails = memo(({ team }: { team: RosterTeam }) => {
+type TeamDetailsProps = {
+  team: RosterTeam;
+  /** Номер стола в рассадке. null — команду ещё не посадили. */
+  seatNumber?: number | null;
+};
+
+export const TeamDetails = memo(({ team, seatNumber }: TeamDetailsProps) => {
   const passesList = useMemo(() => {
     if (!team.passes?.length) return null;
 
@@ -27,6 +33,12 @@ export const TeamDetails = memo(({ team }: { team: RosterTeam }) => {
       <div className={styles.title}>{displayName(team)}</div>
       <div className={styles.meta}>{team.players_count} человек</div>
 
+      {seatNumber != null && (
+        <div className={styles.seat}>
+          Стол в рассадке: <strong>№ {seatNumber}</strong>
+        </div>
+      )}
+
       <div className={styles.blockTitle}>Пропуски</div>
       <ul className={styles.list}>{passesList || <li>—</li>}</ul>
     </>
@@ -37,6 +49,7 @@ TeamDetails.displayName = "TeamDetails";
 
 type TeamDetailsDisclosureProps = {
   team: RosterTeam;
+  seatNumber?: number | null;
   children: ReactNode;
   side?: "top" | "right" | "bottom" | "left";
   align?: "start" | "center" | "end";
@@ -52,6 +65,7 @@ type TeamDetailsDisclosureProps = {
  */
 export function TeamDetailsDisclosure({
   team,
+  seatNumber,
   children,
   side = "right",
   align = "center",
@@ -74,7 +88,7 @@ export function TeamDetailsDisclosure({
           sideOffset={4}
           className={styles.popover}
         >
-          <TeamDetails team={team} />
+          <TeamDetails team={team} seatNumber={seatNumber} />
         </PopoverContent>
       </Popover>
     );
@@ -89,7 +103,7 @@ export function TeamDetailsDisclosure({
         sideOffset={5}
         className={styles.tooltip}
       >
-        <TeamDetails team={team} />
+        <TeamDetails team={team} seatNumber={seatNumber} />
       </TooltipContent>
     </Tooltip>
   );

@@ -58,6 +58,19 @@ describe("TeamDetails", () => {
 
     expect(screen.getByText("Без названия")).toBeInTheDocument();
   });
+
+  it("показывает номер стола в рассадке", () => {
+    render(<TeamDetails team={team()} seatNumber={12} />);
+
+    expect(screen.getByText(/Стол в рассадке/)).toBeInTheDocument();
+    expect(screen.getByText(/12/)).toBeInTheDocument();
+  });
+
+  it("молчит о столе, пока команду не посадили", () => {
+    render(<TeamDetails team={team()} seatNumber={null} />);
+
+    expect(screen.queryByText(/Стол в рассадке/)).not.toBeInTheDocument();
+  });
 });
 
 describe("TeamDetailsDisclosure", () => {

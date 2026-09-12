@@ -11,6 +11,9 @@ import { TeamSeatingPlan } from "./TeamSeatingPlan";
 import { Faq } from "./Faq";
 import { restartTeams } from "@/entities/team/team.bootstrap";
 import { Alert, AlertTitle, AlertDescription } from "@shared/ui/Alert";
+import { useSeatingStore } from "@entities/seating/model/seating.store";
+import { buildSeatNumbers } from "@entities/seating/lib/seatNumbers";
+import { TeamListSkeleton } from "./TeamListSkeleton";
 
 const DESKTOP_PAGE_SIZE = 24;
 const MOBILE_PAGE_SIZE = 12;
@@ -46,6 +49,19 @@ export default function Landing() {
 
   const isSearching = query.trim().length > 0;
 
+  const isLoading = status === "idle" || status === "connecting";
+
+  const seatingTeams = useSeatingStore((s) => s.teams);
+  const isSeatingPublished = useSeatingStore((s) => s.isPublished);
+
+  const seatNumbers = useMemo(
+    () =>
+      isSeatingPublished
+        ? buildSeatNumbers(seatingTeams.values())
+        : new Map<string, number>(),
+    [seatingTeams, isSeatingPublished],
+  );
+
   const visibleTeams = useMemo(
     () => (isSearching ? filteredTeams : filteredTeams.slice(0, visibleCount)),
     [filteredTeams, isSearching, visibleCount],
@@ -74,7 +90,7 @@ export default function Landing() {
 
         <main className={styles.content}>
           <div className={styles.sectionTitle}>Зарегистрированы на игру:</div>
-
+							{/* <div className={styles.searchHint}>{teamsArray.length} команд</div> */}
           <div className={styles.searchRow}>
             <div className={styles.searchField}>
               <span className={styles.searchIcon}>
@@ -88,13 +104,9 @@ export default function Landing() {
                 style={{ paddingLeft: 30 }}
               />
             </div>
-
-            <div className={styles.searchHint}>{teamsArray.length} команд</div>
           </div>
 
-          {status === "connecting" && (
-            <div className={styles.loading}>Подключение к серверу...</div>
-          )}
+          {isLoading && <TeamListSkeleton isMobile={isMobile} />}
 
           {status === "error" && (
             <Alert variant="destructive" className={styles.fetchAlert}>
@@ -114,7 +126,11 @@ export default function Landing() {
 
           {status === "connected" && (
             <div className={styles.tableWrap}>
-              <TeamTable query={query} teams={visibleTeams} />
+              <TeamTable
+                query={query}
+                teams={visibleTeams}
+                seatNumbers={seatNumbers}
+              />
 
               {hiddenCount > 0 && (
                 <div className={styles.showMoreRow}>

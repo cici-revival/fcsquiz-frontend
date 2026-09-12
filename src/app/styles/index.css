@@ -13,10 +13,20 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Детекторы данных в Safari на iOS сами оборачивают «2–3 часа», «до восьми
+   человек» и похожие куски текста в ссылку и красят её в системный синий.
+   Мета-тег format-detection на это не влияет, поэтому цвет снимается стилями:
+   и с обычной ссылки, и с того, что Safari подставил сам. */
 a[href^="tel:"],
-a[href^="mailto:"] {
-  color: inherit;
-  text-decoration: none;
+a[href^="sms:"],
+a[href^="mailto:"],
+a[x-apple-data-detectors],
+a[data-detector],
+[x-apple-data-detectors] {
+  color: inherit !important;
+  text-decoration: none !important;
+  -webkit-text-decoration-color: inherit !important;
+  pointer-events: none;
 }
 
 :root {
