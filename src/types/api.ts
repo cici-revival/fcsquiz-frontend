@@ -51,7 +51,7 @@ export type GameID = {
 export type RegisteredTeamsResponse = { teams: Team[] };
 
 // ---------- ПРОПУСКИ ----------
-// Контракты для passes-ручек /v1/changes/passes/* по gateway openapi.yaml:
+// Контракты для одиночных ручек /v1/changes/pass/* по gateway openapi.yaml:
 // на вход — team_id + pass (PassInput), в ответе — team_id + pass + status.
 
 export type PassStatus =
@@ -65,7 +65,6 @@ export type PassStatus =
 
 export type PassInput = { team_id: string; pass: string };
 export type PassWithStatus = { team_id: string; pass: string; status?: PassStatus };
-export type PassesResponse = { passes?: PassWithStatus[] };
 
 // ---------- ИГРОКИ (вход для players-ручек) ----------
 

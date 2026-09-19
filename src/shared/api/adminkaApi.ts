@@ -5,7 +5,7 @@ import type {
   Player,
   PlayerInput,
   Change,
-  PassesResponse,
+  PassWithStatus,
   PassInput,
   PlayersCountChangeInput,
   PlayersCountChangeResult,
@@ -116,29 +116,18 @@ export const adminkaApi = {
 
   // CHANGES
 
-  addPasses(payload: {
-    season: number;
-    game_number: number;
-    passes: PassInput[];
-  }) {
-    return adminkaApiClient.request<PassesResponse>("/v1/changes/passes/add", {
+  addPass(payload: { season: number; game_number: number; pass: PassInput }) {
+    return adminkaApiClient.request<{ pass: PassWithStatus }>("/v1/changes/pass/add", {
       method: "PUT",
       body: JSON.stringify(payload),
     });
   },
 
-  removePasses(payload: {
-    season: number;
-    game_number: number;
-    passes: PassInput[];
-  }) {
-    return adminkaApiClient.request<PassesResponse>(
-      "/v1/changes/passes/remove",
-      {
-        method: "PUT",
-        body: JSON.stringify(payload),
-      },
-    );
+  removePass(payload: { season: number; game_number: number; pass: PassInput }) {
+    return adminkaApiClient.request<{ pass: PassWithStatus }>("/v1/changes/pass/remove", {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
   },
 
   markResolved(payload: { change_id: string }) {
@@ -175,45 +164,29 @@ export const adminkaApi = {
     });
   },
 
-  changePlayersCount(payload: {
+  changePlayerCount(payload: {
     season: number;
     game_number: number;
-    changes: PlayersCountChangeInput[];
+    change: PlayersCountChangeInput;
   }) {
-    return adminkaApiClient.request<{
-      changes?: PlayersCountChangeResult[];
-    }>("/v1/changes/players/count", {
+    return adminkaApiClient.request<{ change: PlayersCountChangeResult }>(
+      "/v1/changes/player/count",
+      { method: "PUT", body: JSON.stringify(payload) },
+    );
+  },
+
+  addPlayer(payload: { season: number; game_number: number; player: PlayerInput }) {
+    return adminkaApiClient.request<{ player: Player }>("/v1/changes/player/add", {
       method: "PUT",
       body: JSON.stringify(payload),
     });
   },
 
-  addPlayers(payload: {
-    season: number;
-    game_number: number;
-    players: PlayerInput[];
-  }) {
-    return adminkaApiClient.request<{ players?: Player[] }>(
-      "/v1/changes/players/add",
-      {
-        method: "PUT",
-        body: JSON.stringify(payload),
-      },
-    );
-  },
-
-  removePlayers(payload: {
-    season: number;
-    game_number: number;
-    players: PlayerInput[];
-  }) {
-    return adminkaApiClient.request<{ players?: Player[] }>(
-      "/v1/changes/players/remove",
-      {
-        method: "PUT",
-        body: JSON.stringify(payload),
-      },
-    );
+  removePlayer(payload: { season: number; game_number: number; player: PlayerInput }) {
+    return adminkaApiClient.request<{ player: Player }>("/v1/changes/player/remove", {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
   },
 
   unresolved_changes(payload: { season: number; game_number: number }) {

@@ -11,7 +11,7 @@ export const structureStatusMessages: Record<string, string> = {
   unknown: "Неизвестный статус",
 };
 
-/** player_status для PUT /v1/changes/players/add */
+/** player_status для PUT /v1/changes/player/add */
 export const addPlayerStatusMessages: Record<string, string> = {
   added: "Игрок добавлен",
   already_exists: "Игрок уже в команде",
@@ -24,7 +24,7 @@ export const addPlayerStatusMessages: Record<string, string> = {
   removed: "Игрок удалён",
 };
 
-/** player_status для PUT /v1/changes/players/remove */
+/** player_status для PUT /v1/changes/player/remove */
 export const removePlayerStatusMessages: Record<string, string> = {
   removed: "Игрок удалён",
   error: "Ошибка при удалении",
@@ -37,7 +37,7 @@ export const removePlayerStatusMessages: Record<string, string> = {
   do_not_need_pass: "Пропуск не требуется",
 };
 
-/** status для PUT /v1/changes/players/count */
+/** status для PUT /v1/changes/player/count */
 export const playersCountStatusMessages: Record<string, string> = {
   ok: "Количество изменено",
   unknown_team: "Команда не найдена",
@@ -46,7 +46,7 @@ export const playersCountStatusMessages: Record<string, string> = {
   duplicate_team: "Дубликат команды в запросе",
 };
 
-/** status для PassWithStatus (passes/add, passes/remove) */
+/** status для PassWithStatus (pass/add, pass/remove) */
 export const passStatusMessages: Record<string, string> = {
   added: "Пропуск добавлен",
   already_exists: "Пропуск уже заказан",
