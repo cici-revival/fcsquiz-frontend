@@ -466,25 +466,23 @@ export default function ModifyPlayers({ onFormChange }: ModifyPlayersProps) {
 
     try {
       if (block.action === "add") {
-        const addResp = await adminkaApi.addPlayers({
+        const addResp = await adminkaApi.addPlayer({
           season,
           game_number: gameNumber,
-          players: [
-            {
-              team_id: teamId,
-              name: block.playerName.trim(),
-              is_pass_needed: !!block.orderPass,
-            },
-          ],
+          player: {
+            team_id: teamId,
+            name: block.playerName.trim(),
+            is_pass_needed: !!block.orderPass,
+          },
         });
-        const playerStatus = getPlayerStatus(addResp.players?.[0]);
+        const playerStatus = getPlayerStatus(addResp.player);
         const isAddSuccess =
           playerStatus === "added" ||
           playerStatus === "already_exists" ||
           playerStatus === "do_not_need_pass";
         if (!isAddSuccess) {
-          console.error("[ModifyPlayers] addPlayers response:", addResp);
-          console.error("[ModifyPlayers] addPlayers status:", playerStatus, "full player:", addResp.players?.[0]);
+          console.error("[ModifyPlayers] addPlayer response:", addResp);
+          console.error("[ModifyPlayers] addPlayer status:", playerStatus, "full player:", addResp.player);
           const msg = getAddPlayerStatusMessage(playerStatus ?? "unknown");
           throw new Error(playerStatus ? `${msg} (status: ${playerStatus})` : msg);
         }
@@ -496,16 +494,16 @@ export default function ModifyPlayers({ onFormChange }: ModifyPlayersProps) {
           toast.success(`Изменение ${index + 1} сохранено`);
         }
       } else if (block.action === "delete") {
-        const removeResp = await adminkaApi.removePlayers({
+        const removeResp = await adminkaApi.removePlayer({
           season,
           game_number: gameNumber,
-          players: [{ team_id: teamId, name: block.playerName.trim() }],
+          player: { team_id: teamId, name: block.playerName.trim() },
         });
-        const playerStatus = getPlayerStatus(removeResp.players?.[0]);
+        const playerStatus = getPlayerStatus(removeResp.player);
         const isRemoveSuccess = playerStatus === "removed";
         if (!isRemoveSuccess) {
-          console.error("[ModifyPlayers] removePlayers response:", removeResp);
-          console.error("[ModifyPlayers] removePlayers status:", playerStatus, "full player:", removeResp.players?.[0]);
+          console.error("[ModifyPlayers] removePlayer response:", removeResp);
+          console.error("[ModifyPlayers] removePlayer status:", playerStatus, "full player:", removeResp.player);
           const msg = getRemovePlayerStatusMessage(playerStatus ?? "unknown");
           throw new Error(playerStatus ? `${msg} (status: ${playerStatus})` : msg);
         }
@@ -515,46 +513,42 @@ export default function ModifyPlayers({ onFormChange }: ModifyPlayersProps) {
         const newPlayerName = block.playerName.trim();
         const oldPlayerName = (block.playerNameToRemove ?? "").trim();
 
-        const addResp = await adminkaApi.addPlayers({
+        const addResp = await adminkaApi.addPlayer({
           season,
           game_number: gameNumber,
-          players: [
-            {
-              team_id: teamId,
-              name: newPlayerName,
-              is_pass_needed: !!block.orderPass,
-            },
-          ],
+          player: {
+            team_id: teamId,
+            name: newPlayerName,
+            is_pass_needed: !!block.orderPass,
+          },
         });
 
-        const addStatus = getPlayerStatus(addResp.players?.[0]);
+        const addStatus = getPlayerStatus(addResp.player);
         const addOk =
           addStatus === "added" ||
           addStatus === "already_exists" ||
           addStatus === "do_not_need_pass";
         if (!addOk) {
-          console.error("[ModifyPlayers] addPlayers (replace) response:", addResp);
+          console.error("[ModifyPlayers] addPlayer (replace) response:", addResp);
           const msg = getAddPlayerStatusMessage(addStatus ?? "unknown");
           throw new Error(
             addStatus ? `${msg} (status: ${addStatus})` : msg,
           );
         }
 
-        const removeResp = await adminkaApi.removePlayers({
+        const removeResp = await adminkaApi.removePlayer({
           season,
           game_number: gameNumber,
-          players: [
-            {
-              team_id: teamId,
-              name: oldPlayerName,
-            },
-          ],
+          player: {
+            team_id: teamId,
+            name: oldPlayerName,
+          },
         });
 
-        const removeStatus = getPlayerStatus(removeResp.players?.[0]);
+        const removeStatus = getPlayerStatus(removeResp.player);
         const removeOk = removeStatus === "removed";
         if (!removeOk) {
-          console.error("[ModifyPlayers] removePlayers (replace) response:", removeResp);
+          console.error("[ModifyPlayers] removePlayer (replace) response:", removeResp);
           const msg = getRemovePlayerStatusMessage(removeStatus ?? "unknown");
           throw new Error(
             removeStatus ? `${msg} (status: ${removeStatus})` : msg,
@@ -585,7 +579,6 @@ export default function ModifyPlayers({ onFormChange }: ModifyPlayersProps) {
         try {
           await adminkaApi.markResolved({ change_id: unresolvedIdToMark });
         } catch (e) {
-
           console.error(
             `Не удалось пометить изменение ${unresolvedIdToMark} как разрешённое`,
             e,
@@ -664,124 +657,110 @@ export default function ModifyPlayers({ onFormChange }: ModifyPlayersProps) {
       const removeItems = validChanges.filter(({ block }) => block.action === "delete");
       const replaceItems = validChanges.filter(({ block }) => block.action === "replace");
 
-      const addResults = new Map<number, { status: string }>();
-      if (addItems.length > 0) {
-        const addResp = await adminkaApi.addPlayers({
-          season,
-          game_number: gameNumber,
-          players: addItems.map(({ block }) => ({
-            team_id: teamIdByName(block.teamName) ?? "",
-            name: block.playerName.trim(),
-            is_pass_needed: !!block.orderPass,
-          })),
-        });
-        addItems.forEach(({ block, index }, i) => {
-          const st = getPlayerStatus(addResp.players?.[i]) ?? "unknown";
-          addResults.set(index, { status: st });
-          const isOk =
-            st === "added" || st === "already_exists" || st === "do_not_need_pass";
-          if (isOk) {
-            successCount += 1;
-            if (block.storedChangeId) {
-              const stored = useChangesStore.getState().changes.get(block.storedChangeId) as StructureStoredChange | undefined;
-              if (stored?.unresolvedId) unresolvedIdsToMark.add(stored.unresolvedId);
-              useChangesStore.getState().removeChange(block.storedChangeId);
-            }
-          } else {
-            errorCount += 1;
-          }
-        });
-      }
-
-      const removeResults = new Map<number, { status: string }>();
-      if (removeItems.length > 0) {
-        const removeResp = await adminkaApi.removePlayers({
-          season,
-          game_number: gameNumber,
-          players: removeItems.map(({ block }) => ({
-            team_id: teamIdByName(block.teamName) ?? "",
-            name: block.playerName.trim(),
-          })),
-        });
-        removeItems.forEach(({ block, index }, i) => {
-          const st = getPlayerStatus(removeResp.players?.[i]) ?? "unknown";
-          removeResults.set(index, { status: st });
-          const isOk = st === "removed";
-          if (isOk) {
-            successCount += 1;
-            if (block.storedChangeId) {
-              const stored = useChangesStore.getState().changes.get(block.storedChangeId) as StructureStoredChange | undefined;
-              if (stored?.unresolvedId) unresolvedIdsToMark.add(stored.unresolvedId);
-              useChangesStore.getState().removeChange(block.storedChangeId);
-            }
-          } else {
-            errorCount += 1;
-          }
-        });
-      }
-
-      const replaceStatusMap = new Map<
-        string,
-        { addStatus: string; removeStatus: string }
-      >();
-      if (replaceItems.length > 0) {
-        // обрабатываем replace как addPlayers + removePlayers
-        for (const { block } of replaceItems) {
-          const newPlayerName = block.playerName.trim();
-          const oldPlayerName = (block.playerNameToRemove ?? "").trim();
-          const blockTeamId = teamIdByName(block.teamName) ?? "";
-
-          const addResp = await adminkaApi.addPlayers({
+      const addResults = new Map<number, { status: string; message?: string }>();
+      for (const { block, index } of addItems) {
+        let st = "unknown";
+        let message: string | undefined;
+        try {
+          const response = await adminkaApi.addPlayer({
             season,
             game_number: gameNumber,
-            players: [
-              {
-                team_id: blockTeamId,
-                name: newPlayerName,
-                is_pass_needed: !!block.orderPass,
-              },
-            ],
+            player: {
+              team_id: teamIdByName(block.teamName) ?? "",
+              name: block.playerName.trim(),
+              is_pass_needed: !!block.orderPass,
+            },
           });
-          const addStatus = getPlayerStatus(addResp.players?.[0]) ?? "unknown";
+          st = getPlayerStatus(response.player) ?? "unknown";
+        } catch (error) {
+          message = getApiErrorDetails(error);
+        }
+        addResults.set(index, { status: st, message });
+        const isOk = st === "added" || st === "already_exists" || st === "do_not_need_pass";
+        if (isOk) {
+          successCount += 1;
+          if (block.storedChangeId) {
+            const stored = useChangesStore.getState().changes.get(block.storedChangeId) as StructureStoredChange | undefined;
+            if (stored?.unresolvedId) unresolvedIdsToMark.add(stored.unresolvedId);
+            useChangesStore.getState().removeChange(block.storedChangeId);
+          }
+        } else {
+          errorCount += 1;
+        }
+      }
 
-          const removeResp = await adminkaApi.removePlayers({
+      const removeResults = new Map<number, { status: string; message?: string }>();
+      for (const { block, index } of removeItems) {
+        let st = "unknown";
+        let message: string | undefined;
+        try {
+          const response = await adminkaApi.removePlayer({
             season,
             game_number: gameNumber,
-            players: [
-              {
-                team_id: blockTeamId,
-                name: oldPlayerName,
-              },
-            ],
+            player: {
+              team_id: teamIdByName(block.teamName) ?? "",
+              name: block.playerName.trim(),
+            },
           });
-          const removeStatus =
-            getPlayerStatus(removeResp.players?.[0]) ?? "unknown";
-
-          replaceStatusMap.set(block.id, {
-            addStatus,
-            removeStatus,
-          });
-
-          const addOk =
-            addStatus === "added" ||
-            addStatus === "already_exists" ||
-            addStatus === "do_not_need_pass";
-          const removeOk = removeStatus === "removed";
-
-          if (addOk && removeOk) {
-            successCount += 1;
-            if (block.storedChangeId) {
-              const stored =
-                useChangesStore.getState().changes.get(
-                  block.storedChangeId,
-                ) as StructureStoredChange | undefined;
-              if (stored?.unresolvedId)
-                unresolvedIdsToMark.add(stored.unresolvedId);
-              useChangesStore.getState().removeChange(block.storedChangeId);
-            }
-          } else {
-            errorCount += 1;
+          st = getPlayerStatus(response.player) ?? "unknown";
+        } catch (error) {
+          message = getApiErrorDetails(error);
+        }
+        removeResults.set(index, { status: st, message });
+        if (st === "removed") {
+          successCount += 1;
+          if (block.storedChangeId) {
+            const stored = useChangesStore.getState().changes.get(block.storedChangeId) as StructureStoredChange | undefined;
+            if (stored?.unresolvedId) unresolvedIdsToMark.add(stored.unresolvedId);
+            useChangesStore.getState().removeChange(block.storedChangeId);
           }
+        } else {
+          errorCount += 1;
+        }
+      }
+
+      const replaceStatusMap = new Map<string, { addStatus: string; removeStatus: string; message?: string }>();
+      for (const { block } of replaceItems) {
+        const newPlayerName = block.playerName.trim();
+        const oldPlayerName = (block.playerNameToRemove ?? "").trim();
+        const blockTeamId = teamIdByName(block.teamName) ?? "";
+        let addStatus = "unknown";
+        let removeStatus = "unknown";
+        let message: string | undefined;
+
+        try {
+          const response = await adminkaApi.addPlayer({
+            season,
+            game_number: gameNumber,
+            player: { team_id: blockTeamId, name: newPlayerName, is_pass_needed: !!block.orderPass },
+          });
+          addStatus = getPlayerStatus(response.player) ?? "unknown";
+        } catch (error) {
+          message = getApiErrorDetails(error);
+        }
+        const addOk = addStatus === "added" || addStatus === "already_exists" || addStatus === "do_not_need_pass";
+        if (addOk) {
+          try {
+            const response = await adminkaApi.removePlayer({
+              season,
+              game_number: gameNumber,
+              player: { team_id: blockTeamId, name: oldPlayerName },
+            });
+            removeStatus = getPlayerStatus(response.player) ?? "unknown";
+          } catch (error) {
+            message = getApiErrorDetails(error);
+          }
+        }
+        replaceStatusMap.set(block.id, { addStatus, removeStatus, message });
+        if (addOk && removeStatus === "removed") {
+          successCount += 1;
+          if (block.storedChangeId) {
+            const stored = useChangesStore.getState().changes.get(block.storedChangeId) as StructureStoredChange | undefined;
+            if (stored?.unresolvedId) unresolvedIdsToMark.add(stored.unresolvedId);
+            useChangesStore.getState().removeChange(block.storedChangeId);
+          }
+        } else {
+          errorCount += 1;
         }
       }
 
@@ -799,17 +778,17 @@ export default function ModifyPlayers({ onFormChange }: ModifyPlayersProps) {
                 r.status === "already_exists" ||
                 r.status === "do_not_need_pass");
             if (isOk) clearStoredId = true;
-            else if (r) {
+            else {
               status = "error";
-              errorMessage = getAddPlayerStatusMessage(r.status);
+              errorMessage = r?.message ?? getAddPlayerStatusMessage(r?.status ?? "unknown");
             }
           } else if (block.action === "delete") {
             const r = removeResults.get(index);
             const isOk = r && r.status === "removed";
             if (isOk) clearStoredId = true;
-            else if (r) {
+            else {
               status = "error";
-              errorMessage = getRemovePlayerStatusMessage(r.status);
+              errorMessage = r?.message ?? getRemovePlayerStatusMessage(r?.status ?? "unknown");
             }
           } else {
             const r = replaceStatusMap.get(block.id);
@@ -828,7 +807,7 @@ export default function ModifyPlayers({ onFormChange }: ModifyPlayersProps) {
                   r.removeStatus === "unknown"
                     ? ""
                     : getRemovePlayerStatusMessage(r.removeStatus);
-                errorMessage = [addMsg, removeMsg]
+                errorMessage = r.message ?? [addMsg, removeMsg]
                   .filter(Boolean)
                   .join(". ");
               }

@@ -255,42 +255,36 @@ export default function ChangeCount({ onFormChange }: ChangeCountProps) {
         return;
       }
 
-      const changes = filledBlocks.map((block) => {
+      const successfulBlockIds = new Set<string>();
+      const unresolvedIdsToMark = new Set<string>();
+      const failures: string[] = [];
+      for (const block of filledBlocks) {
         const num = parseInt(block.countValue, 10);
         const teamId = teamsByName.get(block.teamName)?.id ?? "";
-        if (block.mode === "set") {
-          return { team_id: teamId, type: "new_count" as const, count: num };
+        const change = block.mode === "set"
+          ? { team_id: teamId, type: "new_count" as const, count: num }
+          : { team_id: teamId, type: "modifier" as const, count: block.mode === "remove" ? -num : num };
+
+        try {
+          const response = await adminkaApi.changePlayerCount({
+            season,
+            game_number: gameNumber,
+            change,
+          });
+          if (response.change.status !== "ok") {
+            failures.push(`Команда "${block.teamName}": ${getPlayersCountStatusMessage(response.change.status ?? "unknown")}`);
+            continue;
+          }
+        } catch (error) {
+          failures.push(`Команда "${block.teamName}": ${getApiErrorDetails(error)}`);
+          continue;
         }
-        return {
-          team_id: teamId,
-          type: "modifier" as const,
-          count: block.mode === "remove" ? -num : num,
-        };
-      });
 
-      const resp = await adminkaApi.changePlayersCount({
-        season,
-        game_number: gameNumber,
-        changes,
-      });
-
-      const teamNameById = new Map(
-        Array.from(teamsMap.values()).map((team) => [team.id, team.name]),
-      );
-
-      const failed = (resp.changes ?? []).filter((c) => c.status && c.status !== "ok");
-      if (failed.length > 0) {
-        const msg = getPlayersCountStatusMessage(failed[0].status ?? "unknown");
-        toast.error(`Команда "${teamNameById.get(failed[0].team_id) ?? failed[0].team_id}": ${msg}`);
-        return;
-      }
-
-      const unresolvedIdsToMark = new Set<string>();
-      filledBlocks.forEach((b) => {
-        const stored = useChangesStore.getState().changes.get(b.id) as CountStoredChange | undefined;
+        successfulBlockIds.add(block.id);
+        const stored = useChangesStore.getState().changes.get(block.id) as CountStoredChange | undefined;
         if (stored?.unresolvedId) unresolvedIdsToMark.add(stored.unresolvedId);
-      });
-      filledBlocks.forEach((b) => useChangesStore.getState().removeChange(b.id));
+        useChangesStore.getState().removeChange(block.id);
+      }
 
       if (unresolvedIdsToMark.size > 0) {
         try {
@@ -299,20 +293,25 @@ export default function ChangeCount({ onFormChange }: ChangeCountProps) {
               adminkaApi.markResolved({ change_id: id }),
             ),
           );
-        } catch (e) {
-          console.error("Не удалось пометить изменения как разрешённые", e);
+        } catch (error) {
+          console.error("Не удалось пометить изменения как разрешённые", error);
         }
       }
 
       setCountBlocks((prev) => {
-        const remaining = prev.filter((b) => !filledBlocks.some((f) => f.id === b.id));
-        const hasEmpty = remaining.some((b) => !b.teamName || !b.countValue.trim());
+        const remaining = prev.filter((block) => !successfulBlockIds.has(block.id));
+        const hasEmpty = remaining.some((block) => !block.teamName || !block.countValue.trim());
         return hasEmpty ? remaining : [...remaining, defaultBlock()];
       });
 
-      toast.success(`Изменено количество участников в ${filledBlocks.length} команде(ах)`);
-      prevHasChangesRef.current = false;
-      onFormChange?.(false);
+      if (failures.length === 0) {
+        toast.success(`Изменено количество участников в ${successfulBlockIds.size} команде(ах)`);
+      } else {
+        toast.error(`${successfulBlockIds.size} успешно, ${failures.length} с ошибкой. ${failures[0]}`);
+      }
+      const hasRemaining = filledBlocks.some((block) => !successfulBlockIds.has(block.id));
+      prevHasChangesRef.current = hasRemaining;
+      onFormChange?.(hasRemaining);
     } catch (err) {
       console.error("Ошибка при изменении количества участников:", err);
       toast.error(getApiErrorDetails(err));

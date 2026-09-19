@@ -163,32 +163,44 @@ export default function DistributePage() {
         })),
       });
 
-      await adminkaApi.addPlayers({
-        season: season,
-        game_number: gameNumber,
-        players: assignments.map(({ player, selectedTeamName }) => ({
-          team_id: teamsByName.get(selectedTeamName ?? "")?.id ?? "",
-          name: player.name,
-          is_pass_needed: !!player.is_pass_needed,
-          tg: player.tg,
-        })),
-      });
+      const successfulNames: string[] = [];
+      const failures: string[] = [];
+      for (const { player, selectedTeamName } of assignments) {
+        try {
+          const response = await adminkaApi.addPlayer({
+            season,
+            game_number: gameNumber,
+            player: {
+              team_id: teamsByName.get(selectedTeamName ?? "")?.id ?? "",
+              name: player.name,
+              is_pass_needed: !!player.is_pass_needed,
+              tg: player.tg,
+            },
+          });
+          const status = response.player.player_status;
+          if (status === "added" || status === "already_exists" || status === "do_not_need_pass") {
+            successfulNames.push(player.name);
+          } else {
+            failures.push(`${player.name}: ${status ?? "неизвестная ошибка"}`);
+          }
+        } catch (error) {
+          failures.push(`${player.name}: ${error instanceof Error ? error.message : "ошибка запроса"}`);
+        }
+      }
 
-      console.info("[DistributePage] addPlayers ok", {
-        count: assignments.length,
-      });
+      if (successfulNames.length > 0) {
+        await adminkaApi.markLostPlayersFound({
+          season,
+          game_number: gameNumber,
+          players: successfulNames,
+        });
+      }
 
-      await adminkaApi.markLostPlayersFound({
-        season,
-        game_number: gameNumber,
-        players: assignments.map(({ player }) => player.name),
-      });
-
-      console.info("[DistributePage] lost/mark_found ok", {
-        count: assignments.length,
-      });
-
-      toast.success("Распределение отправлено");
+      if (failures.length === 0) {
+        toast.success("Распределение отправлено");
+      } else {
+        toast.error(`${successfulNames.length} успешно, ${failures.length} с ошибкой. ${failures[0]}`);
+      }
 
       // Перезагружаем одиночек после mark_found (бэкенд мог ещё и нормализовать список).
       await loadLostPlayers(season, gameNumber);

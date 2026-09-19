@@ -6,7 +6,7 @@ import { Check, ChevronsUpDown, AlertCircle } from "lucide-react";
 import { useTeamStore, useTeamsByName } from "@/entities/team/model/team.store";
 import { useChangesStore } from "@/entities/change/model/change.store";
 import type { PassesStoredChange } from "@/entities/change/types";
-import type { PassInput, PassStatus } from "@/types/api";
+import type { PassInput, PassStatus, PassWithStatus } from "@/types/api";
 import type { RosterTeam } from "@/entities/team/types";
 import {Command,
   CommandEmpty,
@@ -316,20 +316,20 @@ export default function ModifyPasses({ onFormChange }: ModifyPassProps) {
         const payload = {
           season,
           game_number: gameNumber,
-          passes: [
-            {
-              team_id: teamId,
-              pass: block.playerName,
-            },
-          ] as PassInput[],
+          pass: { team_id: teamId, pass: block.playerName } as PassInput,
         };
 
-        const response =
-          actionMode === "add"
-            ? await adminkaApi.addPasses(payload)
-            : await adminkaApi.removePasses(payload);
-
-        const result = response.passes?.[0];
+        let result: PassWithStatus | undefined;
+        try {
+          const response = actionMode === "add"
+            ? await adminkaApi.addPass(payload)
+            : await adminkaApi.removePass(payload);
+          result = response.pass;
+        } catch (error) {
+          failCount += 1;
+          failedStatuses.push(getApiErrorDetails(error));
+          continue;
+        }
 
         const successfulStatuses: PassStatus[] =
           actionMode === "add"
