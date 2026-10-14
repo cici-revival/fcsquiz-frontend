@@ -9,8 +9,6 @@ import { displayName } from "../lib/teamName";
 
 import styles from "./TeamDetails.module.css";
 
-const _MAX_VISIBLE_PASSES = 6;
-
 type TeamDetailsProps = {
   team: RosterTeam;
   /** Номер стола в рассадке. null — команду ещё не посадили. */
@@ -21,7 +19,7 @@ export const TeamDetails = memo(({ team, seatNumber }: TeamDetailsProps) => {
   const passesList = useMemo(() => {
     if (!team.passes?.length) return null;
 
-    return team.passes.slice(0, _MAX_VISIBLE_PASSES).map((pass, index) => (
+    return team.passes.map((pass, index) => (
       <li key={pass}>
         {index + 1}. {pass}
       </li>

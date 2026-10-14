@@ -47,6 +47,16 @@ describe("TeamDetails", () => {
     expect(screen.getByText("2. Пётр")).toBeInTheDocument();
   });
 
+  it("показывает все восемь пропусков без обрезки до шести", () => {
+    const passes = Array.from({ length: 8 }, (_, index) => `Участник ${index + 1}`);
+    render(<TeamDetails team={team({ players_count: 8, passes })} />);
+
+    expect(screen.getAllByRole("listitem")).toHaveLength(8);
+    passes.forEach((pass, index) => {
+      expect(screen.getByText(`${index + 1}. ${pass}`)).toBeInTheDocument();
+    });
+  });
+
   it("ставит прочерк, когда пропусков нет", () => {
     render(<TeamDetails team={team({ passes: [] })} />);
 
