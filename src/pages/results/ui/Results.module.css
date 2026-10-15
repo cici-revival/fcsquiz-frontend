@@ -1,0 +1,83 @@
+.page {
+  width: 100%;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px 32px 40px;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  color: hsl(var(--muted-foreground));
+  text-decoration: none;
+}
+
+.back:hover {
+  color: hsl(var(--foreground));
+}
+
+.title {
+  font-size: clamp(32px, 6vw, 56px);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+}
+
+.subtitle {
+  margin-top: -8px;
+  color: hsl(var(--muted-foreground));
+  word-break: break-all;
+}
+
+.form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+  width: 8rem;
+}
+
+.inputError {
+  margin: -8px 0 0;
+  color: #c00;
+  font-size: 14px;
+}
+
+.muted {
+  color: hsl(var(--muted-foreground));
+}
+
+.alert {
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+}
+
+.teamLink {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+
+  .field {
+    width: calc(50% - 6px);
+  }
+}

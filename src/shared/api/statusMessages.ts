@@ -1,4 +1,5 @@
 import { ApiError } from "./errors";
+
 /**
  * Маппинг статусов API Reshala в человекочитаемые сообщения для тостера.
  * Используется во вкладках modify.
@@ -155,4 +156,25 @@ export function getRegistrationLinkErrorMessage(error: unknown): string {
   }
 
   return getApiErrorDetails(error);
+}
+
+export const gameResultsHttpMessages: Record<number, string> = {
+  400: "Проверьте сезон и номер игры",
+  404: "Результаты этой игры ещё не опубликованы",
+};
+
+export const teamResultsHttpMessages: Record<number, string> = {
+  400: "Неверный идентификатор команды или период",
+};
+
+export function getHttpErrorMessage(
+  error: unknown,
+  messages: Record<number, string>,
+  fallback: string,
+): string {
+  if (error instanceof ApiError && messages[error.status]) {
+    return messages[error.status];
+  }
+
+  return fallback;
 }
