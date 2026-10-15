@@ -173,3 +173,13 @@ export type StatsResultsRange = {
   season_end?: number;
   game_number_end?: number;
 };
+
+export type StatsImportStatus = "queued" | "processing" | "succeeded" | "failed";
+
+export type StatsImportStatusResponse = { status: StatsImportStatus };
+
+export type StartStatsImportRequest = {
+  file_id: string;
+  season: number;
+  game_number: number;
+};

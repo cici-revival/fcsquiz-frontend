@@ -8,7 +8,9 @@ import {
   MIN_GAME_NUMBER,
   ResultsTable,
   type ResultsTableRow,
+  createTeamNameLookup,
   isValidGameNumber,
+  sortByPlace,
   isValidSeason,
 } from "@entities/stats";
 import { adminkaApi } from "@shared/api/adminkaApi";
@@ -131,15 +133,11 @@ export default function ResultsPage() {
   const rows = useMemo<ResultsTableRow[]>(() => {
     if (load.state !== "loaded") return [];
 
-    const names = new Map(load.teams.map((team) => [team.id, team.name]));
+    const nameOf = createTeamNameLookup(load.teams, rosterTeams);
 
-    return [...load.results]
-      .sort((a, b) => a.place - b.place)
+    return sortByPlace(load.results)
       .map((scores) => {
-        const name =
-          names.get(scores.team_id)?.trim() ||
-          rosterTeams.get(scores.team_id)?.name?.trim() ||
-          "";
+        const name = nameOf(scores.team_id);
 
         return {
           key: scores.team_id,
