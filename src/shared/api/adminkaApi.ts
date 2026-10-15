@@ -18,6 +18,8 @@ import type {
   SignsResponse,
   GameID,
   RegisteredTeamsResponse,
+  RegistrationLink,
+  SetRegistrationLinkRequest,
   GameTeamsResponse,
   StatsGameResults,
   StatsTeamHistory,
@@ -86,6 +88,26 @@ export const adminkaApi = {
     );
 
     return response.teams;
+  },
+
+  getRegistrationLink(game?: GameID) {
+    const query = game
+      ? `?${new URLSearchParams({
+          season: String(game.season),
+          game_number: String(game.game_number),
+        }).toString()}`
+      : "";
+
+    return adminkaApiClient.request<RegistrationLink>(
+      `/v1/game/registration_link${query}`,
+    );
+  },
+
+  setRegistrationLink(payload: SetRegistrationLinkRequest) {
+    return adminkaApiClient.request<void>("/v1/game/registration_link", {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
   },
 
   async getGameTeams(game: GameID) {

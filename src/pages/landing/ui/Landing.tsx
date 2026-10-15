@@ -14,6 +14,7 @@ import { Alert, AlertTitle, AlertDescription } from "@shared/ui/Alert";
 import { useSeatingStore } from "@entities/seating/model/seating.store";
 import { buildSeatNumbers } from "@entities/seating/lib/seatNumbers";
 import { TeamListSkeleton } from "./TeamListSkeleton";
+import { useRegistrationLink } from "../model/useRegistrationLink";
 
 const DESKTOP_PAGE_SIZE = 24;
 const MOBILE_PAGE_SIZE = 12;
@@ -24,6 +25,7 @@ export default function Landing() {
   const error = useTeamStore((s) => s.error);
   const [query, setQuery] = useState("");
   const isMobile = useIsMobile();
+  const registrationLink = useRegistrationLink();
 
   const pageSize = isMobile ? MOBILE_PAGE_SIZE : DESKTOP_PAGE_SIZE;
   const [visibleCount, setVisibleCount] = useState(pageSize);
@@ -76,15 +78,17 @@ export default function Landing() {
           <div>
             <h1 className={styles.title}>Квиз Компьютерных Наук</h1>
 
-            {/* <div className={styles.register}>
-              <a
-                href="https://cs.hse.ru/abitur/polls/1110068092.html"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button variant="outline">Регистрация на игру</Button>
-              </a>
-            </div> */}
+            {registrationLink && (
+              <div className={styles.register}>
+                <a
+                  href={registrationLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button variant="outline">Регистрация на игру</Button>
+                </a>
+              </div>
+            )}
           </div>
 
           <nav className={styles.actions}>

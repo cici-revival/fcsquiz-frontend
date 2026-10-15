@@ -13,6 +13,7 @@ const UploadPage = lazy(() => import('../pages/upload/ui/Upload'));
 const ModifyPage = lazy(() => import('../pages/modify/ui/Modify'));
 const DistributePage = lazy(() => import('../pages/distribute/DistributePage'));
 const SeatingPage = lazy(() => import('../pages/seating/ui/SeatingPage'));
+const RegistrationLinkPage = lazy(() => import('../pages/registration-link/ui/RegistrationLink'));
 const StatsImportPage = lazy(() => import('../pages/stats-import/ui/StatsImport'));
 
 const SignsPage = lazy(() =>
@@ -70,6 +71,7 @@ export const routes: AppRoute[] = [
       { path: 'distribute', element: <DistributePage /> },
       { path: 'signs', element: <SignsPage /> },
       { path: 'seating', element: <SeatingPage /> },
+      { path: 'registration-link', element: <RegistrationLinkPage /> },
       { path: 'stats-import', element: <StatsImportPage /> },
     ],
   },
