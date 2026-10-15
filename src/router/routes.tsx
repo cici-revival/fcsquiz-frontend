@@ -4,6 +4,8 @@ import { Landing } from '../pages';
 import type { AppRoute } from './types';
 
 const LoginPage = lazy(() => import('../pages/login/ui/Login'));
+const ResultsPage = lazy(() => import('../pages/results/ui/Results'));
+const TeamHistoryPage = lazy(() => import('../pages/results/ui/TeamHistory'));
 const AdminLayout = lazy(() => import('@/widgets/admin-layout/ui/AdminLayout'));
 
 const Home = lazy(() => import('../pages/home/ui/Home'));
@@ -28,6 +30,14 @@ export const routes: AppRoute[] = [
   {
     path: '/',
     element: <Landing />,
+  },
+  {
+    path: '/results',
+    element: <ResultsPage />,
+  },
+  {
+    path: '/results/team/:teamId',
+    element: <TeamHistoryPage />,
   },
   {
     path: '/login',

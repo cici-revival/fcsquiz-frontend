@@ -1,0 +1,34 @@
+.wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  min-width: 100%;
+}
+
+.caption {
+  caption-side: top;
+  text-align: left;
+  padding-bottom: 8px;
+  color: hsl(var(--muted-foreground));
+}
+
+.numeric {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.place {
+  font-weight: 600;
+}
+
+.label {
+  min-width: 12rem;
+  word-break: break-word;
+}
+
+.total {
+  font-weight: 600;
+}

@@ -140,3 +140,36 @@ export type SignResult = { team_id: string; status: string };
 export type SignsResponse = { signs: SignResult[] };
 
 // ---------- УТИЛИТНЫЕ ЛОКАЛЬНЫЕ ТИПЫ (НЕ ЧАСТЬ КОНТРАКТА БЭКА) ----------
+
+export type GameTeamSummary = { id: string; name: string; players_count: number };
+
+export type GameTeamsResponse = { teams: GameTeamSummary[] | null };
+
+export type StatsTeamScores = {
+  team_id: string;
+  round_scores: number[] | null;
+  total: number;
+  points: number;
+  place: number;
+};
+
+export type StatsGameResults = {
+  game_id: GameID;
+  results: StatsTeamScores[] | null;
+};
+
+export type StatsTeamGameResult = {
+  game_id: GameID;
+  result: StatsTeamScores;
+};
+
+export type StatsTeamHistory = {
+  results: StatsTeamGameResult[] | null;
+};
+
+export type StatsResultsRange = {
+  season_start?: number;
+  game_number_start?: number;
+  season_end?: number;
+  game_number_end?: number;
+};

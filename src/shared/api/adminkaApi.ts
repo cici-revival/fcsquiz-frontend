@@ -18,6 +18,10 @@ import type {
   SignsResponse,
   GameID,
   RegisteredTeamsResponse,
+  GameTeamsResponse,
+  StatsGameResults,
+  StatsTeamHistory,
+  StatsResultsRange,
 } from "@/types/api";
 import { adminkaApiClient } from "./client";
 
@@ -80,6 +84,39 @@ export const adminkaApi = {
     );
 
     return response.teams;
+  },
+
+  async getGameTeams(game: GameID) {
+    const params = new URLSearchParams({
+      season: String(game.season),
+      game_number: String(game.game_number),
+    });
+
+    const response = await adminkaApiClient.request<GameTeamsResponse>(
+      `/v1/game/teams?${params.toString()}`,
+    );
+
+    return response.teams ?? [];
+  },
+
+  // STATS
+
+  getGameResults(game: GameID) {
+    return adminkaApiClient.request<StatsGameResults>(
+      `/stats/games/${game.season}/${game.game_number}/results`,
+    );
+  },
+
+  getTeamResults(teamId: string, range: StatsResultsRange = {}) {
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(range)) {
+      if (value !== undefined) params.set(key, String(value));
+    }
+    const query = params.toString();
+
+    return adminkaApiClient.request<StatsTeamHistory>(
+      `/stats/teams/${encodeURIComponent(teamId)}/results${query ? `?${query}` : ""}`,
+    );
   },
 
   createFileUploadURL(payload: { filename: string; size: number }) {

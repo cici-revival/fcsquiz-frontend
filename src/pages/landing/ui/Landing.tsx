@@ -86,6 +86,12 @@ export default function Landing() {
               </a>
             </div> */}
           </div>
+
+          <nav className={styles.actions}>
+            <a href="/results">
+              <Button variant="outline">Результаты игр</Button>
+            </a>
+          </nav>
         </header>
 
         <main className={styles.content}>
