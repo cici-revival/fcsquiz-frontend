@@ -24,6 +24,8 @@ import type {
   StatsGameResults,
   StatsTeamHistory,
   StatsResultsRange,
+  StatsImportStatusResponse,
+  StartStatsImportRequest,
 } from "@/types/api";
 import { adminkaApiClient } from "./client";
 
@@ -122,6 +124,25 @@ export const adminkaApi = {
   },
 
   // STATS
+
+  startStatsImport(payload: StartStatsImportRequest) {
+    return adminkaApiClient.request<{ import_id: string }>("/stats/imports", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  getStatsImport(importId: string) {
+    return adminkaApiClient.request<StatsImportStatusResponse>(
+      `/stats/imports/${encodeURIComponent(importId)}`,
+    );
+  },
+
+  getGameStatsImport(game: GameID) {
+    return adminkaApiClient.request<StatsImportStatusResponse>(
+      `/stats/games/${game.season}/${game.game_number}/import`,
+    );
+  },
 
   getGameResults(game: GameID) {
     return adminkaApiClient.request<StatsGameResults>(

@@ -3,6 +3,7 @@ import type {
   RegistrationImportStatus,
 } from "@/types/api";
 import { adminkaApi } from "@/shared/api/adminkaApi";
+import { uploadFile } from "@/shared/api/uploadFile";
 
 const POLL_INTERVAL_MS = 1_000;
 const MAX_POLL_ATTEMPTS = 120;
@@ -50,25 +51,12 @@ async function uploadRegistrationFile(
   season: number,
   gameNumber: number,
 ): Promise<RegistrationImportResult> {
-  const upload = await adminkaApi.createFileUploadURL({
-    filename: file.name,
-    size: file.size,
-  });
+  const fileID = await uploadFile(file);
 
-  const response = await fetch(upload.upload_url, {
-    method: "PUT",
-    headers: upload.required_headers,
-    body: file,
-  });
-  if (!response.ok) {
-    throw new Error(`Не удалось загрузить файл в хранилище (${response.status})`);
-  }
-
-  await adminkaApi.submitFile(upload.file_id);
   await adminkaApi.startRegistrationImport({
-    file_id: upload.file_id,
+    file_id: fileID,
     game_id: { season, game_number: gameNumber },
   });
 
-  return waitForImport(upload.file_id);
+  return waitForImport(fileID);
 }

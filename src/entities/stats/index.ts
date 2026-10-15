@@ -1,6 +1,7 @@
 export { ResultsTable } from "./ui/ResultsTable";
 export type { ResultsTableRow } from "./ui/ResultsTable";
 export { formatScore } from "./lib/formatScore";
+export { createTeamNameLookup, sortByPlace } from "./lib/teamNames";
 export {
   EMPTY_RANGE_INPUT,
   MAX_GAME_NUMBER,

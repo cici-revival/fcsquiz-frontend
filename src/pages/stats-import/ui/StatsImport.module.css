@@ -1,0 +1,98 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding: 30px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 720px;
+}
+
+.fileRow {
+  display: grid;
+  gap: 8px;
+}
+
+.fileLabel {
+  font-weight: 500;
+}
+
+.hint {
+  margin: 0;
+  font-size: 14px;
+  color: hsl(var(--muted-foreground));
+}
+
+.fieldError {
+  margin: 0;
+  color: #c00;
+  font-size: 14px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.status {
+  display: grid;
+  gap: 8px;
+  max-width: 720px;
+}
+
+.statusText,
+.statusSucceeded,
+.statusFailed {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.statusText {
+  color: hsl(var(--muted-foreground));
+}
+
+.statusSucceeded {
+  color: #15803d;
+}
+
+.statusFailed {
+  color: #c00;
+}
+
+.alert {
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+}
+
+.results {
+  display: grid;
+  gap: 8px;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

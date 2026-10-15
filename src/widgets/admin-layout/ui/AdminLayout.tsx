@@ -19,6 +19,7 @@ import {
   GalleryVerticalEnd,
   LayoutGrid,
   Link2,
+  Trophy,
 } from "lucide-react";
 import { Button } from "@shared/ui/Button";
 import { cn } from "@shared/lib/utils";
@@ -90,6 +91,12 @@ export default function AdminLayout() {
       label: "Ссылка регистрации",
       icon: Link2,
       id: "registrationLink",
+    },
+    {
+      href: "/admin/stats-import",
+      label: "Результаты игры",
+      icon: Trophy,
+      id: "statsImport",
     },
   ];
 
