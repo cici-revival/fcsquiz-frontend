@@ -18,6 +18,7 @@ import {
   RefreshCw,
   GalleryVerticalEnd,
   LayoutGrid,
+  Link2,
 } from "lucide-react";
 import { Button } from "@shared/ui/Button";
 import { cn } from "@shared/lib/utils";
@@ -83,6 +84,12 @@ export default function AdminLayout() {
       label: "Рассадка",
       icon: LayoutGrid,
       id: "seating",
+    },
+    {
+      href: "/admin/registration-link",
+      label: "Ссылка регистрации",
+      icon: Link2,
+      id: "registrationLink",
     },
   ];
 

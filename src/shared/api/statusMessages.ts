@@ -1,3 +1,4 @@
+import { ApiError } from "./errors";
 /**
  * Маппинг статусов API Reshala в человекочитаемые сообщения для тостера.
  * Используется во вкладках modify.
@@ -139,4 +140,19 @@ export const seatingErrorMessages: Record<string, string> = {
 
 export function getSeatingErrorMessage(code: string): string {
   return seatingErrorMessages[code] ?? seatingErrorMessages.unknown;
+}
+
+export const registrationLinkHttpMessages: Record<number, string> = {
+  400: "Проверьте сезон, номер игры и ссылку",
+  404: "Игра не найдена",
+  409: "Не удалось сохранить: данные игры изменились, обновите страницу и попробуйте ещё раз",
+  500: "Сервер не смог сохранить ссылку, попробуйте позже",
+};
+
+export function getRegistrationLinkErrorMessage(error: unknown): string {
+  if (error instanceof ApiError && registrationLinkHttpMessages[error.status]) {
+    return registrationLinkHttpMessages[error.status];
+  }
+
+  return getApiErrorDetails(error);
 }
