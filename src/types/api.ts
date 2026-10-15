@@ -121,7 +121,43 @@ export type FileUploadURL = {
   required_headers: Record<string, string>;
 };
 
+export type RegistrationImportRecordType =
+  | "register"
+  | "change"
+  | "lost"
+  | "change_with_llm"
+  | "unknown";
+
+export type RegistrationChangeRequest = {
+  id: string;
+  sequence: number;
+  description: string;
+  status: "pending" | "applied" | "not_applicable";
+  type?: "team_name" | "players_count" | "pass" | "readiness";
+  reason?: string;
+};
+
+export type RegistrationImportRecord = {
+  id: string;
+  row_index: number;
+  author: string;
+  group: string;
+  type: RegistrationImportRecordType;
+  tg: string;
+  team_name: string;
+  team_id?: string;
+  players_count: number;
+  passes: string[];
+  is_ready_to_accept_players: boolean;
+  changes: string;
+  ip_address: string;
+  timestamp: number;
+  validation_error?: string;
+  change_requests: RegistrationChangeRequest[];
+};
+
 export type RegistrationImportResult = {
+  records?: RegistrationImportRecord[];
   total_registration_records: number;
   new_registration_records_count: number;
   unique_new_teams_count: number;
