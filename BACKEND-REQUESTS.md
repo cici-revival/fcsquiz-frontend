@@ -6,35 +6,6 @@
 
 ---
 
-## 🔴 `/v1/signs/stream` недостижим из браузера (401)
-
-**Где:** `services/gateway/internal/api/rest/server/server.go:56`,
-`internal/api/rest/middleware/auth.go`
-
-**Проблема:** роут стоит на `authChain`, а middleware читает **только**
-заголовок `Authorization: Bearer` (`auth.go:45`). Браузерный `EventSource`
-заголовки задавать не умеет — `withCredentials: true` шлёт лишь куки, которые
-middleware не смотрит. Значит эндпоинт из браузера недостижим в принципе:
-подключение всегда 401.
-
-Проверено curl'ом по staging: без заголовка — 401, с мусорным Bearer — 401,
-публичный `/v1/game/state` при этом держит соединение.
-
-**Нужно** одно из двух:
-
-- принимать одноразовый тикет в query, как уже сделано для рассадки:
-  `POST /v1/adminka/ws-ticket` → `?ticket=...`, `tickets.Consume`
-  (`seating_websocket.go:53-60`). Фронт умеет это делать — `issueWebSocketTicket`
-  уже есть в `adminkaApi`;
-- либо перевести роут на `publicChain`, если подписи не секретные.
-
-**Почему важно:** страница «Таблички» не получает обновления вообще. Фронт
-бесконечно переподключается с бэкоффом, дёргая `tryRestoreSession()` перед
-каждой попыткой — но обновление токена тут не помогает, его всё равно нечем
-передать. Пользователю при этом ничего не видно.
-
----
-
 ## 🔴 Heartbeat в SSE
 
 **Где:** `services/streams/internal/api/rest/handler/` — `game_state.go`, `sse_handler.go`

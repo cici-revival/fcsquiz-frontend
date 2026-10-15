@@ -1,7 +1,9 @@
 import { useSignStore } from "./sign.store";
 import { type SignEvent } from "../types";
 import { getApiBaseUrl } from "@shared/config/runtimeConfig";
+import { adminkaApi } from "@shared/api/adminkaApi";
 import { adminkaApiClient } from "@shared/api/client";
+import { ForbiddenError } from "@shared/api/errors";
 import {
   FAST_RECONNECT_ATTEMPTS,
   getReconnectDelay,
@@ -16,8 +18,8 @@ let reconnectAttempts = 0;
 
 let isPausedByVisibility = false;
 let unsubscribeVisibility: (() => void) | null = null;
-/** Отличает отказ сервера при подключении от обрыва уже живого потока. */
-let hasEverOpened = false;
+let isConnecting = false;
+let connectGeneration = 0;
 
 function clearReconnectTimeout() {
   if (reconnectTimeout) {
@@ -33,15 +35,21 @@ function closeSource() {
   }
 }
 
+function cancelConnect() {
+  connectGeneration += 1;
+  isConnecting = false;
+}
+
 function watchVisibility() {
   if (unsubscribeVisibility) return;
 
   unsubscribeVisibility = onVisibilityChange({
     onHidden: () => {
-      if (!source && !reconnectTimeout) return;
+      if (!source && !reconnectTimeout && !isConnecting) return;
 
       isPausedByVisibility = true;
       clearReconnectTimeout();
+      cancelConnect();
       closeSource();
       useSignStore.getState().setStatus("disconnected");
     },
@@ -74,19 +82,14 @@ function scheduleReconnect() {
   }, getReconnectDelay(reconnectAttempts));
 }
 
-export function connectSignsSSE() {
-  if (source) return;
+function buildStreamUrl(ticket: string): string {
+  return `${getApiBaseUrl()}/v1/signs/stream?ticket=${encodeURIComponent(ticket)}`;
+}
 
+function openSource(ticket: string) {
   const store = useSignStore.getState();
 
-  watchVisibility();
-
-  if (reconnectAttempts <= FAST_RECONNECT_ATTEMPTS) {
-    store.setStatus("connecting");
-    store.setError(null);
-  }
-
-  source = new EventSource(`${getApiBaseUrl()}/v1/signs/stream`, {
+  source = new EventSource(buildStreamUrl(ticket), {
     withCredentials: true,
   });
 
@@ -94,7 +97,6 @@ export function connectSignsSSE() {
     store.setStatus("connected");
     store.setError(null);
     reconnectAttempts = 0;
-    hasEverOpened = true;
   };
 
   source.onmessage = (event) => {
@@ -110,35 +112,68 @@ export function connectSignsSSE() {
   };
 
   source.onerror = () => {
-    // Поток ни разу не открылся и соединение закрыто — значит сервер отверг
-    // запрос, а не оборвал его. Роут требует заголовок Authorization, который
-    // EventSource задавать не умеет, поэтому переподключаться бессмысленно:
-    // см. BACKEND-REQUESTS.md. Данные страница всё равно берёт обычным
-    // GET /v1/signs, теряется только живая синхронизация между админами.
-    const isRejected = !hasEverOpened && source?.readyState === EventSource.CLOSED;
-
     closeSource();
 
     if (isPausedByVisibility) return;
 
-    if (isRejected) {
+    scheduleReconnect();
+  };
+}
+
+async function connectWithTicket(generation: number) {
+  let ticket: string;
+
+  try {
+    ({ ticket } = await adminkaApi.issueWebSocketTicket());
+  } catch (error) {
+    if (generation !== connectGeneration) return;
+
+    isConnecting = false;
+
+    if (error instanceof ForbiddenError) {
+      const store = useSignStore.getState();
       store.setStatus("error");
-      store.setError("Живые обновления табличек недоступны");
+      store.setError("Нет прав на живые обновления табличек");
 
       return;
     }
 
     scheduleReconnect();
-  };
+
+    return;
+  }
+
+  if (generation !== connectGeneration) return;
+
+  isConnecting = false;
+  closeSource();
+  openSource(ticket);
+}
+
+export function connectSignsSSE() {
+  if (source || isConnecting) return;
+
+  const store = useSignStore.getState();
+
+  watchVisibility();
+
+  if (reconnectAttempts <= FAST_RECONNECT_ATTEMPTS) {
+    store.setStatus("connecting");
+    store.setError(null);
+  }
+
+  isConnecting = true;
+  connectGeneration += 1;
+  void connectWithTicket(connectGeneration);
 }
 
 export function disconnectSignsSSE() {
   const store = useSignStore.getState();
 
   clearReconnectTimeout();
+  cancelConnect();
   reconnectAttempts = 0;
   isPausedByVisibility = false;
-  hasEverOpened = false;
 
   unsubscribeVisibility?.();
   unsubscribeVisibility = null;

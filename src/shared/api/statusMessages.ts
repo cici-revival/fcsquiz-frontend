@@ -143,6 +143,21 @@ export function getSeatingErrorMessage(code: string): string {
   return seatingErrorMessages[code] ?? seatingErrorMessages.unknown;
 }
 
+export const registrationLinkHttpMessages: Record<number, string> = {
+  400: "Проверьте сезон, номер игры и ссылку",
+  404: "Игра не найдена",
+  409: "Не удалось сохранить: данные игры изменились, обновите страницу и попробуйте ещё раз",
+  500: "Сервер не смог сохранить ссылку, попробуйте позже",
+};
+
+export function getRegistrationLinkErrorMessage(error: unknown): string {
+  if (error instanceof ApiError && registrationLinkHttpMessages[error.status]) {
+    return registrationLinkHttpMessages[error.status];
+  }
+
+  return getApiErrorDetails(error);
+}
+
 export const gameResultsHttpMessages: Record<number, string> = {
   400: "Проверьте сезон и номер игры",
   404: "Результаты этой игры ещё не опубликованы",

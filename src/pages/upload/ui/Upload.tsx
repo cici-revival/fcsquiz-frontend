@@ -15,6 +15,7 @@ import { parseExcelFile } from "./parseExcelFile";
 import { uploadGameStateTable } from "@/pages/upload/api/loader";
 import { useTeamStore } from "@/entities/team/model/team.store";
 import { useUploadResultStore } from "../model/uploadResult.store";
+import { ImportRecords } from "./ImportRecords";
 
 const VALID_EXTENSIONS = [".xlsx", ".xls"];
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -174,6 +175,7 @@ export default function UploadPage() {
             <div><dt>Старых изменений</dt><dd>{uploadResult.old_changes_count}</dd></div>
             <div><dt>Игроков без команды</dt><dd>{uploadResult.new_lost_players_count}</dd></div>
           </dl>
+          <ImportRecords records={uploadResult.records} />
         </section>
       )}
 

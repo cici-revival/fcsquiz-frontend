@@ -1,0 +1,61 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 1rem;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.summaryError {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #c00;
+  font-weight: 600;
+}
+
+.filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.tableWrap {
+  max-height: 32rem;
+  overflow: auto;
+}
+
+.errorRow {
+  background: #fff4f4;
+}
+
+.errorCell {
+  color: #c00;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.more {
+  display: flex;
+  justify-content: center;
+}
+
+.empty {
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+}
