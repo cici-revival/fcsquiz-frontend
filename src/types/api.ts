@@ -50,6 +50,10 @@ export type GameID = {
 
 export type RegisteredTeamsResponse = { teams: Team[] };
 
+export type RegistrationLink = { link: string };
+
+export type SetRegistrationLinkRequest = GameID & { link: string };
+
 // ---------- ПРОПУСКИ ----------
 // Контракты для одиночных ручек /v1/changes/pass/* по gateway openapi.yaml:
 // на вход — team_id + pass (PassInput), в ответе — team_id + pass + status.

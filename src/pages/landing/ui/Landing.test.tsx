@@ -1,9 +1,16 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import Landing from "./Landing";
 import { useTeamStore } from "@/entities/team/model/team.store";
 import type { RosterTeam } from "@/entities/team/types";
+import { NotFoundError } from "@shared/api/errors";
+
+const getRegistrationLink = vi.fn();
+
+vi.mock("@shared/api/adminkaApi", () => ({
+  adminkaApi: { getRegistrationLink: () => getRegistrationLink() },
+}));
 
 vi.mock("@/entities/team/team.bootstrap", () => ({
   restartTeams: vi.fn(),
@@ -43,6 +50,35 @@ describe("Landing", () => {
     vi.unstubAllGlobals();
     stubMatchMedia(false);
     useTeamStore.getState().clear();
+    getRegistrationLink.mockReset();
+    getRegistrationLink.mockRejectedValue(new NotFoundError());
+  });
+
+  it("показывает кнопку регистрации с полученной ссылкой", async () => {
+    getRegistrationLink.mockResolvedValue({ link: "https://forms.example/quiz" });
+
+    render(<Landing />);
+
+    const button = await screen.findByRole("button", { name: "Регистрация на игру" });
+    expect(button.closest("a")).toHaveAttribute("href", "https://forms.example/quiz");
+  });
+
+  it("не показывает кнопку регистрации, если ссылки нет", async () => {
+    render(<Landing />);
+
+    await waitFor(() => expect(getRegistrationLink).toHaveBeenCalled());
+
+    expect(screen.queryByRole("button", { name: "Регистрация на игру" })).toBeNull();
+  });
+
+  it("не показывает кнопку регистрации для небезопасной ссылки", async () => {
+    getRegistrationLink.mockResolvedValue({ link: "javascript:alert(1)" });
+
+    render(<Landing />);
+
+    await waitFor(() => expect(getRegistrationLink).toHaveBeenCalled());
+
+    expect(screen.queryByRole("button", { name: "Регистрация на игру" })).toBeNull();
   });
 
   it("сортирует команды по алфавиту, а не по порядку прихода", () => {

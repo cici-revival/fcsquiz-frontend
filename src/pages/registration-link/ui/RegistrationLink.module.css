@@ -1,0 +1,57 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 30px;
+  max-width: 720px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.current {
+  display: grid;
+  gap: 6px;
+}
+
+.currentLabel {
+  color: hsl(var(--muted-foreground));
+  font-size: 14px;
+}
+
+.currentLink {
+  word-break: break-all;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+}
+
+.fieldError {
+  color: #c00;
+  font-size: 14px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
