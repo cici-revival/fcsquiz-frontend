@@ -44,116 +44,12 @@
   gap: 24px;
 }
 
-.dropzone {
-  position: relative;
-  border-radius: 10px;
-  flex: 1;
-  min-height: 400px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--color-panel, #fff);
-  cursor: pointer;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  box-sizing: border-box;
-}
-
-.dropzone.collapsed {
-  flex: 0 0 auto;
-  min-height: 120px;
-  padding: 16px 20px;
-  align-items: center;
-}
-
-.dropzone::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border: 2px solid transparent;
-  background-image:
-    linear-gradient(to right, #343434 1px, transparent 1px),
-    linear-gradient(to right, #343434 1px, transparent 1px),
-    linear-gradient(to bottom, #343434 1px, transparent 1px),
-    linear-gradient(to bottom, #343434 1px, transparent 1px);
-  background-size: 5px 1px, 5px 1px, 1px 5px, 1px 5px;
-  background-position: 0 0, 0 100%, 0 0, 100% 0;
-  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
-  pointer-events: none;
-}
-
-.uploadInput {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.dropzoneContent {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  text-align: center;
-  z-index: 1;
-}
-
-.dropzone.collapsed .dropzoneContent {
-  flex-direction: row;
-  justify-content: space-between;
-  width: 100%;
-  gap: 16px;
-}
-
-.fileInfo {
-  display: flex;
-  align-items: center;
-	justify-content: center;
-  gap: 20px;
-}
-.fileInfo div {
-	text-align: left;
-}
-
-.fileName {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 500;
-  word-break: break-all;
-}
-
-.fileSize {
-  margin: 0;
-  font-size: 0.875rem;
-  color: #6b7280;
-}
-.dropHint {
-	color: rgb(194, 194, 194);
-	font-size: 14px;
-}
-.removeButton {
-  white-space: nowrap;
-  margin-left: auto;
-	gap: 10px;
-	color: red;
-}
-.removeButton:hover {
-	color: red !important;
-}
-
 .actions {
   display: flex;
   align-items: flex-end;
   justify-content: flex-end;
   padding-top: 16px;
   border-top: 1px solid var(--color-border, #e5e7eb);
-}
-
-/* Добавьте эти стили */
-.loaderIcon {
-  animation: spin 1s linear infinite;
 }
 
 .buttonLoader {
@@ -181,12 +77,6 @@
   overflow-y: auto;
   overflow-x: hidden;
   word-break: break-word;
-}
-
-.parseInfo {
-  font-size: 14px;
-  color: #666;
-  margin-top: 4px;
 }
 
 .preview {

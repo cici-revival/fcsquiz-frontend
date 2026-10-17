@@ -148,7 +148,7 @@ export default function SeatingPage() {
 
     const layout = buildLayout(
       [
-        ...teams.map(({ teamId, size }): LayoutTeam => ({ teamId, size })),
+        ...teams.map(({ teamId, size, name }): LayoutTeam => ({ teamId, size, name })),
         ...strays,
       ],
       occupied,

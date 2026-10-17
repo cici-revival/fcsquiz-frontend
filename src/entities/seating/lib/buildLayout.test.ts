@@ -262,3 +262,62 @@ describe("buildLayout", () => {
     expect(onGrid).toBe(getTableRadius(8));
   });
 });
+
+describe("buildLayout: закреплённые места", () => {
+  const PIN_POINT = { x: 635, y: 277 };
+  const PINS = [{ teamName: "Мальчик, сними шляпу", point: PIN_POINT }];
+
+  function placementOf(result: ReturnType<typeof buildLayout>, teamId: string) {
+    return result.placements.find((placement) => placement.teamId === teamId)?.slot;
+  }
+
+  it("сажает команду на её место, даже если она маленькая", () => {
+    const result = buildLayout(
+      [...teams(30, 8), { teamId: "hat", size: 2, name: "Мальчик, сними шляпу" }],
+      [],
+      PINS,
+    );
+
+    expect(placementOf(result, "hat")).toMatchObject(PIN_POINT);
+  });
+
+  it("узнаёт команду с опечаткой в названии", () => {
+    const result = buildLayout(
+      [...teams(5), { teamId: "hat", size: 4, name: "малчик сними шляпy" }],
+      [],
+      PINS,
+    );
+
+    expect(placementOf(result, "hat")).toMatchObject(PIN_POINT);
+  });
+
+  it("без этой команды место достаётся обычному столу", () => {
+    const result = buildLayout(teams(40), [], PINS);
+    const atPin = result.placements.filter(
+      ({ slot }) => slot.x === PIN_POINT.x && slot.y === PIN_POINT.y,
+    );
+
+    expect(atPin).toHaveLength(1);
+  });
+
+  it("не трогает место, если его уже занял стол, поставленный вручную", () => {
+    const result = buildLayout(
+      [{ teamId: "hat", size: 4, name: "Мальчик, сними шляпу" }],
+      [{ teamId: "manual", x: PIN_POINT.x, y: PIN_POINT.y, radius: 40 }],
+      PINS,
+    );
+
+    expect(placementOf(result, "hat")).not.toMatchObject(PIN_POINT);
+  });
+
+  it("не дублирует занятые точки", () => {
+    const result = buildLayout(
+      [...teams(45), { teamId: "hat", size: 3, name: "Мальчик, сними шляпу" }],
+      [],
+      PINS,
+    );
+    const keys = result.placements.map(({ slot }) => `${slot.x}:${slot.y}`);
+
+    expect(new Set(keys).size).toBe(keys.length);
+  });
+});

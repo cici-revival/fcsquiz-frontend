@@ -90,6 +90,12 @@ export default function Landing() {
               </div>
             )}
           </div>
+
+          <nav className={styles.actions}>
+            <a href="/results">
+              <Button variant="outline">Результаты игр</Button>
+            </a>
+          </nav>
         </header>
 
         <main className={styles.content}>

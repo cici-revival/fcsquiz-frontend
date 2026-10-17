@@ -75,7 +75,7 @@ export function SeatingPreview({
   // Раскладка зависит только от состава: если подмешать сюда координаты
   // посаженных столов, каждое перетаскивание переставляло бы соседей.
   const computed = useMemo(
-    () => buildLayout(teams.map(({ teamId, size }): LayoutTeam => ({ teamId, size }))),
+    () => buildLayout(teams.map(({ teamId, size, name }): LayoutTeam => ({ teamId, size, name }))),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [layoutKey],
   );
