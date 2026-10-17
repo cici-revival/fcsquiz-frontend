@@ -91,11 +91,11 @@ export default function Landing() {
             )}
           </div>
 
-          <nav className={styles.actions}>
+          {/* <nav className={styles.actions}>
             <a href="/results">
               <Button variant="outline">Результаты игр</Button>
             </a>
-          </nav>
+          </nav> */}
         </header>
 
         <main className={styles.content}>
