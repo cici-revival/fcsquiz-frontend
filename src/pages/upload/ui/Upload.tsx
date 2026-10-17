@@ -1,13 +1,8 @@
 import { Button } from "@shared/ui/Button";
 import SelectGameSeason from "@/widgets/select-game/SelectGameSeason";
-import {
-  FileText,
-  TriangleAlert,
-  X,
-  Check,
-  Loader2,
-} from "lucide-react";
-import { type FormEvent, useState, useRef } from "react";
+import { Loader2 } from "lucide-react";
+import { type FormEvent, useState } from "react";
+import { FileDropzone } from "@shared/ui/FileDropzone";
 import toast from "react-hot-toast";
 import styles from "./Upload.module.css";
 
@@ -22,7 +17,6 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 export default function UploadPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
   const [isParsing, setIsParsing] = useState(false);
   const [isHeadersValid, setIsHeadersValid] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,8 +28,6 @@ export default function UploadPage() {
 
   const [season, setSeason] = useState<number>(0);
   const [gameNumber, setGameNumber] = useState<number>(0);
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -87,17 +79,12 @@ export default function UploadPage() {
     }
   };
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files || files.length === 0) return;
-
-    const file = files[0];
-
+  const handleFile = (file: File) => {
     if (file.size > MAX_FILE_SIZE) {
       setError("Файл слишком большой. Максимальный размер: 10MB");
-      if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
+
     const fileExtension = file.name
       .toLowerCase()
       .slice(file.name.lastIndexOf("."));
@@ -106,7 +93,6 @@ export default function UploadPage() {
       setError(
         `Пожалуйста, выберите файл в формате: ${VALID_EXTENSIONS.join(", ")}`,
       );
-      if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
 
@@ -119,43 +105,6 @@ export default function UploadPage() {
     setSelectedFile(null);
     setIsHeadersValid(false);
     setError(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = () => setIsDragging(false);
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const file = e.dataTransfer.files[0];
-
-      if (file.size > MAX_FILE_SIZE) {
-        setError("Файл слишком большой. Максимальный размер: 10MB");
-        return;
-      }
-
-      const fileExtension = file.name
-        .toLowerCase()
-        .slice(file.name.lastIndexOf("."));
-
-      if (!VALID_EXTENSIONS.includes(fileExtension)) {
-        setError(
-          `Пожалуйста, используйте файл в формате: ${VALID_EXTENSIONS.join(", ")}`,
-        );
-        return;
-      }
-
-      setSelectedFile(file);
-      setIsHeadersValid(false);
-      setError(null);
-    }
   };
 
   return (
@@ -187,78 +136,17 @@ export default function UploadPage() {
           initialGameNumber={storeGameNumber}
         />
 
-        <div
-          className={`
-            ${styles.dropzone}
-            ${isDragging ? styles.dragging : ""}
-            ${selectedFile ? styles.collapsed : ""}
-          `}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-        >
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".xlsx,.xls"
-            className={styles.uploadInput}
-            onChange={handleFileSelect}
-            disabled={isParsing}
-          />
-
-          <div className={styles.dropzoneContent}>
-            {selectedFile ? (
-              <>
-                <div className={styles.fileInfo}>
-                  {isParsing ? (
-                    <Loader2 className={styles.loaderIcon} strokeWidth={1.5} />
-                  ) : error ? (
-                    <TriangleAlert strokeWidth={1.5} />
-                  ) : (
-                    <Check className={styles.successIcon} strokeWidth={1.5} />
-                  )}
-
-                  <div>
-                    <p className={styles.fileName}>{selectedFile.name}</p>
-                    <p className={styles.fileSize}>
-                      {(selectedFile.size / 1024).toFixed(2)} KB
-                    </p>
-                    {isHeadersValid && (
-                      <p className={styles.parseInfo}>
-                        Заголовки проверены
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleRemoveFile();
-                  }}
-                  className={styles.removeButton}
-                  disabled={isParsing}
-                >
-                  <X size={16} />
-                  Удалить файл
-                </Button>
-              </>
-            ) : (
-              <>
-                <FileText strokeWidth={1.5} />
-                <p className={styles.dropText}>
-                  Поддерживаемые форматы данных:
-                </p>
-                <span className={styles.format}>XLSX, XLS</span>
-                <p className={styles.dropHint}>
-                  Нажмите на область или перетащите файл сюда
-                </p>
-              </>
-            )}
-          </div>
-        </div>
+        <FileDropzone
+          file={selectedFile}
+          accept=".xlsx,.xls"
+          formats="XLSX, XLS"
+          label="Файл участников"
+          onFile={handleFile}
+          onRemove={handleRemoveFile}
+          disabled={isParsing}
+          status={isParsing ? "loading" : error ? "error" : "ok"}
+          details={isHeadersValid ? "Заголовки проверены" : undefined}
+        />
 
         {error && <div className={styles.error}>{error}</div>}
 

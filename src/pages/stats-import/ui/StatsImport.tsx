@@ -16,6 +16,7 @@ import {
 import { adminkaApi } from "@shared/api/adminkaApi";
 import { NotFoundError } from "@shared/api/errors";
 import { Button } from "@shared/ui/Button";
+import { FileDropzone } from "@shared/ui/FileDropzone";
 import { Alert, AlertDescription, AlertTitle } from "@shared/ui/Alert";
 import { useStatsImport, type StatsImportView } from "../model/useStatsImport";
 import styles from "./StatsImport.module.css";
@@ -116,28 +117,26 @@ export default function StatsImportPage() {
     }));
   }, [results, rosterTeams]);
 
-  const handleFile = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = event.target.files?.[0] ?? null;
+  const handleFile = (selected: File) => {
     setFileError(null);
 
-    if (!selected) {
-      setFile(null);
-      return;
-    }
     if (!selected.name.toLowerCase().endsWith(".xlsx")) {
       setFileError("Нужен файл в формате .xlsx");
       setFile(null);
-      event.target.value = "";
       return;
     }
     if (selected.size > MAX_FILE_SIZE) {
       setFileError("Файл слишком большой. Максимальный размер: 10MB");
       setFile(null);
-      event.target.value = "";
       return;
     }
 
     setFile(selected);
+  };
+
+  const handleRemoveFile = () => {
+    setFile(null);
+    setFileError(null);
   };
 
   const busy = isBusy(view);
@@ -169,15 +168,16 @@ export default function StatsImportPage() {
         )}
 
         <div className={styles.fileRow}>
-          <label className={styles.fileLabel} htmlFor="stats-file">
-            Файл результатов (.xlsx)
-          </label>
-          <input
-            id="stats-file"
-            type="file"
+          <FileDropzone
+            file={file}
             accept=".xlsx"
-            onChange={handleFile}
+            formats="XLSX"
+            label="Файл результатов (.xlsx)"
+            onFile={handleFile}
+            onRemove={handleRemoveFile}
             disabled={busy}
+            compact
+            status={view.kind === "uploading" ? "loading" : fileError ? "error" : "ok"}
           />
           <p className={styles.hint}>
             Для игры N обрабатывается лист «Игра N». Нужен согласованный шаблон
