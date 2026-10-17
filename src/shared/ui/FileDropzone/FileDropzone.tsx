@@ -14,7 +14,6 @@ type FileDropzoneProps = {
   status?: FileDropzoneStatus;
   details?: ReactNode;
   disabled?: boolean;
-  compact?: boolean;
   label?: string;
 };
 
@@ -33,7 +32,6 @@ export function FileDropzone({
   status = "idle",
   details,
   disabled = false,
-  compact = false,
   label = "Файл",
 }: FileDropzoneProps) {
   const [isDragging, setIsDragging] = useState(false);
@@ -60,7 +58,6 @@ export function FileDropzone({
 
   const className = [
     styles.dropzone,
-    compact && styles.compact,
     isDragging && styles.dragging,
     file && styles.collapsed,
     disabled && styles.disabled,

@@ -176,7 +176,6 @@ export default function StatsImportPage() {
             onFile={handleFile}
             onRemove={handleRemoveFile}
             disabled={busy}
-            compact
             status={view.kind === "uploading" ? "loading" : fileError ? "error" : "ok"}
           />
           <p className={styles.hint}>

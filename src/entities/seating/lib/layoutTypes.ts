@@ -1,6 +1,7 @@
 export type LayoutTeam = {
   teamId: string;
   size: number;
+  name?: string;
 };
 
 export type PackedCircle = {

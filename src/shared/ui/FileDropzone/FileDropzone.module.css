@@ -36,11 +36,6 @@
   background: hsl(var(--muted, 210 40% 96%));
 }
 
-.compact {
-  flex: 0 0 auto;
-  min-height: 200px;
-}
-
 .collapsed {
   flex: 0 0 auto;
   min-height: 96px;
