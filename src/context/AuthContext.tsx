@@ -12,7 +12,8 @@ import { AuthContext, type Tokens, type User } from "./context";
 interface AccessTokenClaims {
   id: string;
   email?: string | null;
-  role: string;
+  roles?: string[];
+  permissions?: string[];
 }
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -46,7 +47,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser({
         id: decoded.id,
         email: decoded.email,
-        role: decoded.role,
+        roles: decoded.roles ?? [],
+        permissions: decoded.permissions ?? [],
       });
     } catch (error) {
       console.error("Invalid token:", error);
@@ -85,7 +87,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         login,
         logout,
         isAuthenticated: !!user,
-        hasAdminAccess: user?.role === "admin",
+        hasAdminAccess: user?.permissions.includes("adminka.access") ?? false,
       }}
     >
       {children}

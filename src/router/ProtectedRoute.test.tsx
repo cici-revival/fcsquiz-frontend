@@ -7,7 +7,8 @@ import { ProtectedRoute } from "./ProtectedRoute";
 const adminUser = {
   id: "user-id",
   email: "admin@example.com",
-  role: "admin",
+  roles: ["admin"],
+  permissions: ["adminka.access"],
 };
 
 function renderRoute(overrides: Partial<AuthContextType> = {}) {
@@ -40,15 +41,15 @@ describe("ProtectedRoute", () => {
       expected: "Загрузка...",
     },
     {
-      name: "не монтирует админку для пользователя без роли admin",
+      name: "не монтирует админку для пользователя без права adminka.access",
       context: {
-        user: { ...adminUser, role: "user" },
+        user: { ...adminUser, roles: ["user"], permissions: [] },
         hasAdminAccess: false,
       },
       expected: "Нет доступа к админке",
     },
     {
-      name: "монтирует админку для пользователя с ролью admin",
+      name: "монтирует админку для пользователя с правом adminka.access",
       context: {},
       expected: "Админка",
     },
@@ -65,7 +66,7 @@ describe("ProtectedRoute", () => {
   it("завершает сессию с экрана отсутствия доступа", () => {
     const logout = vi.fn();
     renderRoute({
-      user: { ...adminUser, role: "user" },
+      user: { ...adminUser, roles: ["user"], permissions: [] },
       hasAdminAccess: false,
       logout,
     });

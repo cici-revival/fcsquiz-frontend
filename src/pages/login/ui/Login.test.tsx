@@ -38,7 +38,7 @@ describe("Login", () => {
   beforeEach(() => {
     navigate.mockReset();
     vi.mocked(useAuth).mockReturnValue({
-      user: { id: "admin-id", email: "admin@example.com", role: "admin" },
+      user: { id: "admin-id", email: "admin@example.com", roles: ["admin"], permissions: ["adminka.access"] },
       isLoading: false,
       login: vi.fn(),
       logout: vi.fn(),
