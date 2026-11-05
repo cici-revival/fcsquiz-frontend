@@ -3,7 +3,8 @@ import { createContext } from "react";
 export interface User {
   id: string;
   email?: string | null;
-  role: string;
+  roles: string[];
+  permissions: string[];
 }
 
 export interface Tokens {

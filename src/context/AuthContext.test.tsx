@@ -22,9 +22,16 @@ vi.mock("jwt-decode", () => ({
       return {
         id: "user-id",
         email: "a@b.c",
-        role: "admin",
+        roles: ["admin"],
+        permissions: ["adminka.access"],
         exp: Math.floor(Date.now() / 1000) + 3600,
       };
+    }
+    if (token === "no-permissions-access") {
+      return { id: "user-id", email: "a@b.c", role: "admin" };
+    }
+    if (token === "user-access") {
+      return { id: "user-id", email: "a@b.c", roles: ["user"], permissions: [] };
     }
     throw new Error("invalid token");
   },
@@ -36,13 +43,21 @@ function Probe() {
   return (
     <div>
       <span data-testid="user">{ctx.user ? ctx.user.id : "none"}</span>
-      <span data-testid="role">{ctx.user?.role ?? "none"}</span>
+      <span data-testid="roles">{ctx.user?.roles.join(",") ?? "none"}</span>
+      <span data-testid="permissions">{ctx.user?.permissions.join(",") ?? "none"}</span>
+      <span data-testid="admin-access">{ctx.hasAdminAccess ? "yes" : "no"}</span>
       <span data-testid="authenticated">
         {ctx.isAuthenticated ? "yes" : "no"}
       </span>
       <span data-testid="loading">{ctx.isLoading ? "yes" : "no"}</span>
       <button data-testid="login" onClick={() => ctx.login({ access_token: "valid-access" })}>
         login
+      </button>
+      <button data-testid="login-user" onClick={() => ctx.login({ access_token: "user-access" })}>
+        login-user
+      </button>
+      <button data-testid="login-legacy" onClick={() => ctx.login({ access_token: "no-permissions-access" })}>
+        login-legacy
       </button>
       <button data-testid="logout" onClick={() => ctx.logout()}>
         logout
@@ -81,7 +96,9 @@ describe("AuthContext — in-memory token storage", () => {
     expect(localStorage.getItem("access_token")).toBeNull();
     expect(localStorage.getItem("refresh_token")).toBeNull();
     expect(getByTestId("user").textContent).toBe("user-id");
-    expect(getByTestId("role").textContent).toBe("admin");
+    expect(getByTestId("roles").textContent).toBe("admin");
+    expect(getByTestId("permissions").textContent).toBe("adminka.access");
+    expect(getByTestId("admin-access").textContent).toBe("yes");
     expect(getByTestId("authenticated").textContent).toBe("yes");
   });
 
@@ -166,5 +183,44 @@ describe("AuthContext — in-memory token storage", () => {
     });
 
     await waitFor(() => expect(getByTestId("user").textContent).toBe("none"));
+  });
+
+  it("не даёт доступ в админку пользователю без adminka.access", async () => {
+    vi.mocked(adminkaApiClient.tryRestoreSession).mockResolvedValue(null);
+
+    const { getByTestId } = render(
+      <AuthProvider>
+        <Probe />
+      </AuthProvider>,
+    );
+
+    await waitFor(() => expect(getByTestId("loading").textContent).toBe("no"));
+
+    await act(async () => {
+      getByTestId("login-user").click();
+    });
+
+    expect(getByTestId("roles").textContent).toBe("user");
+    expect(getByTestId("admin-access").textContent).toBe("no");
+  });
+
+  it("считает permissions пустым для старого токена без claim и не падает", async () => {
+    vi.mocked(adminkaApiClient.tryRestoreSession).mockResolvedValue(null);
+
+    const { getByTestId } = render(
+      <AuthProvider>
+        <Probe />
+      </AuthProvider>,
+    );
+
+    await waitFor(() => expect(getByTestId("loading").textContent).toBe("no"));
+
+    await act(async () => {
+      getByTestId("login-legacy").click();
+    });
+
+    expect(getByTestId("authenticated").textContent).toBe("yes");
+    expect(getByTestId("permissions").textContent).toBe("");
+    expect(getByTestId("admin-access").textContent).toBe("no");
   });
 });
