@@ -119,8 +119,8 @@ export function SeatingPlan({ teams, query = "" }: SeatingPlanProps) {
           <div
             className={styles.aisle}
             style={{
-              left: HALL_GEOMETRY.aisleLeft,
-              width: HALL_GEOMETRY.aisleRight - HALL_GEOMETRY.aisleLeft,
+              left: HALL_GEOMETRY.aisle.left,
+              width: HALL_GEOMETRY.aisle.right - HALL_GEOMETRY.aisle.left,
               top: HALL.stageHeight + 40,
               height: fieldHeight - HALL.stageHeight,
             }}

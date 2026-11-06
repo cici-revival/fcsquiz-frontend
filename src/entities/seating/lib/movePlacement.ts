@@ -34,11 +34,11 @@ function clampToHall(
   // высоты зала, и туда должно быть можно перетащить стол.
   const y = Math.max(point.y, getSeatingTop() + TABLE_GAP + radius);
 
-  const middle = (HALL_GEOMETRY.aisleLeft + HALL_GEOMETRY.aisleRight) / 2;
+  const middle = (HALL_GEOMETRY.aisle.left + HALL_GEOMETRY.aisle.right) / 2;
   const isLeft = point.x <= middle;
 
-  const from = (isLeft ? hall.left : HALL_GEOMETRY.aisleRight) + radius;
-  const to = (isLeft ? HALL_GEOMETRY.aisleLeft : hall.right) - radius;
+  const from = (isLeft ? hall.left : HALL_GEOMETRY.aisle.right) + radius;
+  const to = (isLeft ? HALL_GEOMETRY.aisle.left : hall.right) - radius;
 
   return { x: Math.min(Math.max(point.x, from), to), y };
 }

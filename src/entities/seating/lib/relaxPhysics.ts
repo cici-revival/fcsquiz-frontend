@@ -30,11 +30,11 @@ function minDistance(a: PackedCircle, b: PackedCircle): number {
 
 function clampToHall(circle: Movable): boolean {
   const hall = getHallBounds(circle.y);
-  const middle = (HALL_GEOMETRY.aisleLeft + HALL_GEOMETRY.aisleRight) / 2;
+  const middle = (HALL_GEOMETRY.aisle.left + HALL_GEOMETRY.aisle.right) / 2;
   const isLeft = circle.x <= middle;
 
-  const from = (isLeft ? hall.left : HALL_GEOMETRY.aisleRight) + circle.radius;
-  const to = (isLeft ? HALL_GEOMETRY.aisleLeft : hall.right) - circle.radius;
+  const from = (isLeft ? hall.left : HALL_GEOMETRY.aisle.right) + circle.radius;
+  const to = (isLeft ? HALL_GEOMETRY.aisle.left : hall.right) - circle.radius;
   const top = getSeatingTop() + circle.radius;
 
   let moved = false;

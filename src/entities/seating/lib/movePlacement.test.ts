@@ -28,10 +28,10 @@ describe("resolveDrop", () => {
   });
 
   it("не пускает команду в центральный проход", () => {
-    const target = (HALL_GEOMETRY.aisleLeft + HALL_GEOMETRY.aisleRight) / 2;
+    const target = (HALL_GEOMETRY.aisle.left + HALL_GEOMETRY.aisle.right) / 2;
     const result = resolveDrop(circle(200, 400), { x: target - 10, y: 400 }, []);
 
-    expect(result.x + 40).toBeLessThanOrEqual(HALL_GEOMETRY.aisleLeft);
+    expect(result.x + 40).toBeLessThanOrEqual(HALL_GEOMETRY.aisle.left);
   });
 
   it("не пускает команду под колонки", () => {

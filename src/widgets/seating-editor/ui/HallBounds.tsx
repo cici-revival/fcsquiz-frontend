@@ -8,7 +8,7 @@ import {
 import styles from "./HallBounds.module.css";
 
 const floor = HALL.height - HALL_GEOMETRY.bottomMargin;
-const ceiling = HALL.stageHeight;
+const ceiling = HALL_GEOMETRY.top.y;
 
 function sidePath(isLeft: boolean): string {
   const outer: string[] = [];
@@ -22,7 +22,7 @@ function sidePath(isLeft: boolean): string {
   const last = getHallBounds(floor);
   outer.push(`${isLeft ? last.left : last.right},${floor}`);
 
-  const inner = isLeft ? HALL_GEOMETRY.aisleLeft : HALL_GEOMETRY.aisleRight;
+  const inner = isLeft ? HALL_GEOMETRY.aisle.left : HALL_GEOMETRY.aisle.right;
 
   return `M ${outer.join(" L ")} L ${inner},${floor} L ${inner},${ceiling} Z`;
 }

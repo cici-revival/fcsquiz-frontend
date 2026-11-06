@@ -11,8 +11,7 @@ export const DEFAULT_SEATING_COLOR = "#3B82F6";
 
 export const HALL = {
   // Ширина задаёт масштаб: поле вписывается в контейнер по ширине, поэтому чем
-  // уже зал, тем крупнее столы на экране. Правее ~1300 всё равно пусто —
-  // getHallBounds не выпускает столы дальше topRight/bottomRight.
+  // уже зал, тем крупнее столы на экране.
   width: 1360,
   height: 900,
   stageHeight: 64,
@@ -57,14 +56,30 @@ export const TABLE_RING = 1;
  */
 export const TABLE_GAP = 12;
 
+/**
+ * Основные ручки формы зала.
+ *
+ * `top` и `lowerGuide` — два горизонтальных среза одной трапеции. Между ними
+ * и ниже `lowerGuide` боковые стены идут по одной прямой. Поэтому, чтобы
+ * сделать зал шире или уже, достаточно двигать left/right у этих двух срезов.
+ *
+ * `lowerGuide` — не нижняя граница зала, а только опорная линия для наклона.
+ */
 export const HALL_GEOMETRY = {
-  aisleLeft: 700,
-  aisleRight: 800,
-  topLeft: 185,
-  topRight: 1279,
-  bottomLeft: 81,
-  bottomRight: 1299,
-  taperEndY: 600,
+  top: {
+    y: HALL.stageHeight,
+    left: 185,
+    right: 1279,
+  },
+  lowerGuide: {
+    y: 600,
+    left: 81,
+    right: 1299,
+  },
+  aisle: {
+    left: 700,
+    right: 800,
+  },
   bottomMargin: 40,
 } as const;
 
@@ -85,17 +100,14 @@ export function isInDeadZone(x: number, y: number, radius: number): boolean {
 }
 
 export function getHallBounds(y: number): { left: number; right: number } {
-  const start = HALL.stageHeight;
-  const end = HALL_GEOMETRY.taperEndY;
-  const progress = Math.min(1, Math.max(0, (y - start) / (end - start)));
+  const { top, lowerGuide } = HALL_GEOMETRY;
+  // Сверху контур начинается у сцены, а снизу намеренно не ограничивается 1:
+  // после lowerGuide трапеция продолжает расширяться с тем же наклоном.
+  const progress = Math.max(0, (y - top.y) / (lowerGuide.y - top.y));
 
   return {
-    left:
-      HALL_GEOMETRY.topLeft +
-      (HALL_GEOMETRY.bottomLeft - HALL_GEOMETRY.topLeft) * progress,
-    right:
-      HALL_GEOMETRY.topRight +
-      (HALL_GEOMETRY.bottomRight - HALL_GEOMETRY.topRight) * progress,
+    left: Math.max(0, top.left + (lowerGuide.left - top.left) * progress),
+    right: Math.min(HALL.width, top.right + (lowerGuide.right - top.right) * progress),
   };
 }
 

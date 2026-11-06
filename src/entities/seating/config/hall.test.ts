@@ -3,14 +3,31 @@ import { describe, expect, it } from "vitest";
 import {
   FIXED_POINT_SPACING,
   FIXED_SLOT_POINTS,
+  HALL_GEOMETRY,
   PACKED_TABLE,
   TABLE,
   TABLE_RING,
+  getHallBounds,
   getPackedTableRadius,
   getTableRadius,
 } from "./hall";
 
 describe("геометрия зала", () => {
+  it("продолжает расширять трапецию ниже нижней опорной линии", () => {
+    const { top, lowerGuide } = HALL_GEOMETRY;
+
+    expect(getHallBounds(top.y)).toEqual({ left: top.left, right: top.right });
+    expect(getHallBounds(lowerGuide.y)).toEqual({
+      left: lowerGuide.left,
+      right: lowerGuide.right,
+    });
+
+    const below = getHallBounds(lowerGuide.y + 100);
+
+    expect(below.left).toBeLessThan(lowerGuide.left);
+    expect(below.right).toBeGreaterThan(lowerGuide.right);
+  });
+
   it("FIXED_POINT_SPACING совпадает с реальным минимумом между точками", () => {
     let min = Infinity;
 

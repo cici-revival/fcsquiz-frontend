@@ -31,8 +31,8 @@ function sideRange(y: number, isLeft: boolean): { from: number; to: number } {
   const hall = getHallBounds(y);
 
   return isLeft
-    ? { from: hall.left, to: HALL_GEOMETRY.aisleLeft }
-    : { from: HALL_GEOMETRY.aisleRight, to: hall.right };
+    ? { from: hall.left, to: HALL_GEOMETRY.aisle.left }
+    : { from: HALL_GEOMETRY.aisle.right, to: hall.right };
 }
 
 /** Сколько столов влезает в ряд на этой глубине. */

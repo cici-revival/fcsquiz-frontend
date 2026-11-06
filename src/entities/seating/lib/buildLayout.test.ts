@@ -72,7 +72,7 @@ describe("buildLayout", () => {
       const left = slot.x - slot.radius;
       const right = slot.x + slot.radius;
       const inAisle =
-        right > HALL_GEOMETRY.aisleLeft + 1 && left < HALL_GEOMETRY.aisleRight - 1;
+        right > HALL_GEOMETRY.aisle.left + 1 && left < HALL_GEOMETRY.aisle.right - 1;
 
       expect(inAisle).toBe(false);
     }

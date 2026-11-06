@@ -85,8 +85,8 @@ describe("packRows", () => {
 
     for (const circle of result.packed) {
       const crossesAisle =
-        circle.x + circle.radius > HALL_GEOMETRY.aisleLeft &&
-        circle.x - circle.radius < HALL_GEOMETRY.aisleRight;
+        circle.x + circle.radius > HALL_GEOMETRY.aisle.left &&
+        circle.x - circle.radius < HALL_GEOMETRY.aisle.right;
 
       expect(crossesAisle).toBe(false);
     }
