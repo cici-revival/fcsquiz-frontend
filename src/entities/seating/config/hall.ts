@@ -12,7 +12,7 @@ export const DEFAULT_SEATING_COLOR = "#3B82F6";
 export const HALL = {
   // Ширина задаёт масштаб: поле вписывается в контейнер по ширине, поэтому чем
   // уже зал, тем крупнее столы на экране.
-  width: 1360,
+  width: 1500,
   height: 900,
   stageHeight: 64,
   stageBulge: 38,
@@ -69,12 +69,12 @@ export const HALL_GEOMETRY = {
   top: {
     y: HALL.stageHeight,
     left: 185,
-    right: 1279,
+    right: 1315,
   },
   lowerGuide: {
     y: 600,
     left: 81,
-    right: 1299,
+    right: 1419,
   },
   aisle: {
     left: 700,

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   FIXED_POINT_SPACING,
   FIXED_SLOT_POINTS,
+  HALL,
   HALL_GEOMETRY,
   PACKED_TABLE,
   TABLE,
@@ -13,6 +14,22 @@ import {
 } from "./hall";
 
 describe("геометрия зала", () => {
+  it("внешний контур и проход симметричны относительно центра поля", () => {
+    const center = HALL.width / 2;
+
+    expect((HALL_GEOMETRY.aisle.left + HALL_GEOMETRY.aisle.right) / 2).toBe(center);
+
+    for (const y of [
+      HALL_GEOMETRY.top.y,
+      HALL_GEOMETRY.lowerGuide.y,
+      HALL.height,
+    ]) {
+      const bounds = getHallBounds(y);
+
+      expect(center - bounds.left).toBeCloseTo(bounds.right - center);
+    }
+  });
+
   it("продолжает расширять трапецию ниже нижней опорной линии", () => {
     const { top, lowerGuide } = HALL_GEOMETRY;
 
