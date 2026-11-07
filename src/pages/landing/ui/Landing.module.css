@@ -61,16 +61,41 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  width: 100%;
   margin-bottom: 18px;
 }
 
 .searchInput {
-  max-width: 260px;
+  width: 100%;
+  max-width: none;
+  height: 44px;
 }
 
 .searchField {
   position: relative;
-  width: 260px;
+  width: 100%;
+  border: 1px solid hsl(var(--muted-foreground) / 0.55);
+  border-radius: var(--radius-md);
+  background-color: hsl(var(--background));
+  transition:
+    border-color var(--default-transition-duration),
+    box-shadow var(--default-transition-duration);
+}
+
+.searchField:hover {
+  border-color: hsl(var(--muted-foreground) / 0.8);
+}
+
+.searchField:focus-within {
+  border-color: hsl(var(--foreground));
+  box-shadow: 0 0 0 3px hsl(var(--foreground) / 0.14);
+}
+
+.searchField .searchInput,
+.searchField .searchInput:focus {
+  border: 0;
+  outline: 0;
+  box-shadow: none;
 }
 
 .searchIcon {
