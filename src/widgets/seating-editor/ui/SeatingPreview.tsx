@@ -8,7 +8,7 @@ import {
 } from "react";
 import toast from "react-hot-toast";
 
-import { getTableRadius, HALL, HALL_GEOMETRY } from "@entities/seating/config/hall";
+import { BALCONY, getTableRadius, HALL, HALL_GEOMETRY } from "@entities/seating/config/hall";
 import { BalconyStrip } from "@entities/seating/ui/BalconyStrip";
 import { buildLayout, type LayoutTeam } from "@entities/seating/lib/buildLayout";
 import { applyGrabOffset, getGrabOffset } from "@entities/seating/lib/dragOffset";
@@ -146,8 +146,14 @@ export function SeatingPreview({
       0,
     );
 
-    return Math.max(HALL.height, Math.ceil(lowest + HALL_GEOMETRY.bottomMargin));
-  }, [circles]);
+    const balconyBottom = (computed.balconyTop ?? 0) + BALCONY.height;
+
+    return Math.max(
+      HALL.height,
+      Math.ceil(lowest + HALL_GEOMETRY.bottomMargin),
+      Math.ceil(balconyBottom + HALL_GEOMETRY.bottomMargin),
+    );
+  }, [circles, computed.balconyTop]);
 
   const circlesRef = useRef(circles);
   circlesRef.current = circles;
@@ -434,7 +440,7 @@ export function SeatingPreview({
           }}
         />
 
-        <BalconyStrip scale={scale} />
+        <BalconyStrip scale={scale} top={computed.balconyTop ?? HALL.height} />
 
         {showBounds && <HallBounds />}
 

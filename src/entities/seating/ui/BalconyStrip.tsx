@@ -4,9 +4,10 @@ import styles from "./BalconyStrip.module.css";
 
 type BalconyStripProps = {
   scale: number;
+  top: number;
 };
 
-export function BalconyStrip({ scale }: BalconyStripProps) {
+export function BalconyStrip({ scale, top }: BalconyStripProps) {
   const labelScale = 1 / Math.max(scale, 0.01);
 
   return (
@@ -14,7 +15,7 @@ export function BalconyStrip({ scale }: BalconyStripProps) {
       className={styles.root}
       style={{
         left: BALCONY.left,
-        top: BALCONY.top,
+        top,
         width: BALCONY.right - BALCONY.left,
         height: BALCONY.height,
       }}

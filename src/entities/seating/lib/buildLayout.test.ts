@@ -3,11 +3,11 @@ import { describe, expect, it } from "vitest";
 import { buildLayout, type LayoutTeam } from "./buildLayout";
 import {
   BALCONY,
-  BALCONY_SLOT_POINTS,
   FIXED_SLOT_POINTS,
   HALL,
   HALL_GEOMETRY,
   getTableRadius,
+  getBalconySlotPoints,
   isInDeadZone,
   TABLE,
   TABLE_RING,
@@ -42,14 +42,16 @@ describe("buildLayout", () => {
       size: 8 - (index % 7),
     }));
     const result = buildLayout(input);
+    const balconyTop = result.balconyTop ?? 0;
     const balcony = new Set(
-      BALCONY_SLOT_POINTS.map((point) => `${point.x}:${point.y}`),
+      getBalconySlotPoints(balconyTop).map((point) => `${point.x}:${point.y}`),
     );
     const balconyPlacements = result.placements.filter(({ slot }) =>
       balcony.has(`${slot.x}:${slot.y}`),
     );
     const flexibleFloor = result.placements.filter(
       ({ slot }) =>
+        !balcony.has(`${slot.x}:${slot.y}`) &&
         !FIXED_SLOT_POINTS.some((point) => point.x === slot.x && point.y === slot.y),
     );
 
@@ -61,9 +63,10 @@ describe("buildLayout", () => {
     expect(result.overflow).toHaveLength(0);
     expect(balconyPlacements).toHaveLength(15);
     expect(flexibleFloor).toHaveLength(35);
-    expect(
-      floorPlacements.every(({ slot }) => slot.y + slot.radius < BALCONY.top),
-    ).toBe(true);
+    const floorBottom = Math.max(
+      ...floorPlacements.map(({ slot }) => slot.y + slot.radius),
+    );
+    expect(balconyTop).toBe(Math.ceil(floorBottom + BALCONY.floorGap));
   });
 
   it("сажает крупные команды на фиксированные места у сцены", () => {
@@ -98,7 +101,16 @@ describe("buildLayout", () => {
 
   it("не ставит столы в центральный проход", () => {
     const result = buildLayout(teams(FIXED_SLOT_POINTS.length + 30));
-    const generated = result.placements.slice(FIXED_SLOT_POINTS.length);
+    const balcony = new Set(
+      getBalconySlotPoints(result.balconyTop ?? 0).map(
+        (point) => `${point.x}:${point.y}`,
+      ),
+    );
+    const generated = result.placements.filter(
+      ({ slot }) =>
+        !balcony.has(`${slot.x}:${slot.y}`) &&
+        !FIXED_SLOT_POINTS.some((point) => point.x === slot.x && point.y === slot.y),
+    );
 
     for (const { slot } of generated) {
       const left = slot.x - slot.radius;
@@ -134,13 +146,18 @@ describe("buildLayout", () => {
   it("укладывает столы плотнее сетки", () => {
     const extra = 24;
     const result = buildLayout(teams(FIXED_SLOT_POINTS.length + extra, 6));
-    const generated = result.placements.slice(FIXED_SLOT_POINTS.length);
-
-    const lowestFixed = Math.max(
-      ...result.placements
-        .slice(0, FIXED_SLOT_POINTS.length)
-        .map((placement) => placement.slot.y),
+    const balcony = new Set(
+      getBalconySlotPoints(result.balconyTop ?? 0).map(
+        (point) => `${point.x}:${point.y}`,
+      ),
     );
+    const generated = result.placements.filter(
+      ({ slot }) =>
+        !balcony.has(`${slot.x}:${slot.y}`) &&
+        !FIXED_SLOT_POINTS.some((point) => point.x === slot.x && point.y === slot.y),
+    );
+
+    const lowestFixed = Math.max(...FIXED_SLOT_POINTS.map((point) => point.y));
     const lowestGenerated = Math.max(
       ...generated.map((placement) => placement.slot.y),
     );
@@ -197,7 +214,7 @@ describe("buildLayout", () => {
   });
 
   it("возвращает пустой результат для пустого списка", () => {
-    expect(buildLayout([])).toEqual({ placements: [], overflow: [] });
+    expect(buildLayout([])).toMatchObject({ placements: [], overflow: [] });
   });
 
 

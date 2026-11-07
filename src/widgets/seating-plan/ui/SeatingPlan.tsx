@@ -2,6 +2,8 @@ import { Fragment, useMemo } from "react";
 
 import {
   getTableRadius,
+  BALCONY,
+  FLOOR_SLOT_POINTS,
   HALL,
   HALL_GEOMETRY,
   isOnBalcony,
@@ -80,6 +82,21 @@ export function SeatingPlan({ teams, query = "" }: SeatingPlanProps) {
     return result;
   }, [seatingTeams, nameById, trimmedQuery, seatNumbers]);
 
+  const balconyTop = useMemo(() => {
+    if (circles.length > FLOOR_SLOT_POINTS.length) {
+      const lastY = circles.reduce((lowest, circle) => Math.max(lowest, circle.y), 0);
+
+      return lastY - BALCONY.seatOffset;
+    }
+
+    const floorBottom = circles.reduce(
+      (lowest, circle) => Math.max(lowest, circle.y + circle.radius),
+      HALL.stageHeight + HALL.stageBulge,
+    );
+
+    return Math.ceil(floorBottom + BALCONY.floorGap);
+  }, [circles]);
+
   // Зал растягивается под раскладку: ряды авторасстановки уходят ниже
   // номинальной высоты, и обрезать их нельзя.
   const fieldHeight = useMemo(() => {
@@ -88,8 +105,12 @@ export function SeatingPlan({ teams, query = "" }: SeatingPlanProps) {
       0,
     );
 
-    return Math.max(HALL.height, Math.ceil(lowest + HALL_GEOMETRY.bottomMargin));
-  }, [circles]);
+    return Math.max(
+      HALL.height,
+      Math.ceil(lowest + HALL_GEOMETRY.bottomMargin),
+      Math.ceil(balconyTop + BALCONY.height + HALL_GEOMETRY.bottomMargin),
+    );
+  }, [balconyTop, circles]);
 
   const found = useMemo(
     () => circles.filter((circle) => circle.isFound),
@@ -128,7 +149,7 @@ export function SeatingPlan({ teams, query = "" }: SeatingPlanProps) {
             }}
           />
 
-          <BalconyStrip scale={scale} />
+          <BalconyStrip scale={scale} top={balconyTop} />
 
           {circles.map((circle) => {
             const className = [
@@ -149,7 +170,7 @@ export function SeatingPlan({ teams, query = "" }: SeatingPlanProps) {
                   width: circle.radius * 2,
                   height: circle.radius * 2,
                 }}
-                aria-label={`${isOnBalcony(circle.x, circle.y) ? "Балкон, стол" : "Стол"} № ${circle.number}, ${circle.name}`}
+                aria-label={`${isOnBalcony(circle.x, circle.y, balconyTop) ? "Балкон, стол" : "Стол"} № ${circle.number}, ${circle.name}`}
               >
                 <span className={styles.tableNumber}>{circle.number}</span>
                 <span className={styles.tableName}>{circle.name}</span>

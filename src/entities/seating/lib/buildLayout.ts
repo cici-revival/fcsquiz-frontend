@@ -1,8 +1,8 @@
 import {
   BALCONY,
-  BALCONY_SLOT_POINTS,
   FLOOR_SLOT_POINTS,
   FIXED_SLOT_POINTS,
+  getBalconySlotPoints,
   getSeatingTop,
   getTableRadius,
   TABLE_GAP,
@@ -26,6 +26,7 @@ export type LayoutPlacement = {
 export type BuildLayoutResult = {
   placements: LayoutPlacement[];
   overflow: LayoutTeam[];
+  balconyTop?: number;
 };
 
 export function buildLayout(
@@ -71,34 +72,17 @@ export function buildLayout(
   }));
 
   const afterFloor = free.slice(floorCount);
-  const balconyPoints = orderFixedPoints(BALCONY_SLOT_POINTS).filter(
-    (point) => !takenPoints.has(`${point.x}:${point.y}`),
-  );
-  const balconyCount = Math.min(balconyPoints.length, afterFloor.length);
+  const balconyCount = Math.min(BALCONY.seats, afterFloor.length);
   // На второй ярус уводим хвост отсортированного списка: крупные команды
   // остаются ближе к сцене, а балкон всегда остаётся последней зоной схемы.
   const balconyTeams = afterFloor.slice(afterFloor.length - balconyCount);
   const rest = afterFloor.slice(0, afterFloor.length - balconyCount);
 
-  const balconyFixed: PackedCircle[] = balconyTeams.map((team, index) => ({
-    teamId: team.teamId,
-    x: balconyPoints[index].x,
-    y: balconyPoints[index].y,
-    radius: getTableRadius(team.size),
-  }));
-
-  const fixed: PackedCircle[] = [
-    ...pinned,
-    ...floorFixed,
-    ...balconyFixed,
-  ];
+  const fixedFloor: PackedCircle[] = [...pinned, ...floorFixed];
 
   // Ряды начинаем ниже всего, что уже стоит: и вкоммиченной сетки, и столов,
   // которые админ поставил руками.
-  const standing = [...fixed, ...occupied];
-  const floorStanding = [...pinned, ...floorFixed, ...occupied].filter(
-    (circle) => circle.y + circle.radius < BALCONY.top,
-  );
+  const floorStanding = [...fixedFloor, ...occupied];
   const startY = floorStanding.reduce(
     (lowest, circle) => Math.max(lowest, circle.y + circle.radius + TABLE_GAP),
     getSeatingTop(),
@@ -108,11 +92,25 @@ export function buildLayout(
 
   // Плотную укладку утрясаем физикой: столы расталкивают друг друга и
   // подстраиваются под соседей. Уже стоящие — препятствия, их не двигаем.
-  const relaxed = relaxPhysics(rows.packed, standing);
+  const relaxed = relaxPhysics(rows.packed, floorStanding);
+  const floor = [...fixedFloor, ...relaxed];
+  const floorBottom = [...floor, ...occupied].reduce(
+    (lowest, circle) => Math.max(lowest, circle.y + circle.radius),
+    getSeatingTop(),
+  );
+  const balconyTop = Math.ceil(floorBottom + BALCONY.floorGap);
+  const balconyPoints = getBalconySlotPoints(balconyTop);
+  const balconyFixed: PackedCircle[] = balconyTeams.map((team, index) => ({
+    teamId: team.teamId,
+    x: balconyPoints[index].x,
+    y: balconyPoints[index].y,
+    radius: getTableRadius(team.size),
+  }));
 
   return {
-    placements: withIdentifiers([...fixed, ...relaxed]),
+    placements: withIdentifiers([...floor, ...balconyFixed]),
     overflow: rows.overflow,
+    balconyTop,
   };
 }
 

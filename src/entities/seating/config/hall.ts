@@ -89,20 +89,22 @@ export const HALL_GEOMETRY = {
  * декоративная копия зала.
  */
 export const BALCONY = {
-  top: 830,
   left: 32,
   right: HALL.width - 32,
   height: 164,
   seats: 15,
-  seatY: 930,
+  seatOffset: 100,
+  // Балкон начинается через расстояние, равное двум максимальным столам,
+  // после нижнего края последней команды партера.
+  floorGap: TABLE.maxRadius * 4,
 } as const;
 
-export function isOnBalcony(x: number, y: number): boolean {
+export function isOnBalcony(x: number, y: number, top: number): boolean {
   return (
     x >= BALCONY.left &&
     x <= BALCONY.right &&
-    y >= BALCONY.top &&
-    y <= BALCONY.top + BALCONY.height
+    y >= top &&
+    y <= top + BALCONY.height
   );
 }
 
@@ -177,20 +179,16 @@ export const FLOOR_SLOT_POINTS: { x: number; y: number }[] = [
   { x: 1249, y: 455 },
 ];
 
-const balconyStep = (BALCONY.right - BALCONY.left) / BALCONY.seats;
+export function getBalconySlotPoints(top: number): { x: number; y: number }[] {
+  const step = (BALCONY.right - BALCONY.left) / BALCONY.seats;
 
-export const BALCONY_SLOT_POINTS: { x: number; y: number }[] = Array.from(
-  { length: BALCONY.seats },
-  (_, index) => ({
-    x: Math.round((BALCONY.left + balconyStep * (index + 0.5)) * 10) / 10,
-    y: BALCONY.seatY,
-  }),
-);
+  return Array.from({ length: BALCONY.seats }, (_, index) => ({
+    x: Math.round((BALCONY.left + step * (index + 0.5)) * 10) / 10,
+    y: top + BALCONY.seatOffset,
+  }));
+}
 
-export const FIXED_SLOT_POINTS: { x: number; y: number }[] = [
-  ...FLOOR_SLOT_POINTS,
-  ...BALCONY_SLOT_POINTS,
-];
+export const FIXED_SLOT_POINTS: { x: number; y: number }[] = FLOOR_SLOT_POINTS;
 
 function radiusFrom(
   scale: { baseRadius: number; radiusPerPlayer: number; minRadius: number; maxRadius: number },
