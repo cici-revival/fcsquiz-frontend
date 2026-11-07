@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  BALCONY,
+  BALCONY_SLOT_POINTS,
   FIXED_POINT_SPACING,
   FIXED_SLOT_POINTS,
   HALL,
@@ -14,6 +16,16 @@ import {
 } from "./hall";
 
 describe("геометрия зала", () => {
+  it("задаёт на балконе ровно 15 фиксированных мест", () => {
+    expect(BALCONY_SLOT_POINTS).toHaveLength(15);
+
+    for (const point of BALCONY_SLOT_POINTS) {
+      expect(point.x).toBeGreaterThan(BALCONY.left);
+      expect(point.x).toBeLessThan(BALCONY.right);
+      expect(point.y).toBe(BALCONY.seatY);
+    }
+  });
+
   it("внешний контур и проход симметричны относительно центра поля", () => {
     const center = HALL.width / 2;
 

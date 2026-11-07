@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { buildLayout, type LayoutTeam } from "./buildLayout";
 import {
+  BALCONY,
+  BALCONY_SLOT_POINTS,
   FIXED_SLOT_POINTS,
   HALL,
   HALL_GEOMETRY,
@@ -34,6 +36,36 @@ describe("getTableRadius", () => {
 });
 
 describe("buildLayout", () => {
+  it("рассаживает 90 команд: 15 на балкон, остальных в партер", () => {
+    const input = Array.from({ length: 90 }, (_, index) => ({
+      teamId: `team-${String(index).padStart(3, "0")}`,
+      size: 8 - (index % 7),
+    }));
+    const result = buildLayout(input);
+    const balcony = new Set(
+      BALCONY_SLOT_POINTS.map((point) => `${point.x}:${point.y}`),
+    );
+    const balconyPlacements = result.placements.filter(({ slot }) =>
+      balcony.has(`${slot.x}:${slot.y}`),
+    );
+    const flexibleFloor = result.placements.filter(
+      ({ slot }) =>
+        !FIXED_SLOT_POINTS.some((point) => point.x === slot.x && point.y === slot.y),
+    );
+
+    const floorPlacements = result.placements.filter(
+      ({ slot }) => !balcony.has(`${slot.x}:${slot.y}`),
+    );
+
+    expect(result.placements).toHaveLength(90);
+    expect(result.overflow).toHaveLength(0);
+    expect(balconyPlacements).toHaveLength(15);
+    expect(flexibleFloor).toHaveLength(35);
+    expect(
+      floorPlacements.every(({ slot }) => slot.y + slot.radius < BALCONY.top),
+    ).toBe(true);
+  });
+
   it("сажает крупные команды на фиксированные места у сцены", () => {
     const result = buildLayout([
       { teamId: "small", size: 2 },

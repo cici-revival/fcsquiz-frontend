@@ -13,7 +13,7 @@ export const HALL = {
   // Ширина задаёт масштаб: поле вписывается в контейнер по ширине, поэтому чем
   // уже зал, тем крупнее столы на экране.
   width: 1500,
-  height: 900,
+  height: 1020,
   stageHeight: 64,
   stageBulge: 38,
 } as const;
@@ -83,6 +83,29 @@ export const HALL_GEOMETRY = {
   bottomMargin: 40,
 } as const;
 
+/**
+ * Второй ярус показан отдельной полосой внизу схемы. Столы на нём используют
+ * ту же шкалу радиусов, что и партер: это реальные места, а не уменьшенная
+ * декоративная копия зала.
+ */
+export const BALCONY = {
+  top: 830,
+  left: 32,
+  right: HALL.width - 32,
+  height: 164,
+  seats: 15,
+  seatY: 930,
+} as const;
+
+export function isOnBalcony(x: number, y: number): boolean {
+  return (
+    x >= BALCONY.left &&
+    x <= BALCONY.right &&
+    y >= BALCONY.top &&
+    y <= BALCONY.top + BALCONY.height
+  );
+}
+
 export const DEAD_ZONE = {
   left: 682,
   right: 974,
@@ -111,7 +134,7 @@ export function getHallBounds(y: number): { left: number; right: number } {
   };
 }
 
-export const FIXED_SLOT_POINTS: { x: number; y: number }[] = [
+export const FLOOR_SLOT_POINTS: { x: number; y: number }[] = [
   { x: 235, y: 156 },
   { x: 332, y: 161 },
   { x: 429, y: 164 },
@@ -152,6 +175,21 @@ export const FIXED_SLOT_POINTS: { x: number; y: number }[] = [
   { x: 1040, y: 458 },
   { x: 1148, y: 464 },
   { x: 1249, y: 455 },
+];
+
+const balconyStep = (BALCONY.right - BALCONY.left) / BALCONY.seats;
+
+export const BALCONY_SLOT_POINTS: { x: number; y: number }[] = Array.from(
+  { length: BALCONY.seats },
+  (_, index) => ({
+    x: Math.round((BALCONY.left + balconyStep * (index + 0.5)) * 10) / 10,
+    y: BALCONY.seatY,
+  }),
+);
+
+export const FIXED_SLOT_POINTS: { x: number; y: number }[] = [
+  ...FLOOR_SLOT_POINTS,
+  ...BALCONY_SLOT_POINTS,
 ];
 
 function radiusFrom(

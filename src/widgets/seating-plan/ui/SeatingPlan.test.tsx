@@ -5,6 +5,7 @@ import { SeatingPlan } from "./SeatingPlan";
 import { useSeatingStore } from "@entities/seating/model/seating.store";
 import { useTeamStore } from "@entities/team/model/team.store";
 import type { SeatingTeam } from "@entities/seating/types";
+import { BALCONY } from "@entities/seating/config/hall";
 
 function seated(teamId: string, x: number, y: number): SeatingTeam {
   return {
@@ -205,6 +206,19 @@ describe("SeatingPlan", () => {
 
     expect(
       screen.getByRole("button", { name: "Стол № 1, Альфа" }),
+    ).toBeInTheDocument();
+  });
+
+  it("называет балкон в подписи стола для скринридера", () => {
+    useSeatingStore.getState().applySnapshot({
+      is_published: true,
+      teams: [seated("a", 200, BALCONY.seatY)],
+    });
+
+    render(<SeatingPlan teams={NAMES} />);
+
+    expect(
+      screen.getByRole("button", { name: "Балкон, стол № 1, Альфа" }),
     ).toBeInTheDocument();
   });
 });

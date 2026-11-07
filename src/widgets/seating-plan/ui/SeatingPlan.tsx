@@ -4,7 +4,9 @@ import {
   getTableRadius,
   HALL,
   HALL_GEOMETRY,
+  isOnBalcony,
 } from "@entities/seating/config/hall";
+import { BalconyStrip } from "@entities/seating/ui/BalconyStrip";
 import { buildSeatNumbers } from "@entities/seating/lib/seatNumbers";
 import { useSeatingStore } from "@entities/seating/model/seating.store";
 import { useTeamStore } from "@entities/team/model/team.store";
@@ -126,6 +128,8 @@ export function SeatingPlan({ teams, query = "" }: SeatingPlanProps) {
             }}
           />
 
+          <BalconyStrip scale={scale} />
+
           {circles.map((circle) => {
             const className = [
               styles.table,
@@ -145,7 +149,7 @@ export function SeatingPlan({ teams, query = "" }: SeatingPlanProps) {
                   width: circle.radius * 2,
                   height: circle.radius * 2,
                 }}
-                aria-label={`Стол № ${circle.number}, ${circle.name}`}
+                aria-label={`${isOnBalcony(circle.x, circle.y) ? "Балкон, стол" : "Стол"} № ${circle.number}, ${circle.name}`}
               >
                 <span className={styles.tableNumber}>{circle.number}</span>
                 <span className={styles.tableName}>{circle.name}</span>

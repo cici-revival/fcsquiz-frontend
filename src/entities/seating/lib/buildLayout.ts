@@ -1,4 +1,7 @@
 import {
+  BALCONY,
+  BALCONY_SLOT_POINTS,
+  FLOOR_SLOT_POINTS,
   FIXED_SLOT_POINTS,
   getSeatingTop,
   getTableRadius,
@@ -55,27 +58,48 @@ export function buildLayout(
   }
   const free = ordered.filter((team) => !pinnedIds.has(team.teamId));
 
-  const fixedPoints = orderFixedPoints().filter(
+  const floorPoints = orderFixedPoints(FLOOR_SLOT_POINTS).filter(
     (point) => !takenPoints.has(`${point.x}:${point.y}`),
   );
-  const fixedCount = Math.min(fixedPoints.length, free.length);
+  const floorCount = Math.min(floorPoints.length, free.length);
+
+  const floorFixed: PackedCircle[] = free.slice(0, floorCount).map((team, index) => ({
+    teamId: team.teamId,
+    x: floorPoints[index].x,
+    y: floorPoints[index].y,
+    radius: getTableRadius(team.size),
+  }));
+
+  const afterFloor = free.slice(floorCount);
+  const balconyPoints = orderFixedPoints(BALCONY_SLOT_POINTS).filter(
+    (point) => !takenPoints.has(`${point.x}:${point.y}`),
+  );
+  const balconyCount = Math.min(balconyPoints.length, afterFloor.length);
+  // На второй ярус уводим хвост отсортированного списка: крупные команды
+  // остаются ближе к сцене, а балкон всегда остаётся последней зоной схемы.
+  const balconyTeams = afterFloor.slice(afterFloor.length - balconyCount);
+  const rest = afterFloor.slice(0, afterFloor.length - balconyCount);
+
+  const balconyFixed: PackedCircle[] = balconyTeams.map((team, index) => ({
+    teamId: team.teamId,
+    x: balconyPoints[index].x,
+    y: balconyPoints[index].y,
+    radius: getTableRadius(team.size),
+  }));
 
   const fixed: PackedCircle[] = [
     ...pinned,
-    ...free.slice(0, fixedCount).map((team, index) => ({
-      teamId: team.teamId,
-      x: fixedPoints[index].x,
-      y: fixedPoints[index].y,
-      radius: getTableRadius(team.size),
-    })),
+    ...floorFixed,
+    ...balconyFixed,
   ];
-
-  const rest = free.slice(fixedCount);
 
   // Ряды начинаем ниже всего, что уже стоит: и вкоммиченной сетки, и столов,
   // которые админ поставил руками.
   const standing = [...fixed, ...occupied];
-  const startY = standing.reduce(
+  const floorStanding = [...pinned, ...floorFixed, ...occupied].filter(
+    (circle) => circle.y + circle.radius < BALCONY.top,
+  );
+  const startY = floorStanding.reduce(
     (lowest, circle) => Math.max(lowest, circle.y + circle.radius + TABLE_GAP),
     getSeatingTop(),
   );
@@ -130,8 +154,8 @@ function placePinnedTeams(
   return placed;
 }
 
-function orderFixedPoints(): { x: number; y: number }[] {
-  return [...FIXED_SLOT_POINTS].sort((a, b) => a.y - b.y || a.x - b.x);
+function orderFixedPoints(points: { x: number; y: number }[]): { x: number; y: number }[] {
+  return [...points].sort((a, b) => a.y - b.y || a.x - b.x);
 }
 
 function withIdentifiers(circles: PackedCircle[]): LayoutPlacement[] {

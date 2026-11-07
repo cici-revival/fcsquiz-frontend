@@ -9,6 +9,7 @@ import {
 import toast from "react-hot-toast";
 
 import { getTableRadius, HALL, HALL_GEOMETRY } from "@entities/seating/config/hall";
+import { BalconyStrip } from "@entities/seating/ui/BalconyStrip";
 import { buildLayout, type LayoutTeam } from "@entities/seating/lib/buildLayout";
 import { applyGrabOffset, getGrabOffset } from "@entities/seating/lib/dragOffset";
 import { clientToField } from "@entities/seating/lib/fieldCoords";
@@ -51,6 +52,9 @@ type SeatingPreviewProps = {
   resetToken?: number;
   showBounds?: boolean;
   controlRef?: React.Ref<SeatingPreviewControl>;
+  localPositions?: ReadonlyMap<string, { x: number; y: number }>;
+  onLocalPositionChange?: (teamId: string, position: { x: number; y: number }) => void;
+  onLocalUnplace?: (teamId: string) => void;
 };
 
 // Порог сравнивается с накопленным смещением от точки нажатия, а не с дельтой
@@ -64,6 +68,9 @@ export function SeatingPreview({
   resetToken = 0,
   showBounds = false,
   controlRef,
+  localPositions,
+  onLocalPositionChange,
+  onLocalUnplace,
 }: SeatingPreviewProps) {
   // Пока тащим — рисуем локально; сохранённые позиции приходят из стора.
   const [dragging, setDragging] = useState<Record<string, { x: number; y: number }>>({});
@@ -104,9 +111,16 @@ export function SeatingPreview({
   const circles = useMemo<PackedCircle[]>(
     () =>
       computed.placements
-        .filter(({ teamId }) => Boolean(seatingTeams.get(teamId)?.position))
+        .filter(({ teamId }) =>
+          localPositions === undefined
+            ? Boolean(seatingTeams.get(teamId)?.position)
+            : localPositions.has(teamId),
+        )
         .map(({ teamId, slot }) => {
-          const saved = seatingTeams.get(teamId)?.position;
+          const saved =
+            localPositions === undefined
+              ? seatingTeams.get(teamId)?.position
+              : localPositions.get(teamId);
           const size = sizeById.get(teamId);
 
           return {
@@ -119,7 +133,7 @@ export function SeatingPreview({
             radius: size === undefined ? slot.radius : getTableRadius(size),
           };
         }),
-    [computed.placements, dragging, seatingTeams, sizeById],
+    [computed.placements, dragging, localPositions, seatingTeams, sizeById],
   );
 
   // seatTeamAt читает актуальные круги через ref: иначе колбэк пришлось бы
@@ -212,6 +226,12 @@ export function SeatingPreview({
     teamId: string,
   ) => {
     event.preventDefault();
+
+    if (localPositions !== undefined) {
+      if (localPositions.has(teamId)) onLocalUnplace?.(teamId);
+
+      return;
+    }
 
     const saved = useSeatingStore.getState().teams.get(teamId);
     if (!saved?.position) return;
@@ -317,6 +337,13 @@ export function SeatingPreview({
 
       setDragging((previous) => ({ ...previous, [teamId]: position }));
 
+      if (localPositions !== undefined) {
+        onLocalPositionChange?.(teamId, position);
+        clearDragging(teamId, generation);
+
+        return;
+      }
+
       const saved = useSeatingStore.getState().teams.get(teamId);
 
       void updateTeamSeating({
@@ -338,7 +365,7 @@ export function SeatingPreview({
         toast.error(getSeatingErrorMessage(ack.code));
       });
     },
-    [clearDragging],
+    [clearDragging, localPositions, onLocalPositionChange],
   );
 
   useImperativeHandle(
@@ -406,6 +433,8 @@ export function SeatingPreview({
             height: fieldHeight - HALL.stageHeight,
           }}
         />
+
+        <BalconyStrip scale={scale} />
 
         {showBounds && <HallBounds />}
 

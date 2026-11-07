@@ -43,6 +43,7 @@
 
 .table {
   position: absolute;
+  z-index: 2;
   border: none;
   padding: 5px;
   cursor: grab;
